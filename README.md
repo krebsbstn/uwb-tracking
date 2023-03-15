@@ -1,4 +1,4 @@
-# UWB-Ranging-Based Trekking Technology
+# UWB-Ranging-Based Tracking Technology
 This repository contains the code, documentation, and resources for the development of a Trekking Technology based on Ultra-Wideband (UWB) Ranging. The project is part of the Master of Electrical Systems and aims to create a system that can accurately track the movement of mobile tags in indoor environments.
 
 The project uses UWB technology to measure the distance between a set of anchors and a wearable device carried by the user. The system then uses this data to estimate the user's position and trajectory, which can be displayed in real-time on a map or other visualization tool.
