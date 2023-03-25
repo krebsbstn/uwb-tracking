@@ -25,12 +25,12 @@ void setup()
   //Create Driving Task
   xTaskCreatePinnedToCore(
     Task0,
-    "Driving",
+    "Task0",
     stackSize,
     NULL,
-    TASK_PRIORITY_DRIVER,
+    TASK0_PRIORITY,
     &Task_0,
-    TASK_CORE_DRIVER);
+    TASK0_CORE);
 
   //Create Position Task
   xTaskCreatePinnedToCore(
@@ -38,9 +38,9 @@ void setup()
     "Position",
     stackSize,
     NULL,
-    TASK_PRIORITY_POSHANDLER,
+    TASK1_PRIORITY,
     &Task_1,
-    TASK_CORE_POSHANDLER);
+    TASK1_CORE);
 }
 
 void loop() 
