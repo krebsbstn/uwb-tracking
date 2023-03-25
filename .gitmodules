@@ -1,3 +1,6 @@
 [submodule "firmware/zephyr"]
 	path = firmware/zephyr
 	url = https://github.com/zephyrproject-rtos/zephyr.git
+[submodule "firmware/include/Makerfabs-ESP32-UWB-DW3000"]
+	path = firmware/include/Makerfabs-ESP32-UWB-DW3000
+	url = https://github.com/Makerfabs/Makerfabs-ESP32-UWB-DW3000.git
