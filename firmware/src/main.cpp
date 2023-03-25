@@ -1,6 +1,7 @@
 #include "freertos/FreeRTOS.h"
 #include <Arduino.h>
 #include <config.h>
+#include <DW3000Handler.h>
 
 /**
  * Task Handler, keeping an Reference to the single Tasks.
