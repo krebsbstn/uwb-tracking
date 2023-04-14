@@ -3,6 +3,14 @@
 #include <config.h>
 #include <DW3000Handler.h>
 
+#define IS_ANCHOR 1
+
+#if IS_ANCHOR
+#include <aes_responder_example.h>
+#else
+#include <aes_initiator_example.h>
+#endif
+
 /**
  * Task Handler, keeping an Reference to the single Tasks.
  */
@@ -12,57 +20,66 @@ TaskHandle_t  Task_1;
 /**
  * The following Prototypes declare the 'mains' of the Tasks.
  */
-void Task0(void*);
-void Task1(void*);
+void Anchor_Task(void*);
+void Tag_Task(void*);
 
 //Setup of main Application
 void setup() 
 {
-  //Initalitze UART Protocol with 9600Baud.
-  Serial.begin(9600);
   //Handle Stack Size for different Tasks, Each get 6k bytes of Stack.
   uint32_t stackSize = 6000;
-   
-  //Create Driving Task
+
+#if IS_ANCHOR
+  //Create Anchor Task
   xTaskCreatePinnedToCore(
-    Task0,
+    Anchor_Task,
     "Task0",
     stackSize,
     NULL,
     TASK0_PRIORITY,
     &Task_0,
     TASK0_CORE);
-
-  //Create Position Task
+#else
+  //Create Tag Task
   xTaskCreatePinnedToCore(
-    Task1,
-    "Position",
+    Tag_Task,
+    "Task0",
     stackSize,
     NULL,
-    TASK1_PRIORITY,
-    &Task_1,
-    TASK1_CORE);
+    TASK0_PRIORITY,
+    &Task_0,
+    TASK0_CORE);
+#endif
 }
 
 void loop() 
-{
-  
-}  
+{}  
 
-void Task0( void * parameter ) 
+#if IS_ANCHOR
+void Anchor_Task( void * parameter ) 
 {
+  UART_init();
+  test_run_info((unsigned char *)"I am a Anchor.");
+  responder_setup();
+  test_run_info((unsigned char *)"setup done.");
+
   for (;;) 
   {
-    Serial.println("Hello from Task 0.");
-    delay(1000);
-  } 
-} 
-
-void Task1( void * parameter ) 
-{
-  for (;;) 
-  {
-    Serial.println("Hello from Task 1.");
-    delay(2000);
+    responder_loop();
+    test_run_info((unsigned char *)"cicle complete.");
   } 
 }
+#else
+void Tag_Task( void * parameter ) 
+{
+  UART_init();
+  test_run_info((unsigned char *)"I am a Tag.");
+  initiator_setup();
+
+  for (;;) 
+  {
+    initiator_loop();
+    test_run_info((unsigned char *)"cicle complete.");
+  } 
+} 
+#endif
