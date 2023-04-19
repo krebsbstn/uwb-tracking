@@ -3,6 +3,8 @@
 #include <config.h>
 #include <DW3000Handler.h>
 
+#include <dw3000.h>
+
 #define IS_ANCHOR 1
 
 #if IS_ANCHOR
@@ -10,6 +12,9 @@
 #else
 #include <aes_initiator_example.h>
 #endif
+
+
+#define INT_34_PIN 34
 
 /**
  * Task Handler, keeping an Reference to the single Tasks.
@@ -26,60 +31,19 @@ void Tag_Task(void*);
 //Setup of main Application
 void setup() 
 {
-  //Handle Stack Size for different Tasks, Each get 6k bytes of Stack.
-  uint32_t stackSize = 6000;
-
-#if IS_ANCHOR
-  //Create Anchor Task
-  xTaskCreatePinnedToCore(
-    Anchor_Task,
-    "Task0",
-    stackSize,
-    NULL,
-    TASK0_PRIORITY,
-    &Task_0,
-    TASK0_CORE);
-#else
-  //Create Tag Task
-  xTaskCreatePinnedToCore(
-    Tag_Task,
-    "Task0",
-    stackSize,
-    NULL,
-    TASK0_PRIORITY,
-    &Task_0,
-    TASK0_CORE);
-#endif
+  pinMode(INT_34_PIN, INPUT);
+  attachInterrupt(INT_34_PIN, EXT_INT_34_ISR, RISING);
 }
+
 
 void loop() 
-{}  
-
-#if IS_ANCHOR
-void Anchor_Task( void * parameter ) 
 {
-  UART_init();
-  test_run_info((unsigned char *)"I am a Anchor.");
-  responder_setup();
-  test_run_info((unsigned char *)"setup done.");
 
-  for (;;) 
-  {
-    responder_loop();
-    test_run_info((unsigned char *)"cicle complete.");
-  } 
+}  
+
+void EXT_INT_34_ISR(void)
+{
+  UART_puts("Interrupt an Pin 34");
 }
-#else
-void Tag_Task( void * parameter ) 
-{
-  UART_init();
-  test_run_info((unsigned char *)"I am a Tag.");
-  initiator_setup();
 
-  for (;;) 
-  {
-    initiator_loop();
-    test_run_info((unsigned char *)"cicle complete.");
-  } 
-} 
-#endif
+
