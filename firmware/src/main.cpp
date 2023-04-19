@@ -5,15 +5,6 @@
 
 #include <dw3000.h>
 
-#define IS_ANCHOR 1
-
-#if IS_ANCHOR
-#include <aes_responder_example.h>
-#else
-#include <aes_initiator_example.h>
-#endif
-
-
 #define INT_34_PIN 34
 
 /**
