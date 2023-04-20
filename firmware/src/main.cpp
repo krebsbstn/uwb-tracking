@@ -13,28 +13,32 @@
 TaskHandle_t  Task_0;  
 TaskHandle_t  Task_1;
 
-/**
- * The following Prototypes declare the 'mains' of the Tasks.
- */
-void Anchor_Task(void*);
-void Tag_Task(void*);
+void EXT_INT_34_ISR(void);
+
+int interupt_triggered = 0;
 
 //Setup of main Application
 void setup() 
 {
-  pinMode(INT_34_PIN, INPUT);
+  UART_init();
+  UART_puts("Setup.\n");
+  pinMode(INT_34_PIN, INPUT_PULLDOWN);
   attachInterrupt(INT_34_PIN, EXT_INT_34_ISR, RISING);
 }
 
 
 void loop() 
 {
-
+  if(interupt_triggered)
+  {
+    UART_puts("Interrupt an Pin 34\n");
+    interupt_triggered = 0;
+  }
 }  
 
 void EXT_INT_34_ISR(void)
 {
-  UART_puts("Interrupt an Pin 34");
+  interupt_triggered = 1;
 }
 
 
