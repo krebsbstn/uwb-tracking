@@ -186,24 +186,8 @@ uint32_t port_CheckEXT_IRQ(void);
 void port_DisableEXT_IRQ(void);
 void port_EnableEXT_IRQ(void);
 
-/* DW IC IRQ (EXTI15_10_IRQ) handler type. */
-typedef void (*port_dwic_isr_t)(void);
-
-/*! ------------------------------------------------------------------------------------------------------------------
- * @fn port_set_DWIC_isr()
- *
- * @brief This function is used to install the handling function for DW1000 IRQ.
- *
- * NOTE:
- *   - As EXTI9_5_IRQHandler does not check that port_deca_isr is not null, the user application must ensure that a
- *     proper handler is set by calling this function before any DW1000 IRQ occurs!
- *   - This function makes sure the DW1000 IRQ line is deactivated while the handler is installed.
- *
- * @param deca_isr function pointer to DW1000 interrupt handler to install
- *
- * @return none
- */
-void port_set_dwic_isr(port_dwic_isr_t isr);
+typedef void(*port_dwic_isr_t)(void);
+void port_set_dwic_isr(port_dwic_isr_t dwic_isr, uint8_t irq);
 
 #if 0
 void sleepms(uint32_t x);
