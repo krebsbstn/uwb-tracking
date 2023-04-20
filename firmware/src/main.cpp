@@ -8,36 +8,35 @@
 #include <dw3000.h>
 #include <dw3000_mac_802_15_4.h>
 
-void Task( void * parameter );
+void Task(void *parameter);
 void responder_setup();
 void responder_loop();
 // Setup of main Application
 void setup()
 {
   xTaskCreatePinnedToCore(
-    Task,
-    "task1",
-    6000,
-    NULL,
-    1,
-    NULL,
-    1);
+      Task,
+      "task1",
+      6000,
+      NULL,
+      1,
+      NULL,
+      1);
 }
 
-void loop(){}
+void loop() {}
 
-void Task( void * parameter ) 
+void Task(void *parameter)
 {
   UART_init();
   test_run_info((unsigned char *)"I am a Anchor.");
   responder_setup();
   test_run_info((unsigned char *)"setup done.");
 
-  for (;;) 
+  for (;;)
   {
     responder_loop();
-    test_run_info((unsigned char *)"cicle complete.");
-  } 
+  }
 }
 
 // connection pins
@@ -139,13 +138,13 @@ static void rx_err_cb(const dwt_cb_data_t *cb_data);
 void responder_setup(void)
 {
 
-  //UART_init();
+  // UART_init();
   /* Configure SPI rate, DW3000 supports up to 36 MHz */
-  //port_set_dw_ic_spi_fastrate(PIN_IRQ, PIN_RST, PIN_SS);
+  // port_set_dw_ic_spi_fastrate(PIN_IRQ, PIN_RST, PIN_SS);
 
   /* Reset DW IC */
-    spiBegin(PIN_IRQ, PIN_RST);
-    spiSelect(PIN_SS);
+  spiBegin(PIN_IRQ, PIN_RST);
+  spiSelect(PIN_SS);
 
   /* Reset DW IC */
   // reset_DWIC(); /* Target specific drive of RSTn line into DW IC low for a period. */
@@ -210,178 +209,157 @@ void responder_setup(void)
   aes_job_tx.payload = tx_resp_msg;             /* payload to be sent */
   aes_job_tx.payload_len = sizeof(tx_resp_msg); /* payload length */
 
-
-
   /* Register the call-backs (SPI CRC error callback is not used). */
-  dwt_setcallbacks(NULL, &rx_ok_cb, &rx_to_cb, &rx_err_cb, NULL, NULL);
+  dwt_setcallbacks(NULL, &rx_ok_cb, NULL, NULL, NULL, NULL);
 
   /* Enable wanted interrupts (TX confirmation, RX good frames, RX timeouts and RX errors). */
-  dwt_setinterrupt(DWT_INT_RFCG | DWT_INT_RFTO | DWT_INT_RXPTO | DWT_INT_RPHE | DWT_INT_RFCE | DWT_INT_RFSL | DWT_INT_SFDT,
+  dwt_setinterrupt(DWT_INT_RFCG,
                    0, DWT_ENABLE_INT_ONLY);
 
-test_run_info((unsigned char *)"set isr.");
+  test_run_info((unsigned char *)"set isr.");
   /* Install DW IC IRQ handler. */
-  port_set_dwic_isr(dwt_isr, 35);
+  port_set_dwic_isr(dwt_isr, PIN_IRQ);
   test_run_info((unsigned char *)"worked.");
+
+  // Debug Pin
+  pinMode(12, OUTPUT);
+  digitalWrite(12, HIGH);
 }
 
-
-static uint8_t active_response = 0; 
-
+static uint8_t active_response = 0;
 
 void responder_loop()
 {
   /* Activate reception immediately. */
   dwt_rxenable(DWT_START_RX_IMMEDIATE);
 
-  /* Poll for reception of a frame or error/timeout. See NOTE 6 below. */
-  //test_run_info((unsigned char *)"poll for message.");
-  //while (!((status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG_BIT_MASK | SYS_STATUS_ALL_RX_ERR)))
-  //{
-  //};
-  //test_run_info((unsigned char *)"got poll.");
-
-  while (!active_response)
-  {
-    
-  }
-  
-  UART_puts("Active Response!");
-
+  while (!active_response){delay(1);} //busy loop till rx_interrupt is triggered
   active_response = 0;
 
+  uint32_t frame_len;
 
+  /* Clear good RX frame event in the DW IC status register. */
+  dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
 
-  /* Once a frame has been received read the payload and decrypt*/
-  if (status_reg & SYS_STATUS_RXFCG_BIT_MASK)
+  /* Read data length that was received */
+  frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
+
+  /* A frame has been received: firstly need to read the MHR and check this frame is what we expect:
+   * the destination address should match our source address (frame filtering can be configured for this check,
+   * however that is not part of this example); then the header needs to have security enabled.
+   * If any of these checks fail the rx_aes_802_15_4 will return an error
+   * */
+  aes_config.mode = AES_Decrypt;                /* configure for decryption*/
+  PAYLOAD_PTR_802_15_4(&mac_frame) = rx_buffer; /* Set the MAC frame structure payload pointer
+                                                     (this will contain decrypted data if status below is AES_RES_OK) */
+
+  status = rx_aes_802_15_4(&mac_frame, frame_len, &aes_job_rx, sizeof(rx_buffer), keys_options, DEST_ADDR, SRC_ADDR, &aes_config);
+  if (status != AES_RES_OK)
   {
-    uint32_t frame_len;
-
-    /* Clear good RX frame event in the DW IC status register. */
-    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
-
-    /* Read data length that was received */
-    frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
-
-    /* A frame has been received: firstly need to read the MHR and check this frame is what we expect:
-     * the destination address should match our source address (frame filtering can be configured for this check,
-     * however that is not part of this example); then the header needs to have security enabled.
-     * If any of these checks fail the rx_aes_802_15_4 will return an error
-     * */
-    aes_config.mode = AES_Decrypt;                /* configure for decryption*/
-    PAYLOAD_PTR_802_15_4(&mac_frame) = rx_buffer; /* Set the MAC frame structure payload pointer
-                                                       (this will contain decrypted data if status below is AES_RES_OK) */
-
-    status = rx_aes_802_15_4(&mac_frame, frame_len, &aes_job_rx, sizeof(rx_buffer), keys_options, DEST_ADDR, SRC_ADDR, &aes_config);
-    if (status != AES_RES_OK)
+    /* report any errors */
+    do
     {
-      /* report any errors */
-      do
+      switch (status)
       {
-        switch (status)
-        {
-        case AES_RES_ERROR_LENGTH:
-          test_run_info((unsigned char *)"AES length error");
-          break;
-        case AES_RES_ERROR:
-          test_run_info((unsigned char *)"ERROR AES");
-          break;
-        case AES_RES_ERROR_FRAME:
-          test_run_info((unsigned char *)"Error Frame");
-          break;
-        case AES_RES_ERROR_IGNORE_FRAME:
-          test_run_info((unsigned char *)"Frame not for us");
-          continue; // Got frame with wrong destination address
-        }
-      } while (1);
-    }
-
-    /* Check that the payload of the MAC frame matches the expected poll message
-     * as should be sent by "SS TWR AES initiator" example. */
-    if (memcmp(rx_buffer, rx_poll_msg, aes_job_rx.payload_len) == 0)
-    {
-      uint32_t resp_tx_time;
-      int ret;
-      uint8_t nonce[13];
-
-      /* Retrieve poll reception timestamp. */
-      poll_rx_ts = get_rx_timestamp_u64();
-
-      /* Compute response message transmission time. See NOTE 7 below. */
-      resp_tx_time = (poll_rx_ts + (POLL_RX_TO_RESP_TX_DLY_UUS * UUS_TO_DWT_TIME)) >> 8;
-      dwt_setdelayedtrxtime(resp_tx_time);
-
-      /* Response TX timestamp is the transmission time we programmed plus the antenna delay. */
-      resp_tx_ts = (((uint64_t)(resp_tx_time & 0xFFFFFFFEUL)) << 8) + TX_ANT_DLY;
-
-      /* Write all timestamps in the final message. See NOTE 8 below. */
-      resp_msg_set_ts(&tx_resp_msg[RESP_MSG_POLL_RX_TS_IDX], poll_rx_ts);
-      resp_msg_set_ts(&tx_resp_msg[RESP_MSG_RESP_TX_TS_IDX], resp_tx_ts);
-
-      /* Now need to encrypt the frame before transmitting*/
-
-      /* Program the correct key to be used */
-      dwt_set_keyreg_128(&keys_options[RESPONDER_KEY_INDEX - 1]);
-      /* Set the key index for the frame */
-      MAC_FRAME_AUX_KEY_IDENTIFY_802_15_4(&mac_frame) = RESPONDER_KEY_INDEX;
-
-      /* Increment the sequence number */
-      MAC_FRAME_SEQ_NUM_802_15_4(&mac_frame)
-      ++;
-
-      /* Update the frame count */
-      mac_frame_update_aux_frame_cnt(&mac_frame, mac_frame_get_aux_frame_cnt(&mac_frame) + 1);
-
-      /* Configure the AES job */
-      aes_job_tx.mic_size = mac_frame_get_aux_mic_size(&mac_frame);
-      aes_job_tx.nonce = nonce; /* set below once MHR is set*/
-      aes_config.mode = AES_Encrypt;
-      aes_config.mic = dwt_mic_size_from_bytes(aes_job_tx.mic_size);
-      dwt_configure_aes(&aes_config);
-
-      /* Update the MHR (reusing the received MHR, thus need to swap SRC/DEST addresses */
-      mac_frame_set_pan_ids_and_addresses_802_15_4(&mac_frame, DEST_PAN_ID, DEST_ADDR, SRC_ADDR);
-
-      /* construct the nonce from the MHR */
-      mac_frame_get_nonce(&mac_frame, nonce);
-
-      /* perform the encryption, the TX buffer will contain a full MAC frame with encrypted payload*/
-      status = dwt_do_aes(&aes_job_tx, aes_config.aes_core_type);
-      if (status < 0)
-      {
+      case AES_RES_ERROR_LENGTH:
         test_run_info((unsigned char *)"AES length error");
-        while (1)
-          ; /* Error */
-      }
-      else if (status & AES_ERRORS)
-      {
+        break;
+      case AES_RES_ERROR:
         test_run_info((unsigned char *)"ERROR AES");
-        while (1)
-          ; /* Error */
+        break;
+      case AES_RES_ERROR_FRAME:
+        test_run_info((unsigned char *)"Error Frame");
+        break;
+      case AES_RES_ERROR_IGNORE_FRAME:
+        test_run_info((unsigned char *)"Frame not for us");
+        continue; // Got frame with wrong destination address
       }
+    } while (1);
+  }
 
-      /* configure the frame control and start transmission */
-      dwt_writetxfctrl(aes_job_tx.header_len + aes_job_tx.payload_len + aes_job_tx.mic_size + FCS_LEN, 0, 1); /* Zero offset in TX buffer, ranging. */
-      ret = dwt_starttx(DWT_START_TX_DELAYED);
+  /* Check that the payload of the MAC frame matches the expected poll message
+   * as should be sent by "SS TWR AES initiator" example. */
+  if (memcmp(rx_buffer, rx_poll_msg, aes_job_rx.payload_len) == 0)
+  {
+    uint32_t resp_tx_time;
+    int ret;
+    uint8_t nonce[13];
 
-      /* If dwt_starttx() returns an error, abandon this ranging exchange and proceed to the next one. See NOTE 10 below. */
-      if (ret == DWT_SUCCESS)
+    /* Retrieve poll reception timestamp. */
+    poll_rx_ts = get_rx_timestamp_u64();
+
+    /* Compute response message transmission time. See NOTE 7 below. */
+    resp_tx_time = (poll_rx_ts + (POLL_RX_TO_RESP_TX_DLY_UUS * UUS_TO_DWT_TIME)) >> 8;
+    dwt_setdelayedtrxtime(resp_tx_time);
+
+    /* Response TX timestamp is the transmission time we programmed plus the antenna delay. */
+    resp_tx_ts = (((uint64_t)(resp_tx_time & 0xFFFFFFFEUL)) << 8) + TX_ANT_DLY;
+
+    /* Write all timestamps in the final message. See NOTE 8 below. */
+    resp_msg_set_ts(&tx_resp_msg[RESP_MSG_POLL_RX_TS_IDX], poll_rx_ts);
+    resp_msg_set_ts(&tx_resp_msg[RESP_MSG_RESP_TX_TS_IDX], resp_tx_ts);
+
+    /* Now need to encrypt the frame before transmitting*/
+
+    /* Program the correct key to be used */
+    dwt_set_keyreg_128(&keys_options[RESPONDER_KEY_INDEX - 1]);
+    /* Set the key index for the frame */
+    MAC_FRAME_AUX_KEY_IDENTIFY_802_15_4(&mac_frame) = RESPONDER_KEY_INDEX;
+
+    /* Increment the sequence number */
+    MAC_FRAME_SEQ_NUM_802_15_4(&mac_frame)
+    ++;
+
+    /* Update the frame count */
+    mac_frame_update_aux_frame_cnt(&mac_frame, mac_frame_get_aux_frame_cnt(&mac_frame) + 1);
+
+    /* Configure the AES job */
+    aes_job_tx.mic_size = mac_frame_get_aux_mic_size(&mac_frame);
+    aes_job_tx.nonce = nonce; /* set below once MHR is set*/
+    aes_config.mode = AES_Encrypt;
+    aes_config.mic = dwt_mic_size_from_bytes(aes_job_tx.mic_size);
+    dwt_configure_aes(&aes_config);
+
+    /* Update the MHR (reusing the received MHR, thus need to swap SRC/DEST addresses */
+    mac_frame_set_pan_ids_and_addresses_802_15_4(&mac_frame, DEST_PAN_ID, DEST_ADDR, SRC_ADDR);
+
+    /* construct the nonce from the MHR */
+    mac_frame_get_nonce(&mac_frame, nonce);
+
+    /* perform the encryption, the TX buffer will contain a full MAC frame with encrypted payload*/
+    status = dwt_do_aes(&aes_job_tx, aes_config.aes_core_type);
+    if (status < 0)
+    {
+      test_run_info((unsigned char *)"AES length error");
+      while (1)
+        ; /* Error */
+    }
+    else if (status & AES_ERRORS)
+    {
+      test_run_info((unsigned char *)"ERROR AES");
+      while (1)
+        ; /* Error */
+    }
+
+    /* configure the frame control and start transmission */
+    dwt_writetxfctrl(aes_job_tx.header_len + aes_job_tx.payload_len + aes_job_tx.mic_size + FCS_LEN, 0, 1); /* Zero offset in TX buffer, ranging. */
+    ret = dwt_starttx(DWT_START_TX_DELAYED);
+
+    /* If dwt_starttx() returns an error, abandon this ranging exchange and proceed to the next one. See NOTE 10 below. */
+    if (ret == DWT_SUCCESS)
+    {
+      /* Poll DW IC until TX frame sent event set. See NOTE 6 below. */
+      while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
       {
-        /* Poll DW IC until TX frame sent event set. See NOTE 6 below. */
-        while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
-        {
-        };
+      };
 
-        /* Clear TXFRS event. */
-        dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
-      }
+      /* Clear TXFRS event. */
+      dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
     }
   }
-  else
-  {
-    /* Clear RX error events in the DW IC status register. */
-    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_ERR);
-  }
+
+  /* Clear RX error events in the DW IC status register. */
+  dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_ERR);
 }
 
 /*! ------------------------------------------------------------------------------------------------------------------
@@ -396,64 +374,6 @@ void responder_loop()
 static void rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
   active_response = 1;
+  digitalWrite(12, !digitalRead(12));
+  dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
 }
-
-/*! ------------------------------------------------------------------------------------------------------------------
- * @fn rx_to_cb()
- *
- * @brief Callback to process RX timeout events
- *
- * @param  cb_data  callback data
- *
- * @return  none
- */
-static void rx_to_cb(const dwt_cb_data_t *cb_data)
-{
-  active_response = 1;
-}
-
-/*! ------------------------------------------------------------------------------------------------------------------
- * @fn rx_err_cb()
- *
- * @brief Callback to process RX error events
- *
- * @param  cb_data  callback data
- *
- * @return  none
- */
-static void rx_err_cb(const dwt_cb_data_t *cb_data)
-{
-  active_response = 1;
-}
-
-
-/*****************************************************************************************************************************************************
- * NOTES:
- *
- * 1. The device ID is a hard coded constant in the blink to keep the example simple but for a real product every device should have a unique ID.
- *    For development purposes it is possible to generate a DW IC unique ID by combining the Lot ID & Part Number values programmed into the
- *    DW IC during its manufacture. However there is no guarantee this will not conflict with someone else�s implementation. We recommended that
- *    customers buy a block of addresses from the IEEE Registration Authority for their production items. See "EUI" in the DW IC User Manual.
- * 2. In this example, the DW IC is put into IDLE state after calling dwt_initialise(). This means that a fast SPI rate of up to 20 MHz can be used
- *    thereafter.
- * 3. TX to RX delay can be set to 0 to activate reception immediately after transmission. But, on the responder side, it takes time to process the
- *    received frame and generate the response (this has been measured experimentally to be around 70 �s). Using an RX to TX delay slightly less than
- *    this minimum turn-around time allows the application to make the communication efficient while reducing power consumption by adjusting the time
- *    spent with the receiver activated.
- * 4. This timeout is for complete reception of a frame, i.e. timeout duration must take into account the length of the expected frame. Here the value
- *    is arbitrary but chosen large enough to make sure that there is enough time to receive a complete frame sent by the "RX then send a response"
- *    example at the 110k data rate used (around 3 ms).
- * 5. In this example, maximum frame length is set to 127 bytes which is 802.15.4 UWB standard maximum frame length. DW IC supports an extended frame
- *    length (up to 1023 bytes long) mode which is not used in this example.
- * 6. In a real application, for optimum performance within regulatory limits, it may be necessary to set TX pulse bandwidth and TX power, (using
- *    the dwt_configuretxrf API call) to per device calibrated values saved in the target system or the DW IC OTP memory.
- * 7. dwt_writetxdata() takes the full size of tx_msg as a parameter but only copies (size - 2) bytes as the check-sum at the end of the frame is
- *    automatically appended by the DW IC. This means that our tx_msg could be two bytes shorter without losing any data (but the sizeof would not
- *    work anymore then as we would still have to indicate the full length of the frame to dwt_writetxdata()).
- * 8. The user is referred to DecaRanging ARM application (distributed with EVK1000 product) for additional practical example of usage, and to the
- *    DW IC API Guide for more details on the DW IC driver functions.
- * 9. In a real application, for optimum performance within regulatory limits, it may be necessary to set TX pulse bandwidth and TX power, (using
- *    the dwt_configuretxrf API call) to per device calibrated values saved in the target system or the DW IC OTP memory.
- * 10.Desired configuration by user may be different to the current programmed configuration. dwt_configure is called to set desired
- *    configuration.
- ****************************************************************************************************************************************************/
