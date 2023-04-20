@@ -544,39 +544,11 @@ void port_EnableEXT_IRQ(void) {
 
 }
 
-/* DW IC IRQ handler definition. */
-static port_dwic_isr_t port_dwic_isr = NULL;
-
-/*! ------------------------------------------------------------------------------------------------------------------
- * @fn port_set_dwic_isr()
- *
- * @brief This function is used to install the handling function for DW IC IRQ.
- *
- * NOTE:
- *   - The user application shall ensure that a proper handler is set by calling this function before any DW IC IRQ occurs.
- *   - This function deactivates the DW IC IRQ line while the handler is installed.
- *
- * @param deca_isr function pointer to DW IC interrupt handler to install
- *
- * @return none
- */
-void port_set_dwic_isr(port_dwic_isr_t dwic_isr)
+void port_set_dwic_isr(port_dwic_isr_t dwic_isr, uint8_t irq)
 {
-    /* Check DW IC IRQ activation status. */
-    //ITStatus en = port_GetEXT_IRQStatus();
-
-    /* If needed, deactivate DW IC IRQ during the installation of the new handler. */
-    //port_DisableEXT_IRQ();
-    portDISABLE_INTERRUPTS();
-    port_dwic_isr = dwic_isr;
-    portENABLE_INTERRUPTS();
-/*
-    if (!en)
-    {
-        port_EnableEXT_IRQ();
-    }*/
+  pinMode(irq, INPUT_PULLDOWN);
+  attachInterrupt(irq, dwic_isr, RISING);
 }
-
 
 #if 0
 void open_spi(void)
