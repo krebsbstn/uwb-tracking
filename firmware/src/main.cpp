@@ -18,51 +18,31 @@
 TaskHandle_t  Task_0;  
 TaskHandle_t  Task_1;
 
-/**
- * The following Prototypes declare the 'mains' of the Tasks.
- */
-void Anchor_Task(void*);
-void Tag_Task(void*);
+void EXT_INT_34_ISR(void);
+
+int interupt_triggered = 0;
 
 void setup() 
 {
-  //Handle Stack Size for different Tasks, Each get 6k bytes of Stack.
-  uint32_t stackSize = 6000;
-
-#if IS_ANCHOR
-  //Create Anchor Task
-  xTaskCreatePinnedToCore(
-    Anchor_Task,
-    "Task0",
-    stackSize,
-    NULL,
-    TASK0_PRIORITY,
-    &Task_0,
-    TASK0_CORE);
-#else
-  //Create Tag Task
-  xTaskCreatePinnedToCore(
-    Tag_Task,
-    "Task0",
-    stackSize,
-    NULL,
-    TASK0_PRIORITY,
-    &Task_0,
-    TASK0_CORE);
-#endif
-  pinMode(INT_34_PIN, INPUT);
+  UART_init();
+  UART_puts("Setup.\n");
+  pinMode(INT_34_PIN, INPUT_PULLDOWN);
   attachInterrupt(INT_34_PIN, EXT_INT_34_ISR, RISING);
 }
 
 
 void loop() 
 {
-
+  if(interupt_triggered)
+  {
+    UART_puts("Interrupt an Pin 34\n");
+    interupt_triggered = 0;
+  }
 }  
 
 void EXT_INT_34_ISR(void)
 {
-  UART_puts("Interrupt an Pin 34");
+  interupt_triggered = 1;
 }
 
 
