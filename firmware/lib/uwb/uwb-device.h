@@ -17,7 +17,7 @@
 
 #define RX_BUF_LEN 127 /* The received frame cannot be bigger than 127 if STD PHR mode is used */
 
-#define RNG_DELAY_MS 300 /* Inter-ranging delay period, in milliseconds. */
+#define RNG_DELAY_MS 600 /* Inter-ranging delay period, in milliseconds. */
 #define TX_ANT_DLY 16385
 #define RX_ANT_DLY 16385
 
@@ -48,8 +48,8 @@ protected:
     String type;
 
     mac_frame_802_15_4_format_t mac_frame;
-    uint8_t poll_msg[12];
-    uint8_t resp_msg[16];
+    uint8_t poll_msg[12] = {'P', 'o', 'l', 'l', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e'};
+    uint8_t resp_msg[16] = {0, 0, 0, 0, 0, 0, 0, 0, 'R', 'e', 's', 'p', 'o', 'n', 's', 'e'};
     /* Buffer to store received response message.
      * Its size is adjusted to longest frame that the code can handle. */
     uint8_t rx_buffer[RX_BUF_LEN];
