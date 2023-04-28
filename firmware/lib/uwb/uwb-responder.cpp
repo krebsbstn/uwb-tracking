@@ -31,7 +31,7 @@ void UwbResponder::setup()
     dwt_setcallbacks(NULL, &UwbResponder::rx_ok_cb, NULL, NULL, NULL, NULL);
 
     /* Enable wanted interrupts (RX good frames). */
-    dwt_setinterrupt(DWT_INT_RFCG,0, DWT_ENABLE_INT_ONLY);
+    dwt_setinterrupt(DWT_INT_RFCG, 0, DWT_ENABLE_INT_ONLY);
 
     /* Install DW IC IRQ handler. */
     port_set_dwic_isr(dwt_isr, PIN_IRQ);
@@ -46,13 +46,11 @@ void UwbResponder::loop()
     while(!active_response){delay(1);}
     active_response = 0;
 
-    uint32_t frame_len;
-
     /* Clear good RX frame event in the DW IC status register. */
     dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
 
     /* Read data length that was received */
-    frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
+    uint32_t frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
 
     /* A frame has been received: firstly need to read the MHR and check this frame is what we expect:
     * the destination address should match our source address (frame filtering can be configured for this check,
@@ -75,24 +73,24 @@ void UwbResponder::loop()
 
     if (this->status != AES_RES_OK)
     {
-        /* report any errors */
-        do{
-            switch (this->status)
-            {
-            case AES_RES_ERROR_LENGTH:
-                UART_puts("AES length error");
-                break;
-            case AES_RES_ERROR:
-                UART_puts("ERROR AES");
-                break;
-            case AES_RES_ERROR_FRAME:
-                UART_puts("Error Frame");
-                break;
-            case AES_RES_ERROR_IGNORE_FRAME:
-                UART_puts("Frame not for us");
-                continue; // Got frame with wrong destination address
-            }
-        } while(true);
+        switch (this->status)
+        {
+        case AES_RES_ERROR_LENGTH:
+            UART_puts("AES length error.\n");
+            break;
+        case AES_RES_ERROR:
+            UART_puts("ERROR AES.\n");
+            break;
+        case AES_RES_ERROR_FRAME:
+            UART_puts("Error Frame.\n");
+            break;
+        case AES_RES_ERROR_IGNORE_FRAME:
+            UART_puts("Frame not for us.\n");
+            break;
+        default:
+            UART_puts("Unhandled AES Error.\n");   
+        }
+        return;
     }
 
     /* Check that the payload of the MAC frame matches the expected poll message
@@ -152,12 +150,12 @@ void UwbResponder::loop()
         if (this->status < 0)
         {
             UART_puts("AES length error");
-            while (1){};
+            return;
         }
         else if (this->status & AES_ERRORS)
         {
             UART_puts("ERROR AES");
-            while (1){};
+            return;
         }
 
         /* configure the frame control and start transmission */
@@ -182,6 +180,5 @@ void UwbResponder::loop()
 void UwbResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     active_response = 1;
-    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
-    //portYIELD_FROM_ISR();
+    delay(1);
 }
