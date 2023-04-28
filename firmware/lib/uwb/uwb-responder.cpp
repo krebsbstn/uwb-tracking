@@ -43,7 +43,7 @@ void UwbResponder::loop()
     /* Activate reception immediately. */
     dwt_rxenable(DWT_START_RX_IMMEDIATE);
     /*busy loop till rx_interrupt is triggered*/
-    while(!active_response){delay(1);} 
+    while(!active_response){delay(1);}
     active_response = 0;
 
     uint32_t frame_len;
@@ -183,4 +183,5 @@ void UwbResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     active_response = 1;
     dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
+    //portYIELD_FROM_ISR();
 }

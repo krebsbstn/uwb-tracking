@@ -5,7 +5,7 @@
  * this includes the poll frame length ~ 240 us*/
 #define POLL_RX_TO_RESP_TX_DLY_UUS 2000
 
-static uint8_t active_response;
+static uint8_t active_response = 0;
 
 class UwbResponder : public UwbDevice 
 {
