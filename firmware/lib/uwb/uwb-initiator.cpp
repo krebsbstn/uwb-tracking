@@ -68,13 +68,13 @@ void UwbInitiator::loop() {
     /* Check for errors */
     if (this->status < 0)
     {
-        UART_puts("AES length error");
-        while (1){};
+        UART_puts("AES length error\n");
+        return;
     }
     else if (this->status & AES_ERRORS)
     {
-        UART_puts("ERROR AES");
-        while (1){};
+        UART_puts("ERROR AES\n");
+        return;
     }
 
     /* configure the frame control and start transmission */
@@ -123,23 +123,24 @@ void UwbInitiator::loop() {
 
         if (this->status != AES_RES_OK)
         {
-            do{
-                switch (this->status)
-                {
-                case AES_RES_ERROR_LENGTH:
-                    UART_puts("Length AES error");
-                    break;
-                case AES_RES_ERROR:
-                    UART_puts("ERROR AES");
-                    break;
-                case AES_RES_ERROR_FRAME:
-                    UART_puts("Error Frame");
-                    break;
-                case AES_RES_ERROR_IGNORE_FRAME:
-                    UART_puts("Frame not for us");
-                    continue; // Got frame not for us
-                }
-            } while(true);
+            switch (this->status)
+            {
+            case AES_RES_ERROR_LENGTH:
+                UART_puts("AES length error.\n");
+                break;
+            case AES_RES_ERROR:
+                UART_puts("ERROR AES.\n");
+                break;
+            case AES_RES_ERROR_FRAME:
+                UART_puts("Error Frame.\n");
+                break;
+            case AES_RES_ERROR_IGNORE_FRAME:
+                UART_puts("Frame not for us.\n");
+                break;
+            default:
+                UART_puts("Unhandled AES Error.\n");   
+            }
+            return;
         }
 
         /* Check that the frame is the expected response from the uwb-responder.
@@ -170,14 +171,14 @@ void UwbInitiator::loop() {
             this->distance = tof * SPEED_OF_LIGHT;
 
             /* Display computed distance on LCD. */
-            snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m", this->distance);
+            snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m\n", this->distance);
             UART_puts(dist_str);
         }
     }
     else
     {
-    /* Clear RX error/timeout events in the DW IC status register. */
-    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
+        /* Clear RX error/timeout events in the DW IC status register. */
+        dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
     }
 
     /* Execute a delay between ranging exchanges. */
