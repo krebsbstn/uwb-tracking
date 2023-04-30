@@ -33,7 +33,7 @@ void setup()
         "uwb_task",
         6000,
         NULL,
-        1,
+        configMAX_PRIORITIES-1,
         &uwb_task_handle,
         1);
 }
@@ -56,7 +56,7 @@ void Task(void *parameter)
     dev->setup();
     dev->enable_leds();
 
-    for (;;)
+    while(true)
     {
         dev->loop();
     }
