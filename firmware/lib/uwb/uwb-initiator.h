@@ -23,4 +23,6 @@ private:
     distance here for reference so that it can be processed further. */
     double tof;
     double distance;
+
+    void poll_msg_set_dist(uint8_t *dist_field, const double dist);
 };

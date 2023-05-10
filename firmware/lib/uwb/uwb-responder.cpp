@@ -93,9 +93,10 @@ void UwbResponder::loop()
         return;
     }
 
-    /* Check that the payload of the MAC frame matches the expected poll message
-     * as should be sent by uwb-initiator. */
-    if (memcmp(this->rx_buffer, this->poll_msg, this->aes_job_rx.payload_len) == 0)
+    /* Check that the frame is the expected poll from the uwb-initiator.
+    * ignore the 8 first bytes of the poll message as they contain the last distance meassured*/
+    if (memcmp(&this->rx_buffer[START_RECEIVE_DATA_LOCATION], &this->poll_msg[START_RECEIVE_DATA_LOCATION],
+        this->aes_job_rx.payload_len - START_RECEIVE_DATA_LOCATION) == 0)
     {
         uint32_t resp_tx_time;
         int ret;
@@ -104,7 +105,7 @@ void UwbResponder::loop()
         /* Retrieve poll reception timestamp. */
         this->poll_rx_ts = get_rx_timestamp_u64();
 
-        /* Compute response message transmission time. See NOTE 7 below. */
+        /* Compute response message transmission time.*/
         resp_tx_time = 
             (this->poll_rx_ts + (POLL_RX_TO_RESP_TX_DLY_UUS * UUS_TO_DWT_TIME)) >> 8;
         dwt_setdelayedtrxtime(resp_tx_time);
@@ -113,12 +114,19 @@ void UwbResponder::loop()
         this->resp_tx_ts = 
             (((uint64_t)(resp_tx_time & 0xFFFFFFFEUL)) << 8) + TX_ANT_DLY;
 
-        /* Write all timestamps in the final message. See NOTE 8 below. */
+        /* Write all timestamps in the final message.*/
         resp_msg_set_ts(&resp_msg[RESP_MSG_POLL_RX_TS_IDX], this->poll_rx_ts);
         resp_msg_set_ts(&resp_msg[RESP_MSG_RESP_TX_TS_IDX], this->resp_tx_ts);
 
-        /* Now need to encrypt the frame before transmitting*/
+        /* Get dist embedded in poll message. */
+        poll_msg_get_dist(&this->rx_buffer[POLL_MSG_DIST_IDX], &this->distance);
+        if(this->distance>0)
+        {
+            snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m\n", this->distance);
+            UART_puts(dist_str);
+        }
 
+        /* Now need to encrypt the frame before transmitting*/
         /* Program the correct key to be used */
         dwt_set_keyreg_128(&keys_options[RESPONDER_KEY_INDEX - 1]);
         /* Set the key index for the frame */
@@ -162,10 +170,10 @@ void UwbResponder::loop()
         dwt_writetxfctrl(this->aes_job_tx.header_len + this->aes_job_tx.payload_len + this->aes_job_tx.mic_size + FCS_LEN, 0, 1); /* Zero offset in TX buffer, ranging. */
         ret = dwt_starttx(DWT_START_TX_DELAYED);
 
-        /* If dwt_starttx() returns an error, abandon this ranging exchange and proceed to the next one. See NOTE 10 below. */
+        /* If dwt_starttx() returns an error, abandon this ranging exchange and proceed to the next one.*/
         if (ret == DWT_SUCCESS)
         {
-            /* Poll DW IC until TX frame sent event set. See NOTE 6 below. */
+            /* Poll DW IC until TX frame sent event set.*/
             while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
             {};
             /* Clear TXFRS event. */
@@ -181,4 +189,9 @@ void UwbResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     active_response = 1;
     delay(1);
+}
+
+void UwbResponder::poll_msg_get_dist(uint8_t *dist_field, double *dist)
+{
+    memcpy(dist, dist_field, sizeof(*dist));
 }
