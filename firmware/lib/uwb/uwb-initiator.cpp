@@ -51,6 +51,12 @@ void UwbInitiator::loop() {
     /* Set the key index for the frame */
     MAC_FRAME_AUX_KEY_IDENTIFY_802_15_4(&this->mac_frame) = INITIATOR_KEY_INDEX;
 
+    /* Write last distance value in the final poll message.*/
+    poll_msg_set_dist(&poll_msg[POLL_MSG_DIST_IDX], this->distance);
+
+    /*Clear last distance to prevent from sending same distance every cycle*/
+    this->distance = 0;
+
     /* Update MHR to the correct SRC and DEST addresses and construct the 13-byte nonce
     * (same MAC frame structure is used to store both received data and transmitted data - thus SRC and DEST addresses
     * need to be updated before each transmission */
@@ -183,4 +189,9 @@ void UwbInitiator::loop() {
 
     /* Execute a delay between ranging exchanges. */
     delay(RNG_DELAY_MS);
+}
+
+void UwbInitiator::poll_msg_set_dist(uint8_t *dist_field, const double dist)
+{
+    memcpy(dist_field, &dist, sizeof(dist));
 }

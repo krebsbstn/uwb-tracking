@@ -11,13 +11,16 @@
 #define RESP_MSG_RESP_TX_TS_IDX 4 // index in the MAC payload for Response TX time
 #define RESP_MSG_TS_LEN 4
 
+#define POLL_MSG_DIST_IDX 0
+#define POLL_MSG_DIST_LEN 8
+
 /* Note, the key index of 0 is forbidden to send as key index. Thus index 1 is the first.*/
 #define INITIATOR_KEY_INDEX 1
 #define RESPONDER_KEY_INDEX 2
 
 #define RX_BUF_LEN 127 /* The received frame cannot be bigger than 127 if STD PHR mode is used */
 
-#define RNG_DELAY_MS 600 /* Inter-ranging delay period, in milliseconds. */
+#define RNG_DELAY_MS 100 /* Inter-ranging delay period, in milliseconds. */
 #define TX_ANT_DLY 16385
 #define RX_ANT_DLY 16385
 
@@ -48,8 +51,8 @@ protected:
     String type;
 
     mac_frame_802_15_4_format_t mac_frame;
-    uint8_t poll_msg[12] = {'P', 'o', 'l', 'l', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e'};
-    uint8_t resp_msg[16] = {0, 0, 0, 0, 0, 0, 0, 0, 'R', 'e', 's', 'p', 'o', 'n', 's', 'e'};
+    uint8_t poll_msg[12] = {0, 0, 0, 0, 0, 0, 0, 0, 'P', 'o', 'l', 'l'};                     //first 8 bytes for last meassured distance
+    uint8_t resp_msg[16] = {0, 0, 0, 0, 0, 0, 0, 0, 'R', 'e', 's', 'p', 'o', 'n', 's', 'e'}; //first 8 bytes for timestamps
     /* Buffer to store received response message.
      * Its size is adjusted to longest frame that the code can handle. */
     uint8_t rx_buffer[RX_BUF_LEN];

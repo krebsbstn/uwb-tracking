@@ -19,6 +19,10 @@ private:
     /* Timestamps of frames transmission/reception. */
     uint64_t poll_rx_ts;
     uint64_t resp_tx_ts;
+    /* Measured Distance betweed the Nodes */
+    double distance;
     /* Declaration of static ISR's. */
     static void rx_ok_cb(const dwt_cb_data_t *cb_data);
+    /* private functions*/
+    void poll_msg_get_dist(uint8_t *dist_field, double *dist);
 };
