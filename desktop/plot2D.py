@@ -4,6 +4,7 @@ import serial
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+from filterpy.kalman import KalmanFilter
 
 # Öffne die serielle Schnittstelle
 ser = serial.Serial('/dev/ttyUSB0', 115200)
@@ -11,6 +12,7 @@ ser = serial.Serial('/dev/ttyUSB0', 115200)
 # Leere Listen für die Datenpunkte
 distances = []
 times = []
+smoothed_distances = []
 
 # Regex-Ausdruck zur Suche nach der Entfernung im String
 pattern = re.compile(r'DIST:\s+(\d+\.\d+)\s+m')
@@ -26,8 +28,17 @@ hist, _, _ = ax2.hist([], bins=bins)
 
 # Erstelle einen leeren Linienplot
 line, = ax1.plot([], [])
+smoothed_line, = ax1.plot([], [])
 ax1.set_ylabel('Entfernung (m)')
 ax1.set_xlabel('Sequenznummer')
+
+# Kalman Filter initialisieren
+kf = KalmanFilter(dim_x=1, dim_z=1)
+kf.x = np.array([0.0])  # initial state
+kf.F = np.array([[1.]])  # state transition matrix
+kf.H = np.array([[1.]])  # measurement function
+kf.P *= 10.  # covariance matrix
+kf.R = 30  # measurement noise
 
 # Schleife zum Lesen der seriellen Daten
 while True:
@@ -41,15 +52,21 @@ while True:
         # Füge den Datenpunkt hinzu
         distances.append(dist)
         times.append(len(distances))
+        # Glätte die Entfernungsmessungen mit dem Kalman-Filter
+        kf.predict()
+        kf.update(dist)
+        smoothed_dist = kf.x[0]
+        smoothed_distances.append(smoothed_dist)
         # Aktualisiere den Linienplot
         line.set_data(times, distances)
+        smoothed_line.set_data(times, smoothed_distances)
         ax1.relim()
         ax1.autoscale_view()
         # Aktualisiere das Textfeld mit dem letzten Messwert
-        text = f'Letzter Messwert: {dist:.2f} m'
+        text = f'Letzter Messwert: {dist:.2f} m (geglättet: {smoothed_dist:.2f} m)'
         fig.suptitle(text)
         # Aktualisiere das Histogramm
-        resolution = np.linspace(min(distances)-0.5, max(distances)+0.5, 50)
+        resolution = np.linspace(min(distances)-0.1, max(distances)+0.1, 50)
         hist, resolution = np.histogram(distances, bins=resolution)
         ax2.set_xlim(resolution[0], resolution[-1])
         ax2.set_ylim(0, max(hist) + 1)
