@@ -14,6 +14,6 @@
 #define USER_2_BTN 21
 
 /* Definiere die LEDs für Benutzer 1, Benutzer 2 und Benutzer 3 */
-#define USER_1_LED 36
-#define USER_2_LED 39
-#define USER_3_LED 35
+#define USER_1_LED 22
+#define USER_2_LED 17
+#define USER_3_LED 25

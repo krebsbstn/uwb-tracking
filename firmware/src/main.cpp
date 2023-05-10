@@ -17,6 +17,7 @@
 
 TaskHandle_t uwb_task_handle; // Handle des UWB-Tasks
 
+//#define Test_LEDS 1
 
 void Task(void *parameter);
 void isr(void);
@@ -25,9 +26,17 @@ void setup()
 {
     UART_init();
     EEPROM.begin(1);
+
+    /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT);
     attachInterrupt(USER_1_BTN, isr, FALLING);
 
+    /*Initialize Outputs*/
+    pinMode(USER_1_LED, OUTPUT);
+    pinMode(USER_2_LED, OUTPUT);
+    pinMode(USER_3_LED, OUTPUT);
+
+#ifndef Test_LEDS
     xTaskCreatePinnedToCore(
         Task,
         "uwb_task",
@@ -36,11 +45,24 @@ void setup()
         configMAX_PRIORITIES-1,
         &uwb_task_handle,
         1);
+#endif
 }
 
-void loop() {}
+void loop() {
+#ifdef Test_LEDS
+    digitalWrite(USER_1_LED,1);
+    digitalWrite(USER_2_LED,1);
+    digitalWrite(USER_3_LED,HIGH);
 
+    delay(2000);
 
+    digitalWrite(USER_1_LED,0);
+    digitalWrite(USER_2_LED,0);
+    digitalWrite(USER_3_LED,LOW);
+
+    delay(2000);
+#endif
+}
 
 void Task(void *parameter)
 {
@@ -49,8 +71,10 @@ void Task(void *parameter)
     EEPROM.get(IS_INITIATOR, current_role);
     if(current_role){
         dev = new UwbInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
+        digitalWrite(USER_1_LED, HIGH);
     }else{
         dev = new UwbResponder(RESPONDER_ADDR, INITIATOR_ADDR);
+        digitalWrite(USER_1_LED, LOW);
     }
 
     dev->setup();
@@ -64,6 +88,7 @@ void Task(void *parameter)
 
 void isr(void)
 {
+    digitalWrite(USER_2_LED, HIGH);
     uint8_t current_role;
     EEPROM.get(IS_INITIATOR, current_role);
     EEPROM.put(IS_INITIATOR, !current_role);
