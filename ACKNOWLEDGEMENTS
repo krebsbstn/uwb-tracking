@@ -1,0 +1,6 @@
+ACKNOWLEDGEMENTS
+
+This project is based on the Makerfabs-ESP32-UWB-DW3000 repository (https://github.com/Makerfabs/Makerfabs-ESP32-UWB-DW3000), provided by Makerfabs.
+We gratefully acknowledge the work of the original author and the contributors to the project,
+and thank them for making their code available as a starting point for our work to port the DW3000 API to the ESP32 platform.
+We have made modifications to adapt the code to our specific use case, but are grateful for the foundation provided by the original repository.
