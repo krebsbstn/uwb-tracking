@@ -24,13 +24,17 @@ void setup()
     EEPROM.begin(1);
 
     /*Initialize Inputs*/
-    pinMode(USER_1_BTN, INPUT);
+    pinMode(USER_1_BTN, INPUT_PULLUP);
     attachInterrupt(USER_1_BTN, isr, FALLING);
 
     /*Initialize Outputs*/
     pinMode(USER_1_LED, OUTPUT);
     pinMode(USER_2_LED, OUTPUT);
     pinMode(USER_3_LED, OUTPUT);
+
+    digitalWrite(USER_1_LED, LOW);
+    digitalWrite(USER_2_LED, LOW);
+    digitalWrite(USER_3_LED, LOW);
 
 #ifndef Test_LEDS
     xTaskCreatePinnedToCore(
@@ -84,7 +88,6 @@ void Task(void *parameter)
 
 void isr(void)
 {
-    digitalWrite(USER_2_LED, HIGH);
     uint8_t current_role;
     EEPROM.get(IS_INITIATOR, current_role);
     EEPROM.put(IS_INITIATOR, !current_role);
