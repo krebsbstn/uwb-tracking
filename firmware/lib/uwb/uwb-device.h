@@ -20,7 +20,7 @@
 
 #define RX_BUF_LEN 127 /* The received frame cannot be bigger than 127 if STD PHR mode is used */
 
-#define RNG_DELAY_MS 100 /* Inter-ranging delay period, in milliseconds. */
+#define RNG_DELAY_MS 500 /* Inter-ranging delay period, in milliseconds. */
 #define TX_ANT_DLY 16385
 #define RX_ANT_DLY 16385
 
