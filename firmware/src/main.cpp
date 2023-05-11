@@ -1,67 +1,97 @@
 #include "freertos/FreeRTOS.h"
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <config.h>
+#include <uwb-device.h>
+#include <uwb-initiator.h>
+#include <uwb-responder.h>
 
-/**
- * Task Handler, keeping an Reference to the single Tasks.
- */
-TaskHandle_t  Task_0;  
-TaskHandle_t  Task_1;
+#define INITIATOR_ADDR 0x1122334455667788
+#define RESPONDER_ADDR 0x8877665544332211
 
-/**
- * The following Prototypes declare the 'mains' of the Tasks.
- */
-void Task0(void*);
-void Task1(void*);
+#define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
 
-//Setup of main Application
-void setup() 
+TaskHandle_t uwb_task_handle; // Handle des UWB-Tasks
+
+//#define Test_LEDS 1
+
+void Task(void *parameter);
+void isr(void);
+
+void setup()
 {
-  //Initalitze UART Protocol with 9600Baud.
-  Serial.begin(9600);
-  //Handle Stack Size for different Tasks, Each get 6k bytes of Stack.
-  uint32_t stackSize = 6000;
-   
-  //Create Driving Task
-  xTaskCreatePinnedToCore(
-    Task0,
-    "Task0",
-    stackSize,
-    NULL,
-    TASK0_PRIORITY,
-    &Task_0,
-    TASK0_CORE);
+    UART_init();
+    EEPROM.begin(1);
 
-  //Create Position Task
-  xTaskCreatePinnedToCore(
-    Task1,
-    "Position",
-    stackSize,
-    NULL,
-    TASK1_PRIORITY,
-    &Task_1,
-    TASK1_CORE);
+    /*Initialize Inputs*/
+    pinMode(USER_1_BTN, INPUT_PULLUP);
+    attachInterrupt(USER_1_BTN, isr, FALLING);
+
+    /*Initialize Outputs*/
+    pinMode(USER_1_LED, OUTPUT);
+    pinMode(USER_2_LED, OUTPUT);
+    pinMode(USER_3_LED, OUTPUT);
+
+    digitalWrite(USER_1_LED, LOW);
+    digitalWrite(USER_2_LED, LOW);
+    digitalWrite(USER_3_LED, LOW);
+
+#ifndef Test_LEDS
+    xTaskCreatePinnedToCore(
+        Task,
+        "uwb_task",
+        6000,
+        NULL,
+        configMAX_PRIORITIES-1,
+        &uwb_task_handle,
+        1);
+#endif
 }
 
-void loop() 
-{
-  
-}  
+void loop() {
+#ifdef Test_LEDS
+    digitalWrite(USER_1_LED,1);
+    digitalWrite(USER_2_LED,1);
+    digitalWrite(USER_3_LED,HIGH);
 
-void Task0( void * parameter ) 
-{
-  for (;;) 
-  {
-    Serial.println("Hello from Task 0.");
-    delay(1000);
-  } 
-} 
-
-void Task1( void * parameter ) 
-{
-  for (;;) 
-  {
-    Serial.println("Hello from Task 1.");
     delay(2000);
-  } 
+
+    digitalWrite(USER_1_LED,0);
+    digitalWrite(USER_2_LED,0);
+    digitalWrite(USER_3_LED,LOW);
+
+    delay(2000);
+#endif
+}
+
+void Task(void *parameter)
+{
+    UwbDevice* dev;
+    uint8_t current_role;
+    EEPROM.get(IS_INITIATOR, current_role);
+    if(current_role){
+        dev = new UwbInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
+        digitalWrite(USER_1_LED, HIGH);
+    }else{
+        dev = new UwbResponder(RESPONDER_ADDR, INITIATOR_ADDR);
+        digitalWrite(USER_1_LED, LOW);
+    }
+
+    dev->setup();
+    dev->enable_leds();
+
+    while(true)
+    {
+        dev->loop();
+    }
+}
+
+void isr(void)
+{
+    uint8_t current_role;
+    EEPROM.get(IS_INITIATOR, current_role);
+    EEPROM.put(IS_INITIATOR, !current_role);
+    EEPROM.commit();
+    esp_restart();
+    return;
 }
