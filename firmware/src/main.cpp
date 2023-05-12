@@ -9,6 +9,7 @@
 #include <uwb-device.h>
 #include <uwb-initiator.h>
 #include <uwb-responder.h>
+#include <ble-server.h>
 
 #define INITIATOR_ADDR 0x1122334455667788
 #define RESPONDER_ADDR 0x8877665544332211
@@ -19,7 +20,8 @@ TaskHandle_t uwb_task_handle; // Handle des UWB-Tasks
 
 //#define Test_LEDS 1
 
-void Task(void *parameter);
+void UWB_Task(void *parameter);
+void BLE_Task(void *parameter);
 void isr(void);
 
 void setup()
@@ -42,7 +44,7 @@ void setup()
 
 #ifndef Test_LEDS
     xTaskCreatePinnedToCore(
-        Task,
+        UWB_Task,
         "uwb_task",
         6000,
         NULL,
@@ -68,7 +70,7 @@ void loop() {
 #endif
 }
 
-void Task(void *parameter)
+void UWB_Task(void *parameter)
 {
     UwbDevice* dev;
     uint8_t current_role;
@@ -87,6 +89,26 @@ void Task(void *parameter)
     while(true)
     {
         dev->loop();
+    }
+}
+
+void BLE_Task(void *parameter)
+{
+    BleServer myServer;
+    myServer.init_server();
+    float i = 0;
+    while(true)
+    {
+        // Read and print the current value of the configuration characteristic
+        myServer.read_value(BLE_CHARAKTERISTIK_a1_UUID);
+
+        // Send a new value to the configuration characteristic
+        myServer.send_value(BLE_CHARAKTERISTIK_a1_UUID, i++);
+
+        // Read and print the current value of the device information characteristic
+        myServer.read_value(BLE_CHARAKTERISTIK_a1_UUID);
+
+        delay(1000);
     }
 }
 

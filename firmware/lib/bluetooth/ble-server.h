@@ -27,8 +27,8 @@ class BleServer
 
     void init_server();
 
-    void read_value(const std::string uuid)
-    void send_value(std::string uuid, VectorHolder data);
+    void read_value(const std::string uuid);
+    void send_value(std::string uuid, float data);
     
     size_t getConnectedCount(){return this->pServer->getConnectedCount();};
     
@@ -38,8 +38,8 @@ class BleServer
     std::list<BLEService*> mServices;
 
     /*Datastructs for easy configuration*/
-    typedef struct Characteristic{std::string name; std::string uuid;};
-    typedef struct Service{std::string uuid; const std::array<Characteristic, 2> characteristics;};
+    struct Characteristic{std::string name; std::string uuid;};
+    struct Service{std::string uuid; const std::array<Characteristic, 2> characteristics;};
 
     /*This Array structure shows the Service-&Characteristic-Architecture of the BLE Connection*/
     const std::array<Service, 2> my_services

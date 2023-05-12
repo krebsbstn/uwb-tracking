@@ -19,7 +19,7 @@ void BleServer::init_server()
     this->pServer = BLEDevice::createServer();
 
     // Initialize Services
-    init_Services();
+    init_services();
 
     // Create Advertising Object
     this->pAdvertising = BLEDevice::getAdvertising();
@@ -53,13 +53,13 @@ void BleServer::init_server()
  */
 void BleServer::init_services()
 {
-    for (this->Service current_service : this->my_services)
+    for (BleServer::Service current_service : this->my_services)
     {
         // Create a new BLEService and add it to the list of services
         this->mServices.push_front(this->pServer->createService(current_service.uuid));
 
         // Create a BLECharacteristic for each characteristic of the service
-        for (this->Characteristic current_characteristic : current_service.characteristics)
+        for (BleServer::Characteristic current_characteristic : current_service.characteristics)
         {
             add_Characteristic(mServices.front(), current_characteristic.uuid);
         }
@@ -101,7 +101,7 @@ void BleServer::read_value(const std::string uuid)
         NimBLECharacteristic *characteristica = s->getCharacteristic(UUID);
         if (characteristica != nullptr)
         {
-            std::string value = pCharacteristic->getValue();
+            std::string value = characteristica->getValue();
             Serial.print("VALUE: ");
             Serial.println(value.c_str());
             return;
