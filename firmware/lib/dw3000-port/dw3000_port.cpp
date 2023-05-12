@@ -116,7 +116,7 @@ void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
   
   // build SPI header
   if(offset == NO_SUB) {
-    header[0] = READ | cmd;
+    header[0] = SPI_READ | cmd;
   } else {
     header[0] = READ_SUB | cmd;
     if(offset < 128) {
@@ -188,7 +188,7 @@ void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
   // TODO proper error handling: address out of bounds
   // build SPI header
   if(offset == NO_SUB) {
-    header[0] = WRITE | cmd;
+    header[0] = SPI_WRITE | cmd;
   } else {
     header[0] = WRITE_SUB | cmd;
     if(offset < 128) {

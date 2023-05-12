@@ -52,9 +52,9 @@
 // no sub-address for register write
 #define NO_SUB 0xFF
 
-#define WRITE      0x80
+#define SPI_WRITE  0x80
 #define WRITE_SUB  0xC0
-#define READ       0x00
+#define SPI_READ   0x00
 #define READ_SUB   0x40
 #define RW_SUB_EXT 0x80
 
