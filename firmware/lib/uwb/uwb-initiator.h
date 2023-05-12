@@ -26,4 +26,5 @@ private:
 
     void poll_msg_set_dist(uint8_t *dist_field, const double dist);
     void send_tof_request(uwb_addr dest);
+    void process_tof_response();
 };

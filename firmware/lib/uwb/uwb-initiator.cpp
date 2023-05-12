@@ -60,84 +60,12 @@ void UwbInitiator::loop() {
 
     if (this->status_reg & SYS_STATUS_RXFCG_BIT_MASK) /* Got response */
     { 
-        uint32_t frame_len;
+        /*Calculate tof and distance from response*/
+        process_tof_response();
 
-        /* Clear good RX frame event in the DW IC status register. */
-        dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
-
-        /* Read data length that was received */
-        frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
-
-        /* A frame has been received: firstly need to read the MHR and check this frame is what we expect:
-        * the destination address should match our source address; then the header needs to have security enabled.
-        * If any of these checks fail the rx_aes_802_15_4 will return an error*/
-        this->aes_config.mode = AES_Decrypt;
-        PAYLOAD_PTR_802_15_4(&this->mac_frame) = this->rx_buffer; /* Set the MAC pyload ptr */
-
-        /* This example assumes that initiator and responder are sending encrypted data */
-        this->status = rx_aes_802_15_4(
-            &this->mac_frame,
-            frame_len,
-            &this->aes_job_rx,
-            sizeof(this->rx_buffer),
-            keys_options,
-            this->dst_address,
-            this->src_address,
-            &this->aes_config);
-
-        if (this->status != AES_RES_OK)
-        {
-            switch (this->status)
-            {
-            case AES_RES_ERROR_LENGTH:
-                UART_puts("AES length error.\n");
-                break;
-            case AES_RES_ERROR:
-                UART_puts("ERROR AES.\n");
-                break;
-            case AES_RES_ERROR_FRAME:
-                UART_puts("Error Frame.\n");
-                break;
-            case AES_RES_ERROR_IGNORE_FRAME:
-                UART_puts("Frame not for us.\n");
-                break;
-            default:
-                UART_puts("Unhandled AES Error.\n");   
-            }
-            return;
-        }
-
-        /* Check that the frame is the expected response from the uwb-responder.
-        * ignore the 8 first bytes of the response message as they contain the poll and response timestamps*/
-        if (memcmp(&this->rx_buffer[START_RECEIVE_DATA_LOCATION], &this->resp_msg[START_RECEIVE_DATA_LOCATION],
-            this->aes_job_rx.payload_len - START_RECEIVE_DATA_LOCATION) == 0)
-        {
-            uint32_t poll_tx_ts, resp_rx_ts, poll_rx_ts, resp_tx_ts;
-            int32_t rtd_init, rtd_resp;
-            float clockOffsetRatio;
-
-            /* Retrieve poll transmission and response reception timestamps. See NOTE 9 below. */
-            poll_tx_ts = dwt_readtxtimestamplo32();
-            resp_rx_ts = dwt_readrxtimestamplo32();
-
-            /* Read carrier integrator value and calculate clock offset ratio. See NOTE 11 below. */
-            clockOffsetRatio = ((float)dwt_readclockoffset()) / (uint32_t)(1 << 26);
-
-            /* Get timestamps embedded in response message. */
-            resp_msg_get_ts(&this->rx_buffer[RESP_MSG_POLL_RX_TS_IDX], &poll_rx_ts);
-            resp_msg_get_ts(&this->rx_buffer[RESP_MSG_RESP_TX_TS_IDX], &resp_tx_ts);
-
-            /* Compute time of flight and distance, using clock offset ratio to correct for differing local and remote clock rates */
-            rtd_init = resp_rx_ts - poll_tx_ts;
-            rtd_resp = resp_tx_ts - poll_rx_ts;
-
-            this->tof = ((rtd_init - rtd_resp * (1 - clockOffsetRatio)) / 2.0) * DWT_TIME_UNITS;
-            this->distance = tof * SPEED_OF_LIGHT;
-
-            /* Display computed distance on LCD. */
-            snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m\n", this->distance);
-            UART_puts(dist_str);
-        }
+        /* Display computed distance via uart. */
+        snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m\n", this->distance);
+        UART_puts(dist_str);
     }
     else
     {
@@ -200,4 +128,82 @@ void UwbInitiator::send_tof_request(uwb_addr dest)
     /* Start transmission, indicating that a response is expected so that reception is enabled automatically after the frame is sent and the delay
      * set by dwt_setrxaftertxdelay() has elapsed. */
     dwt_starttx(DWT_START_TX_IMMEDIATE | DWT_RESPONSE_EXPECTED);
+}
+
+void UwbInitiator::process_tof_response()
+{
+    uint32_t frame_len;
+
+    /* Clear good RX frame event in the DW IC status register. */
+    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
+
+    /* Read data length that was received */
+    frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
+
+    /* A frame has been received: firstly need to read the MHR and check this frame is what we expect:
+    * the destination address should match our source address; then the header needs to have security enabled.
+    * If any of these checks fail the rx_aes_802_15_4 will return an error*/
+    this->aes_config.mode = AES_Decrypt;
+    PAYLOAD_PTR_802_15_4(&this->mac_frame) = this->rx_buffer; /* Set the MAC pyload ptr */
+
+    /* This code assumes that initiator and responder are sending encrypted data */
+    this->status = rx_aes_802_15_4(
+        &this->mac_frame,
+        frame_len,
+        &this->aes_job_rx,
+        sizeof(this->rx_buffer),
+        keys_options,
+        this->dst_address,
+        this->src_address,
+        &this->aes_config);
+
+    if (this->status != AES_RES_OK)
+    {
+        switch (this->status)
+        {
+        case AES_RES_ERROR_LENGTH:
+            UART_puts("AES length error.\n");
+            break;
+        case AES_RES_ERROR:
+            UART_puts("ERROR AES.\n");
+            break;
+        case AES_RES_ERROR_FRAME:
+            UART_puts("Error Frame.\n");
+            break;
+        case AES_RES_ERROR_IGNORE_FRAME:
+            UART_puts("Frame not for us.\n");
+            break;
+        default:
+            UART_puts("Unhandled AES Error.\n");
+        }
+        return;
+    }
+
+    /* Check that the frame is the expected response from the uwb-responder.
+    * ignore the 8 first bytes of the response message as they contain the poll and response timestamps*/
+    if (memcmp(&this->rx_buffer[START_RECEIVE_DATA_LOCATION], &this->resp_msg[START_RECEIVE_DATA_LOCATION],
+        this->aes_job_rx.payload_len - START_RECEIVE_DATA_LOCATION) == 0)
+    {
+        uint32_t poll_tx_ts, resp_rx_ts, poll_rx_ts, resp_tx_ts;
+        int32_t rtd_init, rtd_resp;
+        float clockOffsetRatio;
+
+        /* Retrieve poll transmission and response reception timestamps. See NOTE 9 below. */
+        poll_tx_ts = dwt_readtxtimestamplo32();
+        resp_rx_ts = dwt_readrxtimestamplo32();
+
+        /* Read carrier integrator value and calculate clock offset ratio. See NOTE 11 below. */
+        clockOffsetRatio = ((float)dwt_readclockoffset()) / (uint32_t)(1 << 26);
+
+        /* Get timestamps embedded in response message. */
+        resp_msg_get_ts(&this->rx_buffer[RESP_MSG_POLL_RX_TS_IDX], &poll_rx_ts);
+        resp_msg_get_ts(&this->rx_buffer[RESP_MSG_RESP_TX_TS_IDX], &resp_tx_ts);
+
+        /* Compute time of flight and distance, using clock offset ratio to correct for differing local and remote clock rates */
+        rtd_init = resp_rx_ts - poll_tx_ts;
+        rtd_resp = resp_tx_ts - poll_rx_ts;
+
+        this->tof = ((rtd_init - rtd_resp * (1 - clockOffsetRatio)) / 2.0) * DWT_TIME_UNITS;
+        this->distance = tof * SPEED_OF_LIGHT;
+    }
 }
