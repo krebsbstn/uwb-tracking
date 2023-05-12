@@ -10,7 +10,7 @@ static uint8_t active_response = 0;
 class UwbResponder : public UwbDevice 
 {
 public:
-    UwbResponder(long long src, long long dst);
+    UwbResponder(uwb_addr src, uwb_addr dst);
     ~UwbResponder(){};
 
     virtual void setup() override;

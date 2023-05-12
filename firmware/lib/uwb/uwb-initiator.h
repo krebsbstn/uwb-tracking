@@ -9,7 +9,7 @@
 class UwbInitiator : public UwbDevice 
 {
 public:
-    UwbInitiator(long long src, long long dst);
+    UwbInitiator(uwb_addr src, uwb_addr dst);
     ~UwbInitiator(){};
 
     virtual void setup() override;
@@ -25,4 +25,5 @@ private:
     double distance;
 
     void poll_msg_set_dist(uint8_t *dist_field, const double dist);
+    void send_tof_request(uwb_addr dest);
 };

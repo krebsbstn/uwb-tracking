@@ -1,6 +1,6 @@
 #include "uwb-responder.h"
 
-UwbResponder::UwbResponder(long long src, long long dst) 
+UwbResponder::UwbResponder(uwb_addr src, uwb_addr dst) 
     : UwbDevice(src, dst)
 {
     this->type = "Responder";

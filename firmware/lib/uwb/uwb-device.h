@@ -28,10 +28,13 @@
  * temperature. These values can be calibrated prior to taking reference measurements.*/
 extern dwt_txconfig_t txconfig_options;
 
+/*Define new datatype for uwb addresses*/
+typedef long long uwb_addr;
+
 class UwbDevice
 {
 public:
-    UwbDevice(long long src, long long dst);
+    UwbDevice(uwb_addr src, uwb_addr dst);
     ~UwbDevice(){};
 
     virtual void setup();
@@ -45,8 +48,8 @@ public:
 protected:
     /*defining the source and destination addresses
      * @todo: replace with 1:N-Relation for Responder and 1:1-Connection für Initiator.*/
-    long long src_address;
-    long long dst_address;
+    uwb_addr src_address;
+    uwb_addr dst_address;
 
     String type;
 

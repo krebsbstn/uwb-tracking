@@ -1,6 +1,6 @@
 #include "uwb-device.h"
 
-UwbDevice::UwbDevice(long long src, long long dst)
+UwbDevice::UwbDevice(uwb_addr src, uwb_addr dst)
 : src_address(src)
 , dst_address(dst)
 {

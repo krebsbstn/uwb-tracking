@@ -1,6 +1,6 @@
 #include "uwb-initiator.h"
 
-UwbInitiator::UwbInitiator(long long src, long long dst)
+UwbInitiator::UwbInitiator(uwb_addr src, uwb_addr dst)
     : UwbDevice(src, dst)
 {
     this->type = "Initiator";
@@ -46,53 +46,11 @@ void UwbInitiator::setup() {
 
 void UwbInitiator::loop() {
     UwbDevice::loop();
-    /* Program the correct key to be used */
-    dwt_set_keyreg_128(&this->keys_options[INITIATOR_KEY_INDEX - 1]);
-    /* Set the key index for the frame */
-    MAC_FRAME_AUX_KEY_IDENTIFY_802_15_4(&this->mac_frame) = INITIATOR_KEY_INDEX;
 
-    /* Write last distance value in the final poll message.*/
-    poll_msg_set_dist(&poll_msg[POLL_MSG_DIST_IDX], this->distance);
+    /*create and send tof request to given destination address*/
+    send_tof_request(this->dst_address);
 
-    /*Clear last distance to prevent from sending same distance every cycle*/
-    this->distance = 0;
-
-    /* Update MHR to the correct SRC and DEST addresses and construct the 13-byte nonce
-    * (same MAC frame structure is used to store both received data and transmitted data - thus SRC and DEST addresses
-    * need to be updated before each transmission */
-    mac_frame_set_pan_ids_and_addresses_802_15_4(
-        &this->mac_frame, DEST_PAN_ID, this->dst_address, this->src_address);
-    mac_frame_get_nonce(&this->mac_frame, this->nonce);
-
-    this->aes_job_tx.mic_size = mac_frame_get_aux_mic_size(&this->mac_frame);
-    this->aes_config.mode = AES_Encrypt;
-    this->aes_config.mic = dwt_mic_size_from_bytes(this->aes_job_tx.mic_size);
-    dwt_configure_aes(&this->aes_config);
-
-    /* The AES job will take the TX frame data and and copy it to DW IC TX buffer before transmission. See NOTE 7 below. */
-    this->status = dwt_do_aes(&this->aes_job_tx, this->aes_config.aes_core_type);
-    /* Check for errors */
-    if (this->status < 0)
-    {
-        UART_puts("AES length error\n");
-        return;
-    }
-    else if (this->status & AES_ERRORS)
-    {
-        UART_puts("ERROR AES\n");
-        return;
-    }
-
-    /* configure the frame control and start transmission */
-    dwt_writetxfctrl(
-        this->aes_job_tx.header_len + this->aes_job_tx.payload_len 
-        + this->aes_job_tx.mic_size + FCS_LEN, 0, 1); /* Zero offset in TX buffer, ranging. */
-
-    /* Start transmission, indicating that a response is expected so that reception is enabled automatically after the frame is sent and the delay
-     * set by dwt_setrxaftertxdelay() has elapsed. */
-    dwt_starttx(DWT_START_TX_IMMEDIATE | DWT_RESPONSE_EXPECTED);
-
-    /* We assume that the transmission is achieved correctly, poll for reception of a frame or error/timeout. See NOTE 8 below. */
+    /* We assume that the transmission is achieved correctly, poll for reception of a frame or error/timeout.*/
     while (!((this->status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG_BIT_MASK | SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR)))
     {};
 
@@ -194,4 +152,52 @@ void UwbInitiator::loop() {
 void UwbInitiator::poll_msg_set_dist(uint8_t *dist_field, const double dist)
 {
     memcpy(dist_field, &dist, sizeof(dist));
+}
+
+void UwbInitiator::send_tof_request(uwb_addr dest)
+{
+    /* Program the correct key to be used */
+    dwt_set_keyreg_128(&this->keys_options[INITIATOR_KEY_INDEX - 1]);
+    /* Set the key index for the frame */
+    MAC_FRAME_AUX_KEY_IDENTIFY_802_15_4(&this->mac_frame) = INITIATOR_KEY_INDEX;
+
+    /* Write last distance value into the final poll message.*/
+    poll_msg_set_dist(&poll_msg[POLL_MSG_DIST_IDX], this->distance);
+
+    /*Clear last distance to prevent from sending same distance every cycle*/
+    this->distance = 0;
+
+    /* Update MHR to the correct SRC and DEST addresses and construct the 13-byte nonce
+    * (same MAC frame structure is used to store both received data and transmitted data - thus SRC and DEST addresses
+    * need to be updated before each transmission */
+    mac_frame_set_pan_ids_and_addresses_802_15_4(
+        &this->mac_frame, DEST_PAN_ID, dest, this->src_address);
+    mac_frame_get_nonce(&this->mac_frame, this->nonce);
+
+    this->aes_job_tx.mic_size = mac_frame_get_aux_mic_size(&this->mac_frame);
+    this->aes_config.mode = AES_Encrypt;
+    this->aes_config.mic = dwt_mic_size_from_bytes(this->aes_job_tx.mic_size);
+    dwt_configure_aes(&this->aes_config);
+
+    /* The AES job will take the TX frame data and and copy it to DW IC TX buffer before transmission.*/
+    this->status = dwt_do_aes(&this->aes_job_tx, this->aes_config.aes_core_type);
+    
+    /* Check for errors */
+    if (this->status < 0){
+        UART_puts("TX AES length error\n");
+        return;
+    }
+    else if (this->status & AES_ERRORS){
+        UART_puts("TX AES ERROR\n");
+        return;
+    }
+
+    /* configure the frame control and start transmission */
+    dwt_writetxfctrl(
+        this->aes_job_tx.header_len + this->aes_job_tx.payload_len 
+        + this->aes_job_tx.mic_size + FCS_LEN, 0, 1); /* Zero offset in TX buffer, ranging. */
+
+    /* Start transmission, indicating that a response is expected so that reception is enabled automatically after the frame is sent and the delay
+     * set by dwt_setrxaftertxdelay() has elapsed. */
+    dwt_starttx(DWT_START_TX_IMMEDIATE | DWT_RESPONSE_EXPECTED);
 }
