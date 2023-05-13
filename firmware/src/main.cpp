@@ -44,7 +44,7 @@ void setup()
 
 #ifndef Test_LEDS
     xTaskCreatePinnedToCore(
-        UWB_Task,
+        BLE_Task,
         "uwb_task",
         6000,
         NULL,
@@ -103,7 +103,8 @@ void BLE_Task(void *parameter)
         myServer.read_value(BLE_CHARAKTERISTIK_a1_UUID);
 
         // Send a new value to the configuration characteristic
-        myServer.send_value(BLE_CHARAKTERISTIK_a1_UUID, i++);
+        myServer.send_value(BLE_CHARAKTERISTIK_a1_UUID, std::to_string(i));
+        i++;
 
         // Read and print the current value of the device information characteristic
         myServer.read_value(BLE_CHARAKTERISTIK_a1_UUID);

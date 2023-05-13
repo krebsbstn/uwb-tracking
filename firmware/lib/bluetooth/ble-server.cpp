@@ -61,7 +61,7 @@ void BleServer::init_services()
         // Create a BLECharacteristic for each characteristic of the service
         for (BleServer::Characteristic current_characteristic : current_service.characteristics)
         {
-            add_Characteristic(mServices.front(), current_characteristic.uuid);
+            add_Characteristic(mServices.front(), current_characteristic);
         }
 
         // Start the service
@@ -75,16 +75,17 @@ void BleServer::init_services()
  * @param service The service to which the characteristic should be added.
  * @param uuid The UUID of the characteristic to be added.
  */
-void BleServer::add_Characteristic(BLEService *service, std::string uuid)
+void BleServer::add_Characteristic(BLEService *service, BleServer::Characteristic characteristic)
 {
     NimBLECharacteristic *var = service->createCharacteristic(
-        uuid,
-        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::INDICATE | NIMBLE_PROPERTY::NOTIFY);
-
-    var->createDescriptor(
-        "Descriptor",
-        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::INDICATE | NIMBLE_PROPERTY::NOTIFY,
+        characteristic.characteristic_uuid,
+        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE | NIMBLE_PROPERTY::NOTIFY);
+    
+    NimBLEDescriptor *descriptor = var->createDescriptor(
+        characteristic.descriptor_uuid,
+        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE | NIMBLE_PROPERTY::NOTIFY,
         64);
+    descriptor->setValue(characteristic.name);
 }
 
 /**
@@ -118,7 +119,7 @@ void BleServer::read_value(const std::string uuid)
  * @param uuid The UUID of the Characteristic to which the value should be sent.
  * @param data The value to be sent.
  */
-void BleServer::send_value(std::string uuid, float data)
+void BleServer::send_value(std::string uuid, const std::string data)
 {
     const NimBLEUUID UUID = NimBLEUUID(uuid);
     for (BLEService *s : mServices)
