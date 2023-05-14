@@ -52,3 +52,4 @@ Mkfile.old
 dkms.conf
 .mypy_cache
 __pycache__
+dashboard.json

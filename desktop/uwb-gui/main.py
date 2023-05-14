@@ -1,6 +1,8 @@
 import tkinter as tk
 import tkinter.simpledialog as simpledialog
 from lib.widget import Widget
+from lib.ble_service_widget import BleServiceWidget
+from lib.serial_printer import SerialWidget
 import json
 
 class Dashboard(tk.Frame):
@@ -9,6 +11,7 @@ class Dashboard(tk.Frame):
 
         self.widgets = []
         self.maxindex = 0
+        self.islocked = False
 
         self.canvas = tk.Canvas(self, bg="white")
         self.canvas.pack(fill="both", expand=True, padx=10, pady=10)
@@ -28,14 +31,30 @@ class Dashboard(tk.Frame):
 
         self.lock_button = tk.Button(self, text="lock dashboard", command=self.toggle_resize_and_drag)
         self.lock_button.pack(side="right")
-
+        try:
+            self.load_dashboard()
+            self.toggle_resize_and_drag()
+        except:
+            pass
 
     def add_widget(self):
-        name = str(len(self.widgets)+1) + ". - Widget"
-        widget = Widget(self.canvas, name, width=100, height=100)
-        widget.place(x=0, y=0, width=100, height=100, anchor="nw")
-        self.widgets.append(widget)
-        self.maxindex = self.maxindex + 1
+        widget_types = ["BleServiceWidget", "SerialWidget", "MasterWidget"]
+        dialog = MyDialog(self, "Select Widget Type", widget_types)
+        result = dialog.result
+        if result is not None:
+            name = str(len(self.widgets) + 1) + ". - " + result
+            if result == "BleServiceWidget":
+                widget = BleServiceWidget(self.canvas, name)
+                widget.place(x=0, y=0, width=600, height=280, anchor="nw")
+            elif result == "SerialWidget":
+                widget = SerialWidget(self.canvas, name)
+                widget.place(x=0, y=0, width=550, height=260, anchor="nw")
+            elif result == "MasterWidget":
+                widget = Widget(self.canvas, name)
+                widget.place(x=0, y=0, width=150, height=100, anchor="nw")
+            self.widgets.append(widget)
+            self.maxindex = self.maxindex + 1
+
 
     def delete_widget(self):
         if self.widgets:
@@ -52,6 +71,7 @@ class Dashboard(tk.Frame):
         for widget in self.widgets:
             widget_data = {
                 'name': widget.name,
+                'type': widget.type,
                 'x': widget.winfo_x(),
                 'y': widget.winfo_y(),
                 'width': widget.winfo_width(),
@@ -70,15 +90,22 @@ class Dashboard(tk.Frame):
             widget.destroy()
         self.widgets = []
         for widget_data in widget_list:
-            widget = Widget(self.canvas, widget_data['name'])
+            if widget_data['type'] == "BleServiceWidget":
+                widget = BleServiceWidget(self.canvas, widget_data['name'])
+            elif widget_data['type'] == "SerialWidget":
+                widget = SerialWidget(self.canvas, widget_data['name'])
+            else:
+                widget = Widget(self.canvas, widget_data['name'])
             widget.place(x=widget_data['x'], y=widget_data['y'], width=widget_data['width'], height=widget_data['height'], anchor="nw")
             self.widgets.append(widget)
         self.maxindex = data['max_index']
 
     def toggle_resize_and_drag(self):
-        if self.add_widget_button['state'] == 'normal' or self.delete_widget_button['state'] == 'normal':
+        if self.islocked == False:
             for widget in self.widgets:
                 widget.disable_interaction()
+            self.islocked = True
+            self.lock_button.configure(text="unlock dashboard")
             self.add_widget_button['state'] = 'disabled'
             self.delete_widget_button['state'] = 'disabled'
             self.save_button['state'] = 'disabled'
@@ -86,10 +113,31 @@ class Dashboard(tk.Frame):
         else:
             for widget in self.widgets:
                 widget.enable_interaction()
+            self.islocked = False
+            self.lock_button.configure(text="lock dashboard")
             self.add_widget_button['state'] = 'normal'
             self.delete_widget_button['state'] = 'normal'
             self.save_button['state'] = 'normal'
             self.load_button['state'] = 'normal'
+
+class MyDialog(simpledialog.Dialog):
+    def __init__(self, parent, title, options):
+        self.options = options
+        self.selected_option = tk.StringVar()
+        super().__init__(parent, title=title)
+
+    def body(self, master):
+        label_frame = tk.Frame(master)
+        label_frame.pack(side="top", padx=5, pady=5)
+        tk.Label(label_frame, text="Please select a Widget-Type:").pack(side="left")
+        menu_frame = tk.Frame(master)
+        menu_frame.pack(side="bottom", padx=5, pady=5)
+        tk.OptionMenu(menu_frame, self.selected_option, *self.options).pack(side="left", padx=5)
+        return tk.Label(master, text="")
+
+    def apply(self):
+        self.result = self.selected_option.get()
+
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -3,6 +3,7 @@ import tkinter as tk
 class Widget(tk.Frame):
     def __init__(self, parent, the_name, **kwargs):
         super().__init__(parent, **kwargs)
+        self.type="MasterWidget"
         
         self.border = tk.Frame(self, bd=1, relief="solid", bg="red")
         self.border.pack(fill="both", expand=True)
@@ -13,6 +14,7 @@ class Widget(tk.Frame):
         self.name = the_name
         self.title_label = tk.Label(self.title_frame, text=self.name, font=("Helvetica", 12, "bold"), anchor="w")
         self.title_label.pack(side="left", fill="both", expand=True)
+        self.title_label.configure(bg='grey')
 
 
         self.dragging = False
@@ -23,12 +25,22 @@ class Widget(tk.Frame):
         self.enable_interaction()
 
     def enable_interaction(self):
+        self.title_label.bind("<ButtonPress-1>", self.start_interaction)
+        self.title_label.bind("<B1-Motion>", self.do_interaction)
+        self.title_label.bind("<ButtonRelease-1>", self.stop_interaction)
+        self.title_label.bind("<Motion>", self.update_cursor)
+
         self.border.bind("<ButtonPress-1>", self.start_interaction)
         self.border.bind("<B1-Motion>", self.do_interaction)
         self.border.bind("<ButtonRelease-1>", self.stop_interaction)
         self.border.bind("<Motion>", self.update_cursor)
 
     def disable_interaction(self):
+        self.title_label.unbind("<ButtonPress-1>")
+        self.title_label.unbind("<B1-Motion>")
+        self.title_label.unbind("<ButtonRelease-1>")
+        self.title_label.unbind("<Motion>")
+
         self.border.unbind("<ButtonPress-1>")
         self.border.unbind("<B1-Motion>")
         self.border.unbind("<ButtonRelease-1>")
@@ -36,7 +48,7 @@ class Widget(tk.Frame):
 
     """Interaction splits functionality of resize and drag&drop"""
     def start_interaction(self, event):
-        if self.get_resize_corner(event):
+        if self.get_resize_corner(event).startswith("bottom"):
             self.start_resize(event)
         else:
             self.start_drag(event)
@@ -96,19 +108,6 @@ class Widget(tk.Frame):
         if self.resizing:
             dx = event.x_root - self.last_x
             dy = event.y_root - self.last_y
-            #if self.resize_corner == "top_left_corner":
-            #    new_x = self.winfo_x() + dx
-            #    new_y = self.winfo_y() + dy
-            #    new_width = self.winfo_width() - dx
-            #    new_height = self.winfo_height() - dy
-            #    self.place(x=new_x, y=new_y, anchor="nw")
-            #    self.place(width=new_width, height=new_height)
-            #elif self.resize_corner == "top_right_corner":
-            #    new_y = self.winfo_y() + dy
-            #    new_width = self.winfo_width() + dx
-            #    new_height = self.winfo_height() - dy
-            #    self.place(x=self.winfo_x(), y=new_y, anchor="nw")
-            #    self.place(width=new_width, height=new_height)
             if self.resize_corner == "bottom_left_corner":
                 new_x = self.winfo_x() + dx
                 new_width = self.winfo_width() - dx
@@ -130,14 +129,12 @@ class Widget(tk.Frame):
         """Returns the corner where the resize is taking place"""
         x = event.x
         y = event.y
-        #if x < 10 and y < 10:
-        #    return "top_left_corner"
-        #elif x > self.winfo_width() - 10 and y < 10:
-        #    return "top_right_corner"
         if x < 10 and y > self.winfo_height() - 10:
             return "bottom_left_corner"
         elif x > self.winfo_width() - 10 and y > self.winfo_height() - 10:
             return "bottom_right_corner"
+        elif y < 20:
+            return "fleur"
         else:
             return None
 
