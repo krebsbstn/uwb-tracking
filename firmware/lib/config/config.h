@@ -1,12 +1,19 @@
-#ifndef CONFIG_H_
-#define CONFIG_H_
-/*
-This Space is for defining important Variables like GPIO Pins.
-*/
-#define TASK0_PRIORITY					1
-#define TASK1_PRIORITY					1
+#pragma once
 
-#define TASK0_CORE						0
-#define TASK1_CORE						1
+/* Definiere den Reset-Pin */
+#define PIN_RST 27
 
-#endif
+/* Definiere den IRQ-Pin zum DWM3000 */
+#define PIN_IRQ 34
+
+/* Definiere den SPI-Select-Pin */
+#define PIN_SS 4
+
+/* Definiere die Buttons für Benutzer 1 und Benutzer 2 */
+#define USER_1_BTN 5
+#define USER_2_BTN 21
+
+/* Definiere die LEDs für Benutzer 1, Benutzer 2 und Benutzer 3 */
+#define USER_1_LED 22
+#define USER_2_LED 17
+#define USER_3_LED 25
