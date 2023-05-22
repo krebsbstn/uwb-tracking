@@ -1,5 +1,6 @@
 #pragma once
-#include <config.h>
+#include <pin_config.h>
+#include <datatypes.h>
 #include <dw3000.h>
 #include <dw3000_mac_802_15_4.h>
 
@@ -27,9 +28,6 @@
 /* Values for the PG_DELAY and TX_POWER registers reflect the bandwidth and power of the spectrum at the current
  * temperature. These values can be calibrated prior to taking reference measurements.*/
 extern dwt_txconfig_t txconfig_options;
-
-/*Define new datatype for uwb addresses*/
-typedef long long uwb_addr;
 
 class UwbDevice
 {
