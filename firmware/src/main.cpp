@@ -5,11 +5,11 @@
 #include "freertos/FreeRTOS.h"
 #include <Arduino.h>
 #include <EEPROM.h>
-#include <config.h>
+#include <pin_config.h>
 #include <uwb-device.h>
 #include <uwb-initiator.h>
 #include <uwb-responder.h>
-#include <ble-server.h>
+#include <ble_config_loader.h>
 
 #define INITIATOR_ADDR 0x1122334455667788
 #define RESPONDER_ADDR 0x8877665544332211
@@ -27,7 +27,7 @@ void isr(void);
 void setup()
 {
     UART_init();
-    EEPROM.begin(1);
+    //EEPROM.begin(1);
 
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
@@ -70,55 +70,46 @@ void loop() {
 #endif
 }
 
-void UWB_Task(void *parameter)
-{
-    UwbDevice* dev;
-    uint8_t current_role;
-    EEPROM.get(IS_INITIATOR, current_role);
-    if(current_role){
-        dev = new UwbInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
-        digitalWrite(USER_1_LED, HIGH);
-    }else{
-        dev = new UwbResponder(RESPONDER_ADDR, INITIATOR_ADDR);
-        digitalWrite(USER_1_LED, LOW);
-    }
-
-    dev->setup();
-    dev->enable_leds();
-
-    while(true)
-    {
-        dev->loop();
-    }
-}
+//void UWB_Task(void *parameter)
+//{
+//    UwbDevice* dev;
+//    uint8_t current_role;
+//    EEPROM.get(IS_INITIATOR, current_role);
+//    if(current_role){
+//        dev = new UwbInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
+//        digitalWrite(USER_1_LED, HIGH);
+//    }else{
+//        dev = new UwbResponder(RESPONDER_ADDR, INITIATOR_ADDR);
+//        digitalWrite(USER_1_LED, LOW);
+//    }
+//
+//    dev->setup();
+//    dev->enable_leds();
+//
+//    while(true)
+//    {
+//        dev->loop();
+//    }
+//}
 
 void BLE_Task(void *parameter)
 {
-    BleServer myServer;
-    myServer.init_server();
-    float i = 0;
+    BleConfigLoader my_loader;
     while(true)
     {
-        // Read and print the current value of the configuration characteristic
-        myServer.read_value(BLE_CHARAKTERISTIK_a1_UUID);
-
-        // Send a new value to the configuration characteristic
-        myServer.send_value(BLE_CHARAKTERISTIK_a1_UUID, std::to_string(i));
-        i++;
-
-        // Read and print the current value of the device information characteristic
-        myServer.read_value(BLE_CHARAKTERISTIK_a1_UUID);
-
-        delay(1000);
+        my_loader.load_config_from_ble();
+        my_loader.print_config();
+        
+        delay(10000);
     }
 }
 
 void isr(void)
 {
-    uint8_t current_role;
-    EEPROM.get(IS_INITIATOR, current_role);
-    EEPROM.put(IS_INITIATOR, !current_role);
-    EEPROM.commit();
-    esp_restart();
-    return;
+    //uint8_t current_role;
+    //EEPROM.get(IS_INITIATOR, current_role);
+    //EEPROM.put(IS_INITIATOR, !current_role);
+    //EEPROM.commit();
+    //esp_restart();
+    //return;
 }

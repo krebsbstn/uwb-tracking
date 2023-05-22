@@ -92,9 +92,9 @@ void BleServer::add_Characteristic(BLEService *service, BleServer::Characteristi
  * @brief Reads the message from a characteristic with the given UUID.
  *
  * @param uuid The UUID of the characteristic to read from.
- * @return void.
+ * @return std::string of the read value.
  */
-void BleServer::read_value(const std::string uuid)
+std::string BleServer::read_value(const std::string uuid)
 {
     const NimBLEUUID UUID = NimBLEUUID(uuid);
     for (BLEService *s : mServices)
@@ -103,13 +103,12 @@ void BleServer::read_value(const std::string uuid)
         if (characteristica != nullptr)
         {
             std::string value = characteristica->getValue();
-            Serial.print("VALUE: ");
-            Serial.println(value.c_str());
-            return;
+            return value;
         }
     }
     Serial.print("Not able to find Characteristic: ");
     Serial.println(UUID.toString().c_str());
+    return "";
 }
 
 /**
