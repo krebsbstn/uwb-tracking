@@ -13,7 +13,8 @@ struct coordinate
 
 /*Define roles of a the PCB*/
 enum role{
-    reserved = 0,
+    start_delimiter = 0,
     tag = 1,
-    anchor = 2
+    anchor = 2,
+    end_delimiter
 };

@@ -4,7 +4,7 @@
 #include <NimBLEDevice.h>
 #include <array>
 
-#define BLE_NAME "AA"
+#define BLE_NAME "ESP32"
 
 // BLE Service for Configuration
 #define BLE_SERVICE_CONFIGURATION_UUID  "76847a0a-2748-4fda-bcd7-74425f0e4a10"
@@ -61,15 +61,9 @@ private:
       Service{
         uuid : BLE_SERVICE_CONFIGURATION_UUID, 
         characteristics : {
-          Characteristic{name : "position [i.e. \"{\"x\":1,\"y\":2,\"z\":3}\"]", characteristic_uuid : BLE_CHARAKTERISTIK_a1_UUID, descriptor_uuid : BLE_DESCRIPTOR_a1_UUID}, 
+          Characteristic{name : "position [i.e. {\"x\":1,\"y\":2,\"z\":3}]", characteristic_uuid : BLE_CHARAKTERISTIK_a1_UUID, descriptor_uuid : BLE_DESCRIPTOR_a1_UUID}, 
           Characteristic{name : "role [i.e. 1 or 2]", characteristic_uuid : BLE_CHARAKTERISTIK_a2_UUID, descriptor_uuid : BLE_DESCRIPTOR_a2_UUID},
           Characteristic{name : "address [i.e. 123456]", characteristic_uuid : BLE_CHARAKTERISTIK_a3_UUID, descriptor_uuid : BLE_DESCRIPTOR_a3_UUID}}},
-
-      //Service{
-      //  uuid : BLE_SERVICE_DEV_INFORMATION_UUID,
-      //  characteristics : {
-      //    Characteristic{name : "description b1", characteristic_uuid : BLE_CHARAKTERISTIK_b1_UUID, descriptor_uuid : BLE_DESCRIPTOR_b1_UUID},
-      //    Characteristic{name : "description b2", characteristic_uuid : BLE_CHARAKTERISTIK_b2_UUID, descriptor_uuid : BLE_DESCRIPTOR_b2_UUID}}},
   };
 
   void add_Characteristic(BLEService *service, BleServer::Characteristic characteristic);

@@ -20,37 +20,54 @@ void BleConfigLoader::load_config_from_eeprom()
 
 int BleConfigLoader::load_config_from_ble()
 {
-    std::string tmp = my_server.read_value(BLE_CHARAKTERISTIK_a1_UUID);
-    size_t bufferSize = JSON_OBJECT_SIZE(6);
-    DynamicJsonDocument jsonBuffer(bufferSize);
-    DeserializationError error = deserializeJson(jsonBuffer, tmp);
-    if (error)
+    try
     {
-        Serial.println("Json Failed...");
-        return 0;
+        std::string tmp = my_server.read_value(BLE_CHARAKTERISTIK_a1_UUID);
+        size_t bufferSize = JSON_OBJECT_SIZE(6);
+        DynamicJsonDocument jsonBuffer(bufferSize);
+        DeserializationError error = deserializeJson(jsonBuffer, tmp);
+        if (error) throw std::runtime_error(error.c_str());
+        my_position.x = jsonBuffer["x"].as<double>();
+        my_position.y = jsonBuffer["y"].as<double>();
+        my_position.z = jsonBuffer["z"].as<double>();
     }
-    my_position.x = jsonBuffer["x"].as<double>();
-    my_position.y = jsonBuffer["y"].as<double>();
-    my_position.z = jsonBuffer["z"].as<double>();
-
-    int temp = atoi(my_server.read_value(BLE_CHARAKTERISTIK_a2_UUID).c_str());
-    if(temp == role::tag)
-        my_role = role::tag;
-    else if(temp == role::anchor)
-        my_role = role::anchor;
-    else {
-        Serial.println("role Failed...");
-        return 0;
+    catch(const std::exception& e)
+    {
+        Serial.print("Json Failed with: ");
+        Serial.println(e.what());  
     }
 
-    tmp = my_server.read_value(BLE_CHARAKTERISTIK_a3_UUID);
-    my_address = std::stoll(tmp);
+    try
+    {
+        int temp = atoi(my_server.read_value(BLE_CHARAKTERISTIK_a2_UUID).c_str());
+        if(temp > role::start_delimiter && temp < role::end_delimiter)
+            my_role = (role)temp;
+        else 
+            throw std::runtime_error("role unknown");
+    }
+    catch(const std::exception& e)
+    {
+        Serial.print("Role Failed with: ");
+        Serial.println(e.what());
+    }
+
+    try
+    {
+        std::string tmp = my_server.read_value(BLE_CHARAKTERISTIK_a3_UUID);
+        my_address = std::stoll(tmp);
+    }
+    catch(const std::exception& e)
+    {
+        Serial.print("Address Failed with: ");
+        Serial.println(e.what());
+    }
+    
     return 1;
 }
 
 void BleConfigLoader::save_config_to_ble()
 {
-    size_t bufferSize = JSON_OBJECT_SIZE(3);
+    size_t bufferSize = JSON_OBJECT_SIZE(6);
     DynamicJsonDocument jsonBuffer(bufferSize);
     jsonBuffer["x"] = my_position.x;
     jsonBuffer["y"] = my_position.y;
@@ -66,7 +83,7 @@ void BleConfigLoader::save_config_to_ble()
 
 void BleConfigLoader::print_config()
 {
-    size_t bufferSize = JSON_OBJECT_SIZE(3);
+    size_t bufferSize = JSON_OBJECT_SIZE(6);
     DynamicJsonDocument jsonBuffer(bufferSize);
     jsonBuffer["x"] = my_position.x;
     jsonBuffer["y"] = my_position.y;
