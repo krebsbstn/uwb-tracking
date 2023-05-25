@@ -1,4 +1,5 @@
 from lib.widget import Widget
+import threading
 import asyncio
 import tkinter as tk
 import bleak
@@ -9,19 +10,24 @@ class BleServiceWidget(Widget):
         self.type="BleServiceWidget"
         self.border.configure(bg="grey")
 
+        self.refresh_thread = None
+        self.service_thread = None
+        self.set_value_thread = None
+
         # first Frame with Widgets
         self.top_frame = tk.Frame(self.border)
         self.top_frame.pack(side="top", fill="x")
+        
+        self.refresh_button = tk.Button(self.top_frame, text="Refresh", command=self.refresh_devices)
+        self.refresh_button.pack(side="left")
 
-        self.device_label = tk.Label(self.top_frame, text="Select device:")
+        self.device_label = tk.Label(self.top_frame, text="Device:")
         self.device_label.pack(side="left")
 
         self.device_var = tk.StringVar(value="")
         self.device_menu = tk.OptionMenu(self.top_frame, self.device_var, "")
         self.device_menu.pack(side="left")
 
-        self.refresh_button = tk.Button(self.top_frame, text="Refresh", command=self.refresh_devices)
-        self.refresh_button.pack(side="left")
 
         self.services_button = tk.Button(self.top_frame, text="Show Services", command=self.show_services)
         self.services_button.pack(side="left")
@@ -49,52 +55,48 @@ class BleServiceWidget(Widget):
         self.services_text = tk.Text(self.border)
         self.services_text.pack(side="left", fill='both', expand=True, padx=5, pady=5)
 
-        self.client = None
+        self.client = bleak.BleakClient("")
         asyncio.set_event_loop(asyncio.new_event_loop())
         self.loop = asyncio.get_event_loop()
-
+    
+    def destroy(self) -> None:
+        if self.service_thread is not None:
+            self.service_thread.join()
+        if self.refresh_thread is not None:
+            self.refresh_thread.join()
+        if self.set_value_thread is not None:
+            self.set_value_thread.join()
+        return super().destroy()
+    
     def set_characteristic(self):
+        self.set_value_thread = threading.Thread(target=self.set_characteristic_thread)
+        self.set_value_thread.start()
+
+    def set_characteristic_thread(self):
+        async def set_characteristic_value(address, characteristic_uuid, value):
+            if not self.client.is_connected:
+                self.client = bleak.BleakClient(address)
+                await self.client.connect()
+            await self.client.write_gatt_char(characteristic_uuid, value.encode())
+
         address = self.device_var.get()
         characteristic_uuid = self.characteristic_entry.get()
         value = self.value_entry.get()
         if address and value and characteristic_uuid:
-            task = self.set_characteristic_value(address, characteristic_uuid, value)
+            task = set_characteristic_value(address, characteristic_uuid, value)
             self.loop.run_until_complete(task)
             self.show_services()
 
-    async def set_characteristic_value(self, address, characteristic_uuid, value):
-        if not self.client:
-            self.client = bleak.BleakClient(address)
-            await self.client.connect()
-        await self.client.write_gatt_char(characteristic_uuid, value.encode())
-
-    async def get_services(self, address):
-        if not self.client:
-            self.client = bleak.BleakClient(address)
-            await self.client.connect()
-        services = await self.client.get_services()
-        return services
-        
-    async def get_descriptor(self, address, descriptor):
-        if not self.client:
-            self.client = bleak.BleakClient(address)
-            await self.client.connect()
-        value = await self.client.read_gatt_descriptor(descriptor.handle)
-        return value.decode()
-    
-    async def get_characteristic_value(self, address, characteristic_uuid):
-        if not self.client:
-            self.client = bleak.BleakClient(address)
-            await self.client.connect()
-        value = await self.client.read_gatt_char(characteristic_uuid)
-        return value.decode()
-        
     def show_services(self):
         address = self.device_var.get()
         if address:
-            task = self.print_service_infos(address)
-            self.loop.run_until_complete(task)
-    
+            self.service_thread = threading.Thread(target=self.print_service_infos_thread, args=(address,))
+            self.service_thread.start()
+
+    def print_service_infos_thread(self, address):
+        task = self.print_service_infos(address)
+        self.loop.run_until_complete(task)
+
     async def print_service_infos(self, address):
         services = await self.get_services(address)
         self.services_text.delete(1.0, tk.END)
@@ -120,12 +122,37 @@ class BleServiceWidget(Widget):
                         self.services_text.insert(tk.END, f"|\tValue: Unable to read value\n")
             self.services_text.insert(tk.END, f"\n")
 
-    async def discover_devices(self):
-        devices = await bleak.discover()
-        return devices
-
+    async def get_services(self, address):
+        if not self.client.is_connected:
+            self.client = bleak.BleakClient(address)
+            await self.client.connect()
+        services = await self.client.get_services()
+        return services
+        
+    async def get_descriptor(self, address, descriptor):
+        if not self.client.is_connected:
+            self.client = bleak.BleakClient(address)
+            await self.client.connect()
+        value = await self.client.read_gatt_descriptor(descriptor.handle)
+        return value.decode()
+    
+    async def get_characteristic_value(self, address, characteristic_uuid):
+        if not self.client.is_connected:
+            self.client = bleak.BleakClient(address)
+            await self.client.connect()
+        value = await self.client.read_gatt_char(characteristic_uuid)
+        return value.decode()
+    
     def refresh_devices(self):
-        devices = asyncio.run(self.discover_devices())
+        self.refresh_thread = threading.Thread(target=self.refresh_devices_thread)
+        self.refresh_thread.start()
+
+    def refresh_devices_thread(self):
+        async def discover_devices():
+            devices = await bleak.discover()
+            return devices
+        
+        devices = asyncio.run(discover_devices())
         self.device_menu["menu"].delete(0, tk.END)
         for d in devices:
             label = f"{d.address} - {d.name}" if d.name else d.address

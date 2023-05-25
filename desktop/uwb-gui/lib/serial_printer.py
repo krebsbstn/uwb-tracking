@@ -10,6 +10,9 @@ class SerialWidget(Widget):
         self.type="SerialWidget"
         self.border.configure(bg="grey")
 
+        self.kill = False
+        self.thread = None
+
         # first Frame with Widgets
         self.top_frame = tk.Frame(self.border)
         self.top_frame.pack(side="top", fill="x")
@@ -44,10 +47,19 @@ class SerialWidget(Widget):
 
         self.clear_button = tk.Button(self.bottom_frame, text="Clear", command=self.clear_console)
         self.clear_button.pack(side="left")
+
+        self.disconnect_button = tk.Button(self.bottom_frame, text="Disconnect", command=self.disconnect)
+        self.disconnect_button.pack(side="left")
         
         # Textfield for Serial print
         self.console_text = tk.Text(self.border, height=10)
         self.console_text.pack(side="left", fill='both', expand=True, padx=5, pady=5)
+    
+    def destroy(self) -> None:
+        self.kill = True
+        if self.thread is not None:
+            self.thread.join()
+        return super().destroy()
 
     def refresh_devices(self):
         self.available_ports = [port.device for port in serial.tools.list_ports.comports()]
@@ -57,7 +69,7 @@ class SerialWidget(Widget):
 
     def connect_to_port(self, event=None):
         try:
-            self.serial_conn = serial.Serial(self.selected_port.get(), self.selected_baud.get())
+            self.serial_conn = serial.Serial(self.selected_port.get(), self.selected_baud.get(),exclusive=True)
             self.console_text.config(state=tk.NORMAL)
             self.console_text.delete(1.0, tk.END)
             self.console_text.insert(tk.END, f"Connected to {self.selected_port.get()} with {self.selected_baud.get()} baudrate.\n")
@@ -65,12 +77,15 @@ class SerialWidget(Widget):
             self.serial_conn.flushInput()
             self.serial_conn.flushOutput()
             self.serial_conn.timeout = 0.5
-            thread = threading.Thread(target=self.read_port_task)
-            thread.start()
+            self.thread = threading.Thread(target=self.read_port_task)
+            self.thread.start()
         except serial.SerialException as e:
             self.console_text.config(state=tk.NORMAL)
             self.console_text.insert(tk.END, f"Could not connect to {self.selected_port.get()}: {e}\n")
             self.console_text.config(state=tk.DISABLED)
+    
+    def disconnect(self):
+        pass
 
     def clear_console(self):
         self.console_text.config(state=tk.NORMAL)
@@ -90,5 +105,12 @@ class SerialWidget(Widget):
                         self.console_text.config(state=tk.NORMAL)
                         self.console_text.delete('1.0', '2.0')
                         self.console_text.config(state=tk.DISABLED)
+                if self.kill:
+                    return
             except Exception as e:
-                print(f"Error reading from serial port: {e}")
+                if "multiple access on port" in str(e):
+                    self.console_text.config(state=tk.NORMAL)
+                    self.console_text.insert(tk.END, "Error: Another process is accessing the serial port.\n")
+                    self.console_text.config(state=tk.DISABLED)
+                else:
+                    print(f"Error reading from serial port: {e}")
