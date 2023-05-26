@@ -1,16 +1,16 @@
 #pragma once
-#include "uwb-device.h"
+#include "tof-device.h"
 
 /* Delay between frames, in UWB microseconds.*/
 #define POLL_TX_TO_RESP_RX_DLY_UUS 1720
 /* Receive response timeout.*/
 #define RESP_RX_TIMEOUT_UUS 250
 
-class UwbInitiator : public UwbDevice 
+class TofInitiator : public TofDevice 
 {
 public:
-    UwbInitiator(uwb_addr src, uwb_addr dst);
-    ~UwbInitiator(){};
+    TofInitiator(uwb_addr src, uwb_addr dst);
+    ~TofInitiator(){};
 
     virtual void setup() override;
     virtual void loop() override;

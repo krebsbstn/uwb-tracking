@@ -29,11 +29,11 @@
  * temperature. These values can be calibrated prior to taking reference measurements.*/
 extern dwt_txconfig_t txconfig_options;
 
-class UwbDevice
+class TofDevice
 {
 public:
-    UwbDevice(uwb_addr src, uwb_addr dst);
-    ~UwbDevice(){};
+    TofDevice(uwb_addr src, uwb_addr dst);
+    ~TofDevice(){};
 
     virtual void setup();
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "uwb-device.h"
+#include "tof-device.h"
 
 /* Delay between frames, in UWB microseconds.
  * this includes the poll frame length ~ 240 us*/
@@ -7,11 +7,11 @@
 
 static uint8_t active_response = 0;
 
-class UwbResponder : public UwbDevice 
+class TofResponder : public TofDevice 
 {
 public:
-    UwbResponder(uwb_addr src, uwb_addr dst);
-    ~UwbResponder(){};
+    TofResponder(uwb_addr src, uwb_addr dst);
+    ~TofResponder(){};
 
     virtual void setup() override;
     virtual void loop() override;

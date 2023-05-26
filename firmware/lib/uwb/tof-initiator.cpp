@@ -1,7 +1,7 @@
-#include "uwb-initiator.h"
+#include "tof-initiator.h"
 
-UwbInitiator::UwbInitiator(uwb_addr src, uwb_addr dst)
-    : UwbDevice(src, dst)
+TofInitiator::TofInitiator(uwb_addr src, uwb_addr dst)
+    : TofDevice(src, dst)
 {
     this->type = "Initiator";
     this->tof, this->distance, this->frame_cnt = 0;
@@ -17,10 +17,10 @@ UwbInitiator::UwbInitiator(uwb_addr src, uwb_addr dst)
         0x00};
 }
 
-void UwbInitiator::setup() {
-    UwbDevice::setup();
+void TofInitiator::setup() {
+    TofDevice::setup();
     /* Set expected response's delay and timeout.
-     * This code is paired with uwb-responder and if delays/timings need to be changed
+     * This code is paired with tof-responder and if delays/timings need to be changed
      * they must be changed in both to match. */
     dwt_setrxaftertxdelay(POLL_TX_TO_RESP_RX_DLY_UUS);
     dwt_setrxtimeout(RESP_RX_TIMEOUT_UUS);
@@ -44,8 +44,8 @@ void UwbInitiator::setup() {
     this->aes_job_rx.payload = this->rx_buffer;        /* pointer to where the decrypted data will be copied to when read from the IC*/
 }
 
-void UwbInitiator::loop() {
-    UwbDevice::loop();
+void TofInitiator::loop() {
+    TofDevice::loop();
 
     /*create and send tof request to given destination address*/
     send_tof_request(this->dst_address);
@@ -77,12 +77,12 @@ void UwbInitiator::loop() {
     delay(RNG_DELAY_MS);
 }
 
-void UwbInitiator::poll_msg_set_dist(uint8_t *dist_field, const double dist)
+void TofInitiator::poll_msg_set_dist(uint8_t *dist_field, const double dist)
 {
     memcpy(dist_field, &dist, sizeof(dist));
 }
 
-void UwbInitiator::send_tof_request(uwb_addr dest)
+void TofInitiator::send_tof_request(uwb_addr dest)
 {
     /* Program the correct key to be used */
     dwt_set_keyreg_128(&this->keys_options[INITIATOR_KEY_INDEX - 1]);
@@ -130,7 +130,7 @@ void UwbInitiator::send_tof_request(uwb_addr dest)
     dwt_starttx(DWT_START_TX_IMMEDIATE | DWT_RESPONSE_EXPECTED);
 }
 
-void UwbInitiator::process_tof_response()
+void TofInitiator::process_tof_response()
 {
     uint32_t frame_len;
 
@@ -179,7 +179,7 @@ void UwbInitiator::process_tof_response()
         return;
     }
 
-    /* Check that the frame is the expected response from the uwb-responder.
+    /* Check that the frame is the expected response from the tof-responder.
     * ignore the 8 first bytes of the response message as they contain the poll and response timestamps*/
     if (memcmp(&this->rx_buffer[START_RECEIVE_DATA_LOCATION], &this->resp_msg[START_RECEIVE_DATA_LOCATION],
         this->aes_job_rx.payload_len - START_RECEIVE_DATA_LOCATION) == 0)

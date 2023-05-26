@@ -1,6 +1,6 @@
-#include "uwb-device.h"
+#include "tof-device.h"
 
-UwbDevice::UwbDevice(uwb_addr src, uwb_addr dst)
+TofDevice::TofDevice(uwb_addr src, uwb_addr dst)
 : src_address(src)
 , dst_address(dst)
 {
@@ -56,7 +56,7 @@ UwbDevice::UwbDevice(uwb_addr src, uwb_addr dst)
         0xFFEEDDCC, 0xBBAA9988, 0x77665544, 0x33221100, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 }
 
-void UwbDevice::setup()
+void TofDevice::setup()
 {
     /* If the dwt_configure returns DWT_ERROR either
      * the PLL or RX calibration has failed the host should reset the device */
@@ -74,7 +74,7 @@ void UwbDevice::setup()
     dwt_settxantennadelay(TX_ANT_DLY);
 }
 
-void UwbDevice::enable_leds()
+void TofDevice::enable_leds()
 {
     /* Enabling LEDs here for debug so that for each TX the LED will flash.
      * Note, in real low power applications the LEDs should not be used. */
@@ -83,4 +83,4 @@ void UwbDevice::enable_leds()
     dwt_setlnapamode(DWT_LNA_ENABLE | DWT_PA_ENABLE | DWT_TXRX_EN);
 }
 
-void UwbDevice::loop(){}
+void TofDevice::loop(){}

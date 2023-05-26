@@ -1,15 +1,15 @@
-#include "uwb-responder.h"
+#include "tof-responder.h"
 
-UwbResponder::UwbResponder(uwb_addr src, uwb_addr dst) 
-    : UwbDevice(src, dst)
+TofResponder::TofResponder(uwb_addr src, uwb_addr dst) 
+    : TofDevice(src, dst)
 {
     this->type = "Responder";
     active_response = 0;
 }
 
-void UwbResponder::setup() 
+void TofResponder::setup() 
 {
-    UwbDevice::setup();
+    TofDevice::setup();
     /*Configure the TX and RX AES jobs, the TX job is used to encrypt the Response message,
     * the RX job is used to decrypt the Poll message */
     this->aes_job_rx.mode = AES_Decrypt;                               /* Mode is set to decryption */
@@ -28,7 +28,7 @@ void UwbResponder::setup()
     this->aes_job_tx.payload_len = sizeof(this->resp_msg); /* payload length */
 
     /* Register the call-backs. */
-    dwt_setcallbacks(NULL, &UwbResponder::rx_ok_cb, NULL, NULL, NULL, NULL);
+    dwt_setcallbacks(NULL, &TofResponder::rx_ok_cb, NULL, NULL, NULL, NULL);
 
     /* Enable wanted interrupts (RX good frames). */
     dwt_setinterrupt(DWT_INT_RFCG, 0, DWT_ENABLE_INT_ONLY);
@@ -37,9 +37,9 @@ void UwbResponder::setup()
     port_set_dwic_isr(dwt_isr, PIN_IRQ);
 }
 
-void UwbResponder::loop() 
+void TofResponder::loop() 
 {
-    UwbDevice::loop();
+    TofDevice::loop();
     /* Activate reception immediately. */
     dwt_rxenable(DWT_START_RX_IMMEDIATE);
     /*busy loop till rx_interrupt is triggered*/
@@ -93,7 +93,7 @@ void UwbResponder::loop()
         return;
     }
 
-    /* Check that the frame is the expected poll from the uwb-initiator.
+    /* Check that the frame is the expected poll from the tof-initiator.
     * ignore the 8 first bytes of the poll message as they contain the last distance meassured*/
     if (memcmp(&this->rx_buffer[START_RECEIVE_DATA_LOCATION], &this->poll_msg[START_RECEIVE_DATA_LOCATION],
         this->aes_job_rx.payload_len - START_RECEIVE_DATA_LOCATION) == 0)
@@ -185,13 +185,13 @@ void UwbResponder::loop()
     dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_ERR);
 }
 
-void UwbResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
+void TofResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     active_response = 1;
     delay(1);
 }
 
-void UwbResponder::poll_msg_get_dist(uint8_t *dist_field, double *dist)
+void TofResponder::poll_msg_get_dist(uint8_t *dist_field, double *dist)
 {
     memcpy(dist, dist_field, sizeof(*dist));
 }
