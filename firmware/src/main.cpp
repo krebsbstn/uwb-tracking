@@ -6,9 +6,12 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <pin_config.h>
-#include <uwb-device.h>
-#include <uwb-initiator.h>
-#include <uwb-responder.h>
+#include <tdoa-device.h>
+#include <tdoa-tag.h>
+#include <tdoa-anchor.h>
+#include <tof-device.h>
+#include <tof-initiator.h>
+#include <tof-responder.h>
 #include <ble_config_loader.h>
 
 #define INITIATOR_ADDR 0x1122334455667788
@@ -16,18 +19,18 @@
 
 #define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
 
-TaskHandle_t uwb_task_handle; // Handle des UWB-Tasks
+TaskHandle_t tdoa_task_handle; // Handle des UWB-Tasks
+TaskHandle_t tof_task_handle; // Handle des UWB-Tasks
 
-//#define Test_LEDS 1
-
-void UWB_Task(void *parameter);
+void TOF_Task(void *parameter);
+void TDOA_Task(void *parameter);
 void BLE_Task(void *parameter);
 void isr(void);
 
 void setup()
 {
     UART_init();
-    //EEPROM.begin(1);
+    EEPROM.begin(1);
 
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
@@ -42,55 +45,70 @@ void setup()
     digitalWrite(USER_2_LED, LOW);
     digitalWrite(USER_3_LED, LOW);
 
-#ifndef Test_LEDS
+    //xTaskCreatePinnedToCore(
+    //    TOF_Task,
+    //    "tof_task",
+    //    6000,
+    //    NULL,
+    //    configMAX_PRIORITIES-1,
+    //    &tof_task_handle,
+    //    1);
+
     xTaskCreatePinnedToCore(
-        BLE_Task,
-        "uwb_task",
+        TDOA_Task,
+        "tdoa_task",
         6000,
         NULL,
         configMAX_PRIORITIES-1,
-        &uwb_task_handle,
+        &tdoa_task_handle,
         1);
-#endif
 }
 
-void loop() {
-#ifdef Test_LEDS
-    digitalWrite(USER_1_LED,1);
-    digitalWrite(USER_2_LED,1);
-    digitalWrite(USER_3_LED,HIGH);
+void loop() {}
 
-    delay(2000);
+void TDOA_Task(void *parameter)
+{
+    TdoaDevice* dev;
+    uint8_t current_role;
+    EEPROM.get(IS_INITIATOR, current_role);
+    if(current_role){
+        dev = new TdoaTag(INITIATOR_ADDR);
+        digitalWrite(USER_1_LED, HIGH);
+    }else{
+        dev = new TdoaAnchor(RESPONDER_ADDR);
+        digitalWrite(USER_1_LED, LOW);
+    }
 
-    digitalWrite(USER_1_LED,0);
-    digitalWrite(USER_2_LED,0);
-    digitalWrite(USER_3_LED,LOW);
+    dev->setup();
+    dev->enable_leds();
 
-    delay(2000);
-#endif
+    while(true)
+    {
+        dev->loop();
+    }
 }
 
-//void UWB_Task(void *parameter)
-//{
-//    UwbDevice* dev;
-//    uint8_t current_role;
-//    EEPROM.get(IS_INITIATOR, current_role);
-//    if(current_role){
-//        dev = new UwbInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
-//        digitalWrite(USER_1_LED, HIGH);
-//    }else{
-//        dev = new UwbResponder(RESPONDER_ADDR, INITIATOR_ADDR);
-//        digitalWrite(USER_1_LED, LOW);
-//    }
-//
-//    dev->setup();
-//    dev->enable_leds();
-//
-//    while(true)
-//    {
-//        dev->loop();
-//    }
-//}
+void TOF_Task(void *parameter)
+{
+    TofDevice* dev;
+    uint8_t current_role;
+    EEPROM.get(IS_INITIATOR, current_role);
+    if(current_role){
+        dev = new TofInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
+        digitalWrite(USER_1_LED, HIGH);
+    }else{
+        dev = new TofResponder(INITIATOR_ADDR, RESPONDER_ADDR);
+        digitalWrite(USER_1_LED, LOW);
+    }
+
+    dev->setup();
+    dev->enable_leds();
+
+    while(true)
+    {
+        dev->loop();
+    }
+}
 
 void BLE_Task(void *parameter)
 {
@@ -106,10 +124,10 @@ void BLE_Task(void *parameter)
 
 void isr(void)
 {
-    //uint8_t current_role;
-    //EEPROM.get(IS_INITIATOR, current_role);
-    //EEPROM.put(IS_INITIATOR, !current_role);
-    //EEPROM.commit();
-    //esp_restart();
-    //return;
+    uint8_t current_role;
+    EEPROM.get(IS_INITIATOR, current_role);
+    EEPROM.put(IS_INITIATOR, !current_role);
+    EEPROM.commit();
+    esp_restart();
+    return;
 }
