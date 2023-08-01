@@ -1,8 +1,7 @@
 #include "tof-device.h"
 
-TofDevice::TofDevice(uwb_addr src, uwb_addr dst)
+TofDevice::TofDevice(uwb_addr src)
 : src_address(src)
-, dst_address(dst)
 {
     /* Reset DW IC */
     spiBegin(PIN_IRQ, PIN_RST);

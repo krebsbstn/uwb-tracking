@@ -1,7 +1,10 @@
 #include "tof-initiator.h"
 
-TofInitiator::TofInitiator(uwb_addr src, uwb_addr dst)
-    : TofDevice(src, dst)
+TofInitiator::TofInitiator(uwb_addr src, uwb_addr *dst, uint8_t num_of_responders)
+    : TofDevice(src)
+    , dst_address(dst)
+    , total_responders(num_of_responders)
+    , current_responder(0)
 {
     this->type = "Initiator";
     this->tof, this->distance, this->frame_cnt = 0;
@@ -47,8 +50,13 @@ void TofInitiator::setup() {
 void TofInitiator::loop() {
     TofDevice::loop();
 
+    if(current_responder < total_responders-1)
+        current_responder++;
+    else
+        current_responder = 0;
+
     /*create and send tof request to given destination address*/
-    send_tof_request(this->dst_address);
+    send_tof_request(*(dst_address + current_responder));
 
     /* We assume that the transmission is achieved correctly, poll for reception of a frame or error/timeout.*/
     while (!((this->status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG_BIT_MASK | SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR)))
@@ -153,7 +161,7 @@ void TofInitiator::process_tof_response()
         &this->aes_job_rx,
         sizeof(this->rx_buffer),
         keys_options,
-        this->dst_address,
+        *(dst_address + current_responder),
         this->src_address,
         &this->aes_config);
 

@@ -32,7 +32,7 @@ extern dwt_txconfig_t txconfig_options;
 class TofDevice
 {
 public:
-    TofDevice(uwb_addr src, uwb_addr dst);
+    TofDevice(uwb_addr src);
     ~TofDevice(){};
 
     virtual void setup();
@@ -44,10 +44,8 @@ public:
     char* get_type() {return const_cast<char*>(this->type.c_str());};
     
 protected:
-    /*defining the source and destination addresses
-     * @todo: replace with 1:N-Relation for Responder and 1:1-Connection für Initiator.*/
+    /*defining the source and destination addresses*/
     uwb_addr src_address;
-    uwb_addr dst_address;
 
     String type;
 

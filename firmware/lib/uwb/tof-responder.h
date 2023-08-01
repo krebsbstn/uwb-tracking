@@ -16,6 +16,7 @@ public:
     virtual void setup() override;
     virtual void loop() override;
 private:
+    uwb_addr dst_address;
     /* Timestamps of frames transmission/reception. */
     uint64_t poll_rx_ts;
     uint64_t resp_tx_ts;

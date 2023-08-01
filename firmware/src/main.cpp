@@ -18,9 +18,15 @@
 #include <ArduinoEigen.h>
 
 #define INITIATOR_ADDR 0x1122334455667788
-#define RESPONDER_ADDR 0x8877665544332211
+#define RESPONDER_ADDR 0x1877665544332211
+#define RESPONDER_ADDR2 0x1877665544332212
 
 #define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
+
+
+
+uwb_addr dest_addr_list[] = {RESPONDER_ADDR, RESPONDER_ADDR2};
+
 
 TaskHandle_t ekf_task_handle; // Handle des EKF-Tasks
 TaskHandle_t tdoa_task_handle; // Handle des UWB-tdoa-Tasks
@@ -50,14 +56,14 @@ void setup()
     digitalWrite(USER_2_LED, LOW);
     digitalWrite(USER_3_LED, LOW);
 
-    //xTaskCreatePinnedToCore(
-    //    TOF_Task,
-    //    "tof_task",
-    //    6000,
-    //    NULL,
-    //    configMAX_PRIORITIES-1,
-    //    &tof_task_handle,
-    //    1);
+    xTaskCreatePinnedToCore(
+        TOF_Task,
+        "tof_task",
+        6000,
+        NULL,
+        configMAX_PRIORITIES-1,
+        &tof_task_handle,
+        1);
 
     //xTaskCreatePinnedToCore(
     //    TDOA_Task,
@@ -68,14 +74,14 @@ void setup()
     //    &tdoa_task_handle,
     //    1);
 
-    xTaskCreatePinnedToCore(
-        EKF_Task,
-        "ekf_task",
-        6000,
-        NULL,
-        configMAX_PRIORITIES-1,
-        &ekf_task_handle,
-        1);
+    //TaskCreatePinnedToCore(
+    //   EKF_Task,
+    //   "ekf_task",
+    //   6000,
+    //   NULL,
+    //   configMAX_PRIORITIES-1,
+    //   &ekf_task_handle,
+    //   1);
 }
 
 void loop() {}
@@ -84,13 +90,24 @@ void EKF_Task(void *parameter)
 {
     static ekf::EKF_Filter kalmanfilter;
     kalmanfilter.vecX() << 0.0, 0.0, 0.0; // 3D-Vektor
-    kalmanfilter.matP() << 0.1, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.1; // 3x3-Matrix
+    kalmanfilter.matP() << 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0; // 3x3-Matrix
 
     //Simulate curcle movement.
     double angle = 0.0; // Winkel für die Kreisbewegung
     double radius = 5.0; // Radius des Kreises
-    const int numIterations = 200; // Anzahl der Iterationen 
+    const int numIterations = 20; // Anzahl der Iterationen 
     double angle_increment = 2*PI/numIterations; // Increment für die Kreisbewegung
+
+    Serial.print("estimate: ");
+        for (int i = 0; i < DIM_X; i++) {
+            Serial.print(kalmanfilter.vecX()(i));
+            if(i<DIM_X-1){Serial.print(", ");};
+        }
+
+        Serial.print("&real: ");
+        Serial.print(radius);
+        Serial.print(", 0.0, 0.0");
+        Serial.println();
 
     for (int iter = 0; iter < numIterations; iter++) {
         Matrix<double, DIM_X, DIM_X> matJacobF;
@@ -99,16 +116,16 @@ void EKF_Task(void *parameter)
                     0.0, 0.0, 1.0;
 
         Matrix<double, DIM_X, DIM_X> matQ;
-        matQ << 0.4,  0.0,   0.0,
-                0.0,   0.4,  0.0,
-                0.0,   0.0,   0.4;
+        matQ << 0.1,  0.0,   0.0,
+                0.0,   0.1,  0.0,
+                0.0,   0.0,   0.1;
 
         kalmanfilter.predictEkf(ekf::predictionModel, matJacobF, matQ);
         /***********************Simulation von Messwerten***********************/
-        //double x = 0 + radius * std::cos(angle); // X-Koordinate berechnen
-        //double y = 0 - radius * std::sin(angle); // Y-Koordinate berechnen
-        double x = radius * std::cos(angle); // X-coordinate calculation
-        double y = 0.5 * radius * std::sin(2.0 * angle); // Y-coordinate calculation
+        double x = 0 + radius * std::cos(angle); // X-Koordinate berechnen
+        double y = 0 - radius * std::sin(angle); // Y-Koordinate berechnen
+        //double x = radius * std::cos(angle); // X-coordinate calculation
+        //double y = 0.5 * radius * std::sin(2.0 * angle); // Y-coordinate calculation
 
         //berechne die distanz zu jeder Landmarke einzeln
         Matrix<double, DIM_Z, 1> vecZ;
@@ -123,11 +140,11 @@ void EKF_Task(void *parameter)
         /***********************************************************************/
 
         Matrix<double, DIM_Z, DIM_Z> matR;
-        matR << 0.5, 0.0, 0.0, 0.0, 0.0,
-                0.0, 0.5, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.5, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.5, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.5;
+        matR << 0.01, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.01, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.01, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.01, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.01;
         Matrix<double, DIM_Z, DIM_X> matHj{ ekf::calculateJacobianMatrix(kalmanfilter.vecX()) }; // jacobian matrix Hj
 
         kalmanfilter.correctEkf(ekf::calculateMeasurement, vecZ, matR, matHj);
@@ -139,9 +156,9 @@ void EKF_Task(void *parameter)
         }
 
         Serial.print("&real: ");
-        Serial.print(vecZ(0));
+        Serial.print(x);
         Serial.print(", ");
-        Serial.print(vecZ(1));
+        Serial.print(y);
         Serial.print(", 0.0");
         Serial.println();
         delay(500); // Warten zwischen den Iterationen
@@ -180,10 +197,10 @@ void TOF_Task(void *parameter)
     uint8_t current_role;
     EEPROM.get(IS_INITIATOR, current_role);
     if(current_role){
-        dev = new TofInitiator(INITIATOR_ADDR, RESPONDER_ADDR);
+        dev = new TofInitiator(INITIATOR_ADDR, dest_addr_list, sizeof(dest_addr_list)/sizeof(uwb_addr));
         digitalWrite(USER_1_LED, HIGH);
     }else{
-        dev = new TofResponder(INITIATOR_ADDR, RESPONDER_ADDR);
+        dev = new TofResponder(dest_addr_list[1], INITIATOR_ADDR);
         digitalWrite(USER_1_LED, LOW);
     }
 

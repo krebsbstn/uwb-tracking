@@ -9,7 +9,7 @@
 class TofInitiator : public TofDevice 
 {
 public:
-    TofInitiator(uwb_addr src, uwb_addr dst);
+    TofInitiator(uwb_addr src, uwb_addr* dst, uint8_t num_of_responders);
     ~TofInitiator(){};
 
     virtual void setup() override;
@@ -19,6 +19,10 @@ private:
     uint8_t seq_cnt; /* Frame sequence number, incremented after each transmission. */
     uint8_t nonce[13]; /* 13-byte nonce used in this example as per IEEE802.15.4 */
     
+    uwb_addr* dst_address;
+    uint8_t total_responders;
+    uint8_t current_responder;
+
     /* Hold copies of computed time of flight and 
     distance here for reference so that it can be processed further. */
     double tof;
