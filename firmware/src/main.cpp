@@ -17,15 +17,17 @@
 #include <extended-kalman.h>
 #include <ArduinoEigen.h>
 
-#define INITIATOR_ADDR 0x1122334455667788
-#define RESPONDER_ADDR 0x1877665544332211
-#define RESPONDER_ADDR2 0x1877665544332212
-
 #define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
+#define DEVICE_ID 1 /*EEPROM-Address for storing the device id*/
 
+#define INITIATOR_ADDR 0x1877665544332211 // Device-ID 0x01
 
-
-uwb_addr dest_addr_list[] = {RESPONDER_ADDR, RESPONDER_ADDR2};
+uwb_addr dest_addr_list[] = {
+    0x1877665544332212, // Device-ID 0x02
+    0x1877665544332213, // Device-ID 0x03
+    0x1877665544332214, // Device-ID 0x04
+    0x1877665544332215, // Device-ID 0x05
+    0x1877665544332216};// Device-ID 0x06
 
 
 TaskHandle_t ekf_task_handle; // Handle des EKF-Tasks
@@ -40,6 +42,9 @@ void isr(void);
 
 void setup()
 {
+    EEPROM.put(DEVICE_ID, 0x01);
+    EEPROM.commit();
+
     UART_init();
     EEPROM.begin(1);
 
@@ -200,7 +205,9 @@ void TOF_Task(void *parameter)
         dev = new TofInitiator(INITIATOR_ADDR, dest_addr_list, sizeof(dest_addr_list)/sizeof(uwb_addr));
         digitalWrite(USER_1_LED, HIGH);
     }else{
-        dev = new TofResponder(dest_addr_list[1], INITIATOR_ADDR);
+        uint8_t dev_id;
+        EEPROM.get(DEVICE_ID, dev_id);
+        dev = new TofResponder(dest_addr_list[dev_id], INITIATOR_ADDR);
         digitalWrite(USER_1_LED, LOW);
     }
 
@@ -228,9 +235,9 @@ void BLE_Task(void *parameter)
 void isr(void)
 {
     uint8_t current_role;
-    EEPROM.get(IS_INITIATOR, current_role);
-    EEPROM.put(IS_INITIATOR, !current_role);
-    EEPROM.commit();
-    esp_restart();
+    //EEPROM.get(IS_INITIATOR, current_role);
+    //EEPROM.put(IS_INITIATOR, !current_role);
+    //EEPROM.commit();
+    //esp_restart();
     return;
 }
