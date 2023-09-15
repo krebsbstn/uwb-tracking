@@ -2,7 +2,7 @@
 #include "tof-device.h"
 
 /* Delay between frames, in UWB microseconds.*/
-#define POLL_TX_TO_RESP_RX_DLY_UUS 1720
+#define POLL_TX_TO_RESP_RX_DLY_UUS 2220
 /* Receive response timeout.*/
 #define RESP_RX_TIMEOUT_UUS 250
 
@@ -28,7 +28,6 @@ private:
     double tof;
     double distance;
 
-    void poll_msg_set_dist(uint8_t *dist_field, const double dist);
     void send_tof_request(uwb_addr dest);
     void process_tof_response();
 };

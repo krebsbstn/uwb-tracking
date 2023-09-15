@@ -12,9 +12,6 @@
 #define RESP_MSG_RESP_TX_TS_IDX 4 // index in the MAC payload for Response TX time
 #define RESP_MSG_TS_LEN 4
 
-#define POLL_MSG_DIST_IDX 0
-#define POLL_MSG_DIST_LEN 8
-
 /* Note, the key index of 0 is forbidden to send as key index. Thus index 1 is the first.*/
 #define INITIATOR_KEY_INDEX 1
 #define RESPONDER_KEY_INDEX 2
@@ -50,7 +47,7 @@ protected:
     String type;
 
     mac_frame_802_15_4_format_t mac_frame;
-    uint8_t poll_msg[12] = {0, 0, 0, 0, 0, 0, 0, 0, 'P', 'o', 'l', 'l'};                     //first 8 bytes for last meassured distance
+    uint8_t poll_msg[4] = {'P', 'o', 'l', 'l'};                     //first 8 bytes for last meassured distance
     uint8_t resp_msg[16] = {0, 0, 0, 0, 0, 0, 0, 0, 'R', 'e', 's', 'p', 'o', 'n', 's', 'e'}; //first 8 bytes for timestamps
     /* Buffer to store received response message.
      * Its size is adjusted to longest frame that the code can handle. */

@@ -3737,6 +3737,7 @@ int dwt_starttx(uint8_t mode)
         }
 
         checkTxOK = dwt_read8bitoffsetreg(SYS_STATUS_ID, 3); // Read at offset 3 to get the upper 2 bytes out of 5
+
         if ((checkTxOK & (SYS_STATUS_HPDWARN_BIT_MASK>>24)) == 0) // Transmit Delayed Send set over Half a Period away.
         {
             sys_state = dwt_read32bitreg(SYS_STATE_LO_ID);
@@ -3752,6 +3753,7 @@ int dwt_starttx(uint8_t mode)
         }
         else
         {
+            Serial.println("TX Error!");
             dwt_writefastCMD(CMD_TXRXOFF);
             retval = DWT_ERROR ; // Failed !
 

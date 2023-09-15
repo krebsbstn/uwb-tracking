@@ -49,7 +49,7 @@ void TofResponder::loop()
     }
     active_response = 0;
 
-    Serial.println("Got request!");
+    //Serial.println("Got request!");
 
     /* Clear good RX frame event in the DW IC status register. */
     dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
@@ -98,10 +98,8 @@ void TofResponder::loop()
         return;
     }
 
-    /* Check that the frame is the expected poll from the tof-initiator.
-     * ignore the 8 first bytes of the poll message as they contain the last distance meassured*/
-    if (memcmp(&this->rx_buffer[START_RECEIVE_DATA_LOCATION], &this->poll_msg[START_RECEIVE_DATA_LOCATION],
-               this->aes_job_rx.payload_len - START_RECEIVE_DATA_LOCATION) == 0)
+    /* Check that the frame is the expected poll from the tof-initiator.*/
+    if (memcmp(this->rx_buffer, this->poll_msg, this->aes_job_rx.payload_len) == 0)
     {
         uint32_t resp_tx_time;
         int ret;
@@ -122,14 +120,6 @@ void TofResponder::loop()
         /* Write all timestamps in the final message.*/
         resp_msg_set_ts(&resp_msg[RESP_MSG_POLL_RX_TS_IDX], this->poll_rx_ts);
         resp_msg_set_ts(&resp_msg[RESP_MSG_RESP_TX_TS_IDX], this->resp_tx_ts);
-
-        /* Get dist embedded in poll message. */
-        poll_msg_get_dist(&this->rx_buffer[POLL_MSG_DIST_IDX], &this->distance);
-        if (this->distance > 0)
-        {
-            snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m\n", this->distance);
-            UART_puts(dist_str);
-        }
 
         /* Now need to encrypt the frame before transmitting*/
         /* Program the correct key to be used */
@@ -196,9 +186,4 @@ void TofResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     active_response = 1;
     delay(1);
-}
-
-void TofResponder::poll_msg_get_dist(uint8_t *dist_field, double *dist)
-{
-    memcpy(dist, dist_field, sizeof(*dist));
 }
