@@ -18,7 +18,7 @@
 #include <ArduinoEigen.h>
 
 #define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
-#define DEVICE_ID 1 /*EEPROM-Address for storing the device id*/
+#define DEVICE_ID 8 /*EEPROM-Address for storing the device id*/
 
 #define INITIATOR_ADDR 0x1877665544332211 // Device-ID 0x01
 
@@ -42,11 +42,14 @@ void isr(void);
 
 void setup()
 {
-    EEPROM.put(DEVICE_ID, 0x01);
-    EEPROM.commit();
-
     UART_init();
-    EEPROM.begin(1);
+    EEPROM.begin(128);
+
+    /*Write correct device ID in EEPROM. Only need to do one time */
+    //EEPROM.put(DEVICE_ID, 6);
+    //EEPROM.commit();
+    //EEPROM.put(IS_INITIATOR, 0);
+    //EEPROM.commit();
 
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
@@ -174,6 +177,7 @@ void EKF_Task(void *parameter)
     
 }
 
+/*
 void TDOA_Task(void *parameter)
 {
     TdoaDevice* dev;
@@ -195,6 +199,8 @@ void TDOA_Task(void *parameter)
         dev->loop();
     }
 }
+*/
+
 
 void TOF_Task(void *parameter)
 {
@@ -207,7 +213,7 @@ void TOF_Task(void *parameter)
     }else{
         uint8_t dev_id;
         EEPROM.get(DEVICE_ID, dev_id);
-        dev = new TofResponder(dest_addr_list[dev_id], INITIATOR_ADDR);
+        dev = new TofResponder(dest_addr_list[dev_id-2], INITIATOR_ADDR);
         digitalWrite(USER_1_LED, LOW);
     }
 

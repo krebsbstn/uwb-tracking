@@ -7,7 +7,8 @@ TofDevice::TofDevice(uwb_addr src)
     spiBegin(PIN_IRQ, PIN_RST);
     spiSelect(PIN_SS);
 
-    delay(2); // Time needed for DW3000 to start up
+    dwt_softreset();    //Set device to Idle RC for faster startup
+    delay(20); // Time needed for DW3000 to start up
 
     // Need to make sure DW IC is in IDLE_RC before proceeding
     while (!dwt_checkidlerc()) 

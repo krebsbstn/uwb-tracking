@@ -72,13 +72,20 @@ void TofInitiator::loop() {
         process_tof_response();
 
         /* Display computed distance via uart. */
-        snprintf(dist_str, sizeof(dist_str), "DIST: %3.2f m\n", this->distance);
+        Serial.print("DIST Device 0x");
+        Serial.print(current_responder + 2, HEX);
+        snprintf(dist_str, sizeof(dist_str), " %3.2f m\n", this->distance);
         UART_puts(dist_str);
     }
     else
     {
         /* Clear RX error/timeout events in the DW IC status register. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
+    }
+
+    if(current_responder == 4)
+    {
+        Serial.println("\n------------ New Cycle ------------");
     }
 
     /* Execute a delay between ranging exchanges. */
