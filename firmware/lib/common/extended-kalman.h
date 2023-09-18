@@ -1,5 +1,7 @@
 #pragma once
 #include <ArduinoEigen.h>
+#include <EEPROM.h>
+#include <datatypes.h>
 
 using namespace Eigen;
 
@@ -7,7 +9,6 @@ using namespace Eigen;
 namespace ekf{
 
 #define DIM_X 3
-#define NUM_LANDMARKS 5
 #define DIM_Z NUM_LANDMARKS
 
 static Matrix<double, NUM_LANDMARKS, 3> landmarkPositions
@@ -16,7 +17,8 @@ static Matrix<double, NUM_LANDMARKS, 3> landmarkPositions
 class EKF_Filter
 { 
 public:
-    EKF_Filter(){}
+    EKF_Filter()
+    {}
     ~EKF_Filter(){}
 
     Matrix<double, DIM_X, 1>& vecX() { return m_vecX; }

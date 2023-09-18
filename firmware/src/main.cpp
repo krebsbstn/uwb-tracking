@@ -33,27 +33,30 @@ uwb_addr dest_addr_list[] = {
 TaskHandle_t ekf_task_handle; // Handle des EKF-Tasks
 TaskHandle_t tdoa_task_handle; // Handle des UWB-tdoa-Tasks
 TaskHandle_t tof_task_handle; // Handle des UWB-tof-Tasks
+TaskHandle_t ble_task_handle; // Handle des Bluetooth-Tasks
 
 void EKF_Task(void *parameter);
 void TOF_Task(void *parameter);
 void TDOA_Task(void *parameter);
 void BLE_Task(void *parameter);
-void isr(void);
+void user_1_button(void);
+void animate_leds(void);
+
 
 void setup()
 {
     UART_init();
-    EEPROM.begin(128);
+    EEPROM.begin(256);
 
     /*Write correct device ID in EEPROM. Only need to do one time */
-    //EEPROM.put(DEVICE_ID, 6);
+    //EEPROM.put(DEVICE_ID, 1);
     //EEPROM.commit();
-    //EEPROM.put(IS_INITIATOR, 0);
+    //EEPROM.put(IS_INITIATOR, 1);
     //EEPROM.commit();
 
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
-    attachInterrupt(USER_1_BTN, isr, FALLING);
+    attachInterrupt(USER_1_BTN, user_1_button, FALLING);
 
     /*Initialize Outputs*/
     pinMode(USER_1_LED, OUTPUT);
@@ -72,7 +75,7 @@ void setup()
         configMAX_PRIORITIES-1,
         &tof_task_handle,
         1);
-
+    
     //xTaskCreatePinnedToCore(
     //    TDOA_Task,
     //    "tdoa_task",
@@ -82,14 +85,6 @@ void setup()
     //    &tdoa_task_handle,
     //    1);
 
-    //TaskCreatePinnedToCore(
-    //   EKF_Task,
-    //   "ekf_task",
-    //   6000,
-    //   NULL,
-    //   configMAX_PRIORITIES-1,
-    //   &ekf_task_handle,
-    //   1);
 }
 
 void loop() {}
@@ -210,6 +205,16 @@ void TOF_Task(void *parameter)
     if(current_role){
         dev = new TofInitiator(INITIATOR_ADDR, dest_addr_list, sizeof(dest_addr_list)/sizeof(uwb_addr));
         digitalWrite(USER_1_LED, HIGH);
+
+        /*Start EKF Task on Initiator*/
+        xTaskCreatePinnedToCore( 
+         EKF_Task,
+         "ekf_task",
+         6000,
+         NULL,
+         configMAX_PRIORITIES-1,
+         &ekf_task_handle,
+         1);
     }else{
         uint8_t dev_id;
         EEPROM.get(DEVICE_ID, dev_id);
@@ -229,21 +234,63 @@ void TOF_Task(void *parameter)
 void BLE_Task(void *parameter)
 {
     BleConfigLoader my_loader;
+    
+    my_loader.load_config_from_eeprom();
+    my_loader.save_config_to_ble();
+
     while(true)
     {
-        my_loader.load_config_from_ble();
+        if(my_loader.load_config_from_ble()){break;}
         my_loader.print_config();
-        
-        delay(10000);
+        animate_leds();
+        delay(333);
     }
+
+    my_loader.save_config_to_eeprom();
+    delay(20);
+    esp_restart();
 }
 
-void isr(void)
+void user_1_button(void)
 {
     uint8_t current_role;
-    //EEPROM.get(IS_INITIATOR, current_role);
-    //EEPROM.put(IS_INITIATOR, !current_role);
-    //EEPROM.commit();
-    //esp_restart();
+    EEPROM.get(IS_INITIATOR, current_role);
+
+    
+    //eTaskGetState(ble_task_handle);
+
+    if(current_role){
+        vTaskDelete(tof_task_handle);
+        vTaskDelete(ekf_task_handle);
+
+        xTaskCreatePinnedToCore(
+         BLE_Task,
+         "ble_task",
+         6000,
+         NULL,
+         configMAX_PRIORITIES-1,
+         &ble_task_handle,
+         1);
+    }
+    
+    return;
+}
+
+void animate_leds(void)
+{
+    digitalWrite(USER_1_LED, HIGH);
+    digitalWrite(USER_2_LED, LOW);
+    digitalWrite(USER_3_LED, LOW);
+    delay(333);
+
+    digitalWrite(USER_1_LED, LOW);
+    digitalWrite(USER_2_LED, HIGH);
+    digitalWrite(USER_3_LED, LOW);
+    delay(333);
+
+    digitalWrite(USER_1_LED, LOW);
+    digitalWrite(USER_2_LED, LOW);
+    digitalWrite(USER_3_LED, HIGH);
+    
     return;
 }
