@@ -8,7 +8,7 @@ class BleServiceWidget(Widget):
     def __init__(self, parent, the_name):
         super().__init__(parent, the_name)
         self.type="BleServiceWidget"
-        self.border.configure(bg="grey")
+        self.border.configure(bg="#555555")
 
         self.refresh_thread = None
         self.service_thread = None
@@ -67,7 +67,7 @@ class BleServiceWidget(Widget):
         if self.set_value_thread is not None:
             self.set_value_thread.join()
         return super().destroy()
-    
+
     def set_characteristic(self):
         self.set_value_thread = threading.Thread(target=self.set_characteristic_thread)
         self.set_value_thread.start()
@@ -108,19 +108,21 @@ class BleServiceWidget(Widget):
                 self.services_text.insert(tk.END, f"|--------UUID: {characteristic.uuid}\n", "bold")
                 self.services_text.insert(tk.END, f"|\tHandle: {characteristic.handle}\n")
                 self.services_text.insert(tk.END, f"|\tProperties: {characteristic.properties}\n")
-                if not f"{characteristic.uuid}".startswith("0000"):
-                    try:
-                        descriptor = characteristic.descriptors[0] # get the first descriptor
-                        description = await self.get_descriptor(address, descriptor)
-                        self.services_text.insert(tk.END, f"|\tDescripton: \"{description}\"\n")
-                    except bleak.exc.BleakError:
-                        self.services_text.insert(tk.END, f"|\tDescripton: Unable to read Description\n")
-                    try:
-                        value = await self.get_characteristic_value(address, characteristic.uuid)
-                        self.services_text.insert(tk.END, f"|\tValue: {value}\n")
-                    except bleak.exc.BleakError:
-                        self.services_text.insert(tk.END, f"|\tValue: Unable to read value\n")
-            self.services_text.insert(tk.END, f"\n")
+                
+                # Descriptoren innerhalb der Charakteristik
+                descriptors = characteristic.descriptors
+                if descriptors:
+                    for descriptor in descriptors:
+                        if not f"{descriptor.uuid}".startswith("0000"):
+                            description = await self.get_descriptors(address, descriptor)
+                            self.services_text.insert(tk.END, f"|\tDescriptor Value: {description.decode()}\n")
+
+                try:
+                    value = await self.get_characteristic_value(address, characteristic)
+                    self.services_text.insert(tk.END, f"|\tValue: {value}\n")
+                except bleak.exc.BleakError:
+                    self.services_text.insert(tk.END, f"|\tValue: Unable to read value\n")
+        self.services_text.insert(tk.END, f"\n")
 
     async def get_services(self, address):
         if not self.client.is_connected:
@@ -128,19 +130,19 @@ class BleServiceWidget(Widget):
             await self.client.connect()
         services = await self.client.get_services()
         return services
-        
-    async def get_descriptor(self, address, descriptor):
+
+    async def get_descriptors(self, address, characteristic):
         if not self.client.is_connected:
             self.client = bleak.BleakClient(address)
             await self.client.connect()
-        value = await self.client.read_gatt_descriptor(descriptor.handle)
-        return value.decode()
-    
-    async def get_characteristic_value(self, address, characteristic_uuid):
+        descriptors = await self.client.read_gatt_descriptor(characteristic.handle)
+        return descriptors
+
+    async def get_characteristic_value(self, address, characteristic):
         if not self.client.is_connected:
             self.client = bleak.BleakClient(address)
             await self.client.connect()
-        value = await self.client.read_gatt_char(characteristic_uuid)
+        value = await self.client.read_gatt_char(characteristic.handle)
         return value.decode()
     
     def refresh_devices(self):

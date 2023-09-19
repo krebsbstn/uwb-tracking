@@ -13,7 +13,9 @@ class Dashboard(tk.Frame):
         self.maxindex = 0
         self.islocked = False
 
-        self.canvas = tk.Canvas(self, bg="white")
+        self.configure(bg="#555555")  # Color the Border of the Window
+        self.canvas = tk.Canvas(self, bg="#333333")  # Color the Canvas of the Application
+        #self.canvas = tk.Canvas(self, bg="white")
         self.canvas.pack(fill="both", expand=True, padx=10, pady=10)
         self.canvas.config(width=700, height=500)
 

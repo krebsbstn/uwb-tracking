@@ -14,7 +14,7 @@ class Widget(tk.Frame):
         self.name = the_name
         self.title_label = tk.Label(self.title_frame, text=self.name, font=("Helvetica", 12, "bold"), anchor="w")
         self.title_label.pack(side="left", fill="both", expand=True)
-        self.title_label.configure(bg='grey')
+        self.title_label.configure(bg='#999999') # light gray for title line
 
 
         self.dragging = False
