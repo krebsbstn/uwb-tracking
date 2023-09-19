@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.simpledialog as simpledialog
 from lib.widget import Widget
 from lib.ble_service_widget import BleServiceWidget
+from lib.ble_config_widget import BleConfigWidget
 from lib.serial_printer import SerialWidget
 import json
 
@@ -40,13 +41,16 @@ class Dashboard(tk.Frame):
             pass
 
     def add_widget(self):
-        widget_types = ["BleServiceWidget", "SerialWidget", "MasterWidget"]
+        widget_types = ["BleServiceWidget", "BleConfigWidget", "SerialWidget", "MasterWidget"]
         dialog = MyDialog(self, "Select Widget Type", widget_types)
         result = dialog.result
         if result is not None:
             name = str(len(self.widgets) + 1) + ". - " + result
             if result == "BleServiceWidget":
                 widget = BleServiceWidget(self.canvas, name)
+                widget.place(x=0, y=0, width=600, height=280, anchor="nw")
+            elif result == "BleConfigWidget":
+                widget = BleConfigWidget(self.canvas, name)
                 widget.place(x=0, y=0, width=600, height=280, anchor="nw")
             elif result == "SerialWidget":
                 widget = SerialWidget(self.canvas, name)
@@ -94,6 +98,8 @@ class Dashboard(tk.Frame):
         for widget_data in widget_list:
             if widget_data['type'] == "BleServiceWidget":
                 widget = BleServiceWidget(self.canvas, widget_data['name'])
+            elif widget_data['type'] == "BleConfigWidget":
+                widget = BleConfigWidget(self.canvas, widget_data['name'])
             elif widget_data['type'] == "SerialWidget":
                 widget = SerialWidget(self.canvas, widget_data['name'])
             else:
