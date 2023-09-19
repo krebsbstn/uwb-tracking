@@ -6,6 +6,8 @@
 /* Receive response timeout.*/
 #define RESP_RX_TIMEOUT_UUS 250
 
+extern double distances[NUM_LANDMARKS];
+
 class TofInitiator : public TofDevice 
 {
 public:
@@ -26,7 +28,7 @@ private:
     /* Hold copies of computed time of flight and 
     distance here for reference so that it can be processed further. */
     double tof;
-    double distance;
+    double temp_distance;
 
     void send_tof_request(uwb_addr dest);
     void process_tof_response();

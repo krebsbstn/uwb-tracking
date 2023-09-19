@@ -22,6 +22,8 @@
 
 #define INITIATOR_ADDR 0x1877665544332211 // Device-ID 0x01
 
+double distances[NUM_LANDMARKS] = {0.0}; // Initialize and define distances 
+
 uwb_addr dest_addr_list[] = {
     0x1877665544332212, // Device-ID 0x02
     0x1877665544332213, // Device-ID 0x03
@@ -95,24 +97,7 @@ void EKF_Task(void *parameter)
     kalmanfilter.vecX() << 0.0, 0.0, 0.0; // 3D-Vektor
     kalmanfilter.matP() << 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0; // 3x3-Matrix
 
-    //Simulate curcle movement.
-    double angle = 0.0; // Winkel für die Kreisbewegung
-    double radius = 5.0; // Radius des Kreises
-    const int numIterations = 20; // Anzahl der Iterationen 
-    double angle_increment = 2*PI/numIterations; // Increment für die Kreisbewegung
-
-    Serial.print("estimate: ");
-        for (int i = 0; i < DIM_X; i++) {
-            Serial.print(kalmanfilter.vecX()(i));
-            if(i<DIM_X-1){Serial.print(", ");};
-        }
-
-        Serial.print("&real: ");
-        Serial.print(radius);
-        Serial.print(", 0.0, 0.0");
-        Serial.println();
-
-    for (int iter = 0; iter < numIterations; iter++) {
+    while (true) {
         Matrix<double, DIM_X, DIM_X> matJacobF;
         matJacobF << 1.0, 0.0, 0.0,
                     0.0, 1.0, 0.0,
@@ -124,23 +109,28 @@ void EKF_Task(void *parameter)
                 0.0,   0.0,   0.1;
 
         kalmanfilter.predictEkf(ekf::predictionModel, matJacobF, matQ);
-        /***********************Simulation von Messwerten***********************/
-        double x = 0 + radius * std::cos(angle); // X-Koordinate berechnen
-        double y = 0 - radius * std::sin(angle); // Y-Koordinate berechnen
-        //double x = radius * std::cos(angle); // X-coordinate calculation
-        //double y = 0.5 * radius * std::sin(2.0 * angle); // Y-coordinate calculation
+        ///***********************Simulation von Messwerten***********************/
+        //double x = 0 + radius * std::cos(angle); // X-Koordinate berechnen
+        //double y = 0 - radius * std::sin(angle); // Y-Koordinate berechnen
+        ////double x = radius * std::cos(angle); // X-coordinate calculation
+        ////double y = 0.5 * radius * std::sin(2.0 * angle); // Y-coordinate calculation
+//
+        ////berechne die distanz zu jeder Landmarke einzeln
+        Matrix<double, DIM_Z, 1> vecZ = Matrix<double, DIM_Z, 1>::Zero();
 
-        //berechne die distanz zu jeder Landmarke einzeln
-        Matrix<double, DIM_Z, 1> vecZ;
-        for (int i = 0; i < NUM_LANDMARKS; i++) {
-            double distance = std::sqrt(
-                (x - ekf::landmarkPositions(i, 0)) * (x - ekf::landmarkPositions(i, 0)) +
-                (y - ekf::landmarkPositions(i, 1)) * (y - ekf::landmarkPositions(i, 1)) +
-                (0 - ekf::landmarkPositions(i, 2)) * (0 - ekf::landmarkPositions(i, 2)));
-            vecZ(i) = distance + (std::rand() / (double)RAND_MAX) * 0.4 - 0.2;
+        for (int i = 0; i < DIM_Z; i++)
+        {
+            vecZ(i, 0) = distances[i];
         }
-        angle += angle_increment;
-        /***********************************************************************/
+        //for (int i = 0; i < NUM_LANDMARKS; i++) {
+        //    double distance = std::sqrt(
+        //        (x - ekf::landmarkPositions(i, 0)) * (x - ekf::landmarkPositions(i, 0)) +
+        //        (y - ekf::landmarkPositions(i, 1)) * (y - ekf::landmarkPositions(i, 1)) +
+        //        (0 - ekf::landmarkPositions(i, 2)) * (0 - ekf::landmarkPositions(i, 2)));
+        //    vecZ(i) = distance + (std::rand() / (double)RAND_MAX) * 0.4 - 0.2;
+        //}
+        //angle += angle_increment;
+        ///***********************************************************************/
 
         Matrix<double, DIM_Z, DIM_Z> matR;
         matR << 0.01, 0.0, 0.0, 0.0, 0.0,
@@ -152,24 +142,20 @@ void EKF_Task(void *parameter)
 
         kalmanfilter.correctEkf(ekf::calculateMeasurement, vecZ, matR, matHj);
 
-        Serial.print("estimate: ");
+        Serial.print("\nestimate: ");
         for (int i = 0; i < DIM_X; i++) {
             Serial.print(kalmanfilter.vecX()(i));
             if(i<DIM_X-1){Serial.print(", ");};
         }
 
-        Serial.print("&real: ");
-        Serial.print(x);
-        Serial.print(", ");
-        Serial.print(y);
-        Serial.print(", 0.0");
-        Serial.println();
-        delay(500); // Warten zwischen den Iterationen
-    }
-    Serial.println("end");
-    while(true)
-    {}
-    
+        //Serial.print("&real: ");
+        //Serial.print(x);
+        //Serial.print(", ");
+        //Serial.print(y);
+        //Serial.print(", 0.0");
+        //Serial.println();
+        delay(2500); // Warten zwischen den Iterationen
+    } 
 }
 
 /*

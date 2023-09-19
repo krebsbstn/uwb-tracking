@@ -7,7 +7,7 @@ TofInitiator::TofInitiator(uwb_addr src, uwb_addr *dst, uint8_t num_of_responder
     , current_responder(0)
 {
     this->type = "Initiator";
-    this->tof, this->distance, this->frame_cnt = 0;
+    this->tof, this->temp_distance, this->frame_cnt = 0;
     this->seq_cnt = 0x0A;
 
     this->mac_frame = {
@@ -70,12 +70,12 @@ void TofInitiator::loop() {
     { 
         /*Calculate tof and distance from response*/
         process_tof_response();
-
+        distances[current_responder] = temp_distance;
         /* Display computed distance via uart. */
-        Serial.print("DIST Device 0x");
-        Serial.print(current_responder + 2, HEX);
-        snprintf(dist_str, sizeof(dist_str), " %3.2f m\n", this->distance);
-        UART_puts(dist_str);
+        //Serial.print("DIST Device 0x");
+        //Serial.print(current_responder + 2, HEX);
+        //snprintf(dist_str, sizeof(dist_str), " %3.2f m\n", this->temp_distance);
+        //UART_puts(dist_str);
     }
     else
     {
@@ -83,10 +83,10 @@ void TofInitiator::loop() {
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
     }
 
-    if(current_responder == 4)
-    {
-        Serial.println("\n------------ New Cycle ------------");
-    }
+    //if(current_responder == 4)
+    //{
+    //    Serial.println("\n------------ New Cycle ------------");
+    //}
 
     /* Execute a delay between ranging exchanges. */
     delay(RNG_DELAY_MS);
@@ -208,6 +208,6 @@ void TofInitiator::process_tof_response()
         rtd_resp = resp_tx_ts - poll_rx_ts;
 
         this->tof = ((rtd_init - rtd_resp * (1 - clockOffsetRatio)) / 2.0) * DWT_TIME_UNITS;
-        this->distance = tof * SPEED_OF_LIGHT;
+        this->temp_distance = tof * SPEED_OF_LIGHT;
     }
 }

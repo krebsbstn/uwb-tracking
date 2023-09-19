@@ -3,6 +3,22 @@
 using namespace ekf;
 using namespace Eigen;
 
+EKF_Filter::EKF_Filter()
+{
+    read_landmarks_from_eeprom();
+}
+
+void EKF_Filter::read_landmarks_from_eeprom(void)
+{
+    for(int i=0; i<NUM_LANDMARKS; i++)
+    {
+        uint8_t address_base = ((i*3)+2)*8;
+        EEPROM.get(address_base, landmarkPositions(i, 0));
+        EEPROM.get(address_base+8, landmarkPositions(i, 1));
+        EEPROM.get(address_base+16, landmarkPositions(i, 2));
+    }
+}
+
 Matrix<double, DIM_X, 1> ekf::predictionModel(const Matrix<double, DIM_X, 1>& currentState)
 {
     Matrix<double, DIM_X, 1> result;

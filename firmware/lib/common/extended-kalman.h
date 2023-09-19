@@ -11,14 +11,10 @@ namespace ekf{
 #define DIM_X 3
 #define DIM_Z NUM_LANDMARKS
 
-static Matrix<double, NUM_LANDMARKS, 3> landmarkPositions
-    = (Eigen::Matrix<double, NUM_LANDMARKS, 3>() << 0.0, -4.0, 4.0, 0.0, 0.0, 4.0, 0.0, 4.0, 4.0, 4.0, 2.0, 4.0, 4.0, -2.0, 4.0).finished();
-
 class EKF_Filter
 { 
 public:
-    EKF_Filter()
-    {}
+    EKF_Filter();
     ~EKF_Filter(){}
 
     Matrix<double, DIM_X, 1>& vecX() { return m_vecX; }
@@ -64,11 +60,14 @@ public:
 private:
     Matrix<double, DIM_X, 1> m_vecX{ Matrix<double, DIM_X, 1>::Zero() }; /// @brief estimated state vector
     Matrix<double, DIM_X, DIM_X> m_matP{ Matrix<double, DIM_X, DIM_X>::Zero() }; /// @brief state covariance matrix
+
+    void read_landmarks_from_eeprom(void);
 };
 
 static uint32_t lastTime = millis();
 static Matrix<double, DIM_X, 1> x_kminus1 = (Eigen::Matrix<double, DIM_X, 1>() << 0.0, 0.0, 0.0).finished();
 
+static Matrix<double, NUM_LANDMARKS, 3> landmarkPositions { Matrix<double, NUM_LANDMARKS, 3>::Zero() };
 Matrix<double, DIM_X, 1> predictionModel(const Matrix<double, DIM_X, 1>& currentState);
 Matrix<double, DIM_Z, DIM_X> calculateJacobianMatrix(const Matrix<double, DIM_X, 1>& vecX);
 Matrix<double, DIM_Z, 1> calculateMeasurement(const Matrix<double, DIM_X, 1>& currentPosition);
