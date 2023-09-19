@@ -199,13 +199,8 @@ class BleConfigWidget(Widget):
     def save_config(self):
         self.set_characteristic("1", "76847a0a-2748-4fda-bcd7-74425f0e4a13")
         #   TODO: Reconnect/Clear oder update emtrys
-        # self.connect()
 
-    def update_remote(self):
-        #sende alle geänderten daten per ble, das machst du so:
-        #wenn sich ein werte des devices verändert hat, dann bildest du ein json nach dem folgenden format: {"id":2,"x":1,"y":2,"z":3}
-        # dieses sendest du dann weg 
-        
+    def update_remote(self):        
         for i, (device_frame, entry_fields) in enumerate(self.device_frames):
             device_id = i + 2
             
@@ -217,10 +212,4 @@ class BleConfigWidget(Widget):
             }
             updated_device_str = json.dumps(updated_device)
             self.set_characteristic(updated_device_str, "76847a0a-2748-4fda-bcd7-74425f0e4a11")
-        # Konvertieren Sie das JSON-Datenobjekt in eine Zeichenfolge
-        #updated_data_str = json.dumps(updated_data)
-
-
-
-        #print("fehlt noch")
-        pass
+        return
