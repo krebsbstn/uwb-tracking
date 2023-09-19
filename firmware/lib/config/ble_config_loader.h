@@ -19,14 +19,8 @@ public:
     
     void print_config();
 
-    coordinate get_my_position(){return my_position;};
-
 private:
     BleServer my_server;
 
     coordinate landmarkAddresses[NUM_LANDMARKS];
-
-    uint8_t my_status;
-    coordinate my_position;
-
 };

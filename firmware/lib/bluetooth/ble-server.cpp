@@ -25,11 +25,11 @@ void BleServer::init_server()
     this->pAdvertising = BLEDevice::getAdvertising();
 
     // Add Service UUIDs to Advertising
-    pAdvertising->addServiceUUID(BLE_SERVICE_GET_ANCHOR_POSITION_UUID);
-    pAdvertising->addServiceUUID(BLE_SERVICE_SEND_OWN_POSITION_UUID);
+    pAdvertising->addServiceUUID(BLE_SERVICE_INPUT_UUID);
+    pAdvertising->addServiceUUID(BLE_SERVICE_OUTPUT_UUID);
 
     // Disable Scan Response
-    pAdvertising->setScanResponse(false);
+    // pAdvertising->setScanResponse(false);
 
     // Set Advertising Intervals
     pAdvertising->setMinPreferred(BLE_MIN_INTERVAL);

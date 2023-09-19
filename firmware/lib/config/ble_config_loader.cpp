@@ -4,15 +4,13 @@ BleConfigLoader::BleConfigLoader()
 : my_server()
 {
     my_server.init_server();
-    //size_t size = sizeof(my_position) + sizeof(dev_position) + sizeof(dev_id);
-    //EEPROM.begin(size);
 }
 
 void BleConfigLoader::save_config_to_eeprom()
 {
     for(int i=0; i<NUM_LANDMARKS; i++)
     {
-        uint8_t address_base = ((i*3)+2)*8;     //Calculates EEPROM addresses with increment of 8 per address (landmarkAddresses[i] is double)
+        uint8_t address_base = ((i*3)+2)*sizeof(double);     //Calculates EEPROM addresses with increment of 8 per address (landmarkAddresses[i] is double)
         EEPROM.put(address_base, landmarkAddresses[i].x);
         EEPROM.commit();
         EEPROM.put(address_base+8, landmarkAddresses[i].y);
@@ -75,41 +73,31 @@ uint8_t BleConfigLoader::load_config_from_ble()
 
 void BleConfigLoader::save_config_to_ble()
 {
-    /*
-    size_t bufferSize = JSON_OBJECT_SIZE(6);
-    DynamicJsonDocument own_jsonBuffer(bufferSize);
-    own_jsonBuffer["x"] = my_position.x;
-    own_jsonBuffer["y"] = my_position.y;
-    own_jsonBuffer["z"] = my_position.z;
-    std::string own_positionString;
-    serializeJson(own_jsonBuffer, own_positionString);
+    size_t bufferSize = JSON_OBJECT_SIZE(NUM_LANDMARKS) + NUM_LANDMARKS * JSON_OBJECT_SIZE(3) * sizeof(double);
+    DynamicJsonDocument jsonBuffer(bufferSize);
 
-    my_server.send_value(BLE_CHARAKTERISTIK_OWN_POSITION_UUID, own_positionString);
+    // Erstellen Sie das JSON-Objekt
+    JsonObject root = jsonBuffer.to<JsonObject>();
 
-    my_server.send_value(BLE_CHARAKTERISTIK_OWN_STATUS_UUID, std::to_string(my_status));
-    */
+    // Iterieren Sie über das Array landmarkAddresses und fügen Sie die Informationen in das JSON-Objekt ein
+    for (int i = 0; i < NUM_LANDMARKS; i++) {
+        JsonObject coordinate = root.createNestedObject(String("0x0") + String(i + 2));
+        coordinate["x"] = landmarkAddresses[i].x;
+        coordinate["y"] = landmarkAddresses[i].y;
+        coordinate["z"] = landmarkAddresses[i].z;
+    }
+
+    std::string landmarksString;
+    serializeJson(jsonBuffer, landmarksString);
+    my_server.send_value(BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID, landmarksString);
 }
 
 void BleConfigLoader::print_config()
 {
-    //Serial.print("Own Status: ");
-    //Serial.println(std::to_string(my_status).c_str());
 
     size_t bufferSize = JSON_OBJECT_SIZE(8);
 
-    /*
-    DynamicJsonDocument own_jsonBuffer(bufferSize);
-    own_jsonBuffer["x"] = my_position.x;
-    own_jsonBuffer["y"] = my_position.y;
-    own_jsonBuffer["z"] = my_position.z;
-    std::string own_positionString;
-    serializeJson(own_jsonBuffer, own_positionString);
-    Serial.print("Own Position: ");
-    Serial.println(own_positionString.c_str());
-    */
-    
     Serial.println("Landmark Positions: ");
-
     for(int i=0; i<NUM_LANDMARKS; i++)
     {
         DynamicJsonDocument device_jsonBuffer(bufferSize);

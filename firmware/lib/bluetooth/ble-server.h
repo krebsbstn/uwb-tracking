@@ -7,16 +7,16 @@
 #define BLE_NAME "ESP32"
 
 // BLE Service for Configuration
-#define BLE_SERVICE_GET_ANCHOR_POSITION_UUID        "76847a0a-2748-4fda-bcd7-74425f0e4a10"
+#define BLE_SERVICE_INPUT_UUID                      "76847a0a-2748-4fda-bcd7-74425f0e4a10"
 #define BLE_CHARAKTERISTIK_DEVICE_POSITION_UUID     "76847a0a-2748-4fda-bcd7-74425f0e4a11"
 #define BLE_DESCRIPTOR_DEVICE_POSITION_UUID         "76847a0a-2748-4fda-bcd7-74425f0e4a12"
 #define BLE_CHARAKTERISTIK_SAVE_CONFIG_UUID         "76847a0a-2748-4fda-bcd7-74425f0e4a13"
 #define BLE_DESCRIPTOR_SAVE_CONFIG_UUID             "76847a0a-2748-4fda-bcd7-74425f0e4a14"
 
 // BLE Service for Device-Information
-#define BLE_SERVICE_SEND_OWN_POSITION_UUID          "76847a0a-2748-4fda-bcd7-74425f0e4a20"
-#define BLE_CHARAKTERISTIK_OWN_POSITION_UUID        "76847a0a-2748-4fda-bcd7-74425f0e4a21"
-#define BLE_DESCRIPTOR_OWN_POSITION_UUID            "76847a0a-2748-4fda-bcd7-74425f0e4a22"
+#define BLE_SERVICE_OUTPUT_UUID                     "76847a0a-2748-4fda-bcd7-74425f0e4a20"
+#define BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID    "76847a0a-2748-4fda-bcd7-74425f0e4a21"
+#define BLE_DESCRIPTOR_ANCHOR_POSITIONS_UUID        "76847a0a-2748-4fda-bcd7-74425f0e4a22"
 #define BLE_CHARAKTERISTIK_OWN_STATUS_UUID          "76847a0a-2748-4fda-bcd7-74425f0e4a23"
 #define BLE_DESCRIPTOR_OWN_STATUS_UUID              "76847a0a-2748-4fda-bcd7-74425f0e4a24"
 
@@ -55,21 +55,21 @@ private:
   };
 
   /*This Array structure shows the Service-&Characteristic-Architecture of the BLE Connection*/
-  const std::array<Service, 1> my_services{
+  const std::array<Service, 2> my_services{
       Service{
-        uuid : BLE_SERVICE_GET_ANCHOR_POSITION_UUID, 
+        uuid : BLE_SERVICE_INPUT_UUID, 
         characteristics : {
           Characteristic{name : "anchor position [i.e. {\"x\":1,\"y\":2,\"z\":3}]", characteristic_uuid : BLE_CHARAKTERISTIK_DEVICE_POSITION_UUID, descriptor_uuid : BLE_DESCRIPTOR_DEVICE_POSITION_UUID},
-          Characteristic{name : "Send \"1\" for saving config", characteristic_uuid : BLE_CHARAKTERISTIK_SAVE_CONFIG_UUID, descriptor_uuid : BLE_DESCRIPTOR_SAVE_CONFIG_UUID},      
+          Characteristic{name : "send \"1\" for saving config", characteristic_uuid : BLE_CHARAKTERISTIK_SAVE_CONFIG_UUID, descriptor_uuid : BLE_DESCRIPTOR_SAVE_CONFIG_UUID},      
+        }
       },
 
-      /*
       Service{
-        uuid : BLE_SERVICE_SEND_OWN_POSITION_UUID, 
+        uuid : BLE_SERVICE_OUTPUT_UUID, 
         characteristics : {
-          Characteristic{name : "my position [i.e. {\"x\":1,\"y\":2,\"z\":3}]", characteristic_uuid : BLE_CHARAKTERISTIK_OWN_POSITION_UUID, descriptor_uuid : BLE_DESCRIPTOR_OWN_POSITION_UUID}, 
-          Characteristic{name : "my status", characteristic_uuid : BLE_CHARAKTERISTIK_OWN_STATUS_UUID, descriptor_uuid : BLE_DESCRIPTOR_OWN_STATUS_UUID}}},
-      */
+          Characteristic{name : "Anchor Positions [Output only]", characteristic_uuid : BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID, descriptor_uuid : BLE_DESCRIPTOR_ANCHOR_POSITIONS_UUID}, 
+          //Characteristic{name : "my status", characteristic_uuid : BLE_CHARAKTERISTIK_OWN_STATUS_UUID, descriptor_uuid : BLE_DESCRIPTOR_OWN_STATUS_UUID}}},
+        }
       }
         
   };

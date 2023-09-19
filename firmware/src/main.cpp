@@ -241,7 +241,8 @@ void BLE_Task(void *parameter)
     while(true)
     {
         if(my_loader.load_config_from_ble()){break;}
-        my_loader.print_config();
+        my_loader.save_config_to_ble();
+        //my_loader.print_config();
         animate_leds();
         delay(333);
     }
