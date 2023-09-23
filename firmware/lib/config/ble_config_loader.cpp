@@ -18,7 +18,7 @@ void BleConfigLoader::save_config_to_eeprom()
         EEPROM.put(address_base+16, landmarkAddresses[i].z);
         EEPROM.commit();
     }
-
+    Serial.println("Saved settings to EEPROM");
     return;
 }
 

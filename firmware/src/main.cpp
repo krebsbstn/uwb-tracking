@@ -22,7 +22,14 @@
 
 #define INITIATOR_ADDR 0x1877665544332211 // Device-ID 0x01
 
-double distances[NUM_LANDMARKS] = {0.0}; // Initialize and define distances 
+double distances[NUM_LANDMARKS] = {0.0}; // Initialize and define distance
+uint8_t ble_kill_flag = 0;
+/* Define operating modes of a tag */
+enum{
+    uwb_mode = 0,
+    ble_mode = 1,
+};
+uint8_t current_mode = uwb_mode;
 
 uwb_addr dest_addr_list[] = {
     0x1877665544332212, // Device-ID 0x02
@@ -30,7 +37,6 @@ uwb_addr dest_addr_list[] = {
     0x1877665544332214, // Device-ID 0x04
     0x1877665544332215, // Device-ID 0x05
     0x1877665544332216};// Device-ID 0x06
-
 
 TaskHandle_t ekf_task_handle; // Handle des EKF-Tasks
 TaskHandle_t tdoa_task_handle; // Handle des UWB-tdoa-Tasks
@@ -43,18 +49,14 @@ void TDOA_Task(void *parameter);
 void BLE_Task(void *parameter);
 void user_1_button(void);
 void animate_leds(void);
+void preproduction_eeprom_settings(void);
+
 
 
 void setup()
 {
     UART_init();
     EEPROM.begin(256);
-
-    /*Write correct device ID in EEPROM. Only need to do one time */
-    //EEPROM.put(DEVICE_ID, 1);
-    //EEPROM.commit();
-    //EEPROM.put(IS_INITIATOR, 1);
-    //EEPROM.commit();
 
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
@@ -69,14 +71,30 @@ void setup()
     digitalWrite(USER_2_LED, LOW);
     digitalWrite(USER_3_LED, LOW);
 
+    current_mode = uwb_mode;
     xTaskCreatePinnedToCore(
         TOF_Task,
         "tof_task",
-        6000,
+        4096,
         NULL,
         configMAX_PRIORITIES-1,
         &tof_task_handle,
         1);
+
+    /*Start EKF Task on Initiator*/
+    uint8_t current_role;
+    EEPROM.get(IS_INITIATOR, current_role);
+    if(current_role){
+        delay(500); //let Initiator initiation
+        xTaskCreatePinnedToCore( 
+            EKF_Task,
+            "ekf_task",
+            4096,
+            NULL,
+            configMAX_PRIORITIES-2,
+            &ekf_task_handle,
+            1);
+    }
     
     //xTaskCreatePinnedToCore(
     //    TDOA_Task,
@@ -109,28 +127,11 @@ void EKF_Task(void *parameter)
                 0.0,   0.0,   0.1;
 
         kalmanfilter.predictEkf(ekf::predictionModel, matJacobF, matQ);
-        ///***********************Simulation von Messwerten***********************/
-        //double x = 0 + radius * std::cos(angle); // X-Koordinate berechnen
-        //double y = 0 - radius * std::sin(angle); // Y-Koordinate berechnen
-        ////double x = radius * std::cos(angle); // X-coordinate calculation
-        ////double y = 0.5 * radius * std::sin(2.0 * angle); // Y-coordinate calculation
-//
-        ////berechne die distanz zu jeder Landmarke einzeln
+        
+        //create the measurement vector
         Matrix<double, DIM_Z, 1> vecZ = Matrix<double, DIM_Z, 1>::Zero();
-
         for (int i = 0; i < DIM_Z; i++)
-        {
             vecZ(i, 0) = distances[i];
-        }
-        //for (int i = 0; i < NUM_LANDMARKS; i++) {
-        //    double distance = std::sqrt(
-        //        (x - ekf::landmarkPositions(i, 0)) * (x - ekf::landmarkPositions(i, 0)) +
-        //        (y - ekf::landmarkPositions(i, 1)) * (y - ekf::landmarkPositions(i, 1)) +
-        //        (0 - ekf::landmarkPositions(i, 2)) * (0 - ekf::landmarkPositions(i, 2)));
-        //    vecZ(i) = distance + (std::rand() / (double)RAND_MAX) * 0.4 - 0.2;
-        //}
-        //angle += angle_increment;
-        ///***********************************************************************/
 
         Matrix<double, DIM_Z, DIM_Z> matR;
         matR << 0.01, 0.0, 0.0, 0.0, 0.0,
@@ -147,13 +148,6 @@ void EKF_Task(void *parameter)
             Serial.print(kalmanfilter.vecX()(i));
             if(i<DIM_X-1){Serial.print(", ");};
         }
-
-        //Serial.print("&real: ");
-        //Serial.print(x);
-        //Serial.print(", ");
-        //Serial.print(y);
-        //Serial.print(", 0.0");
-        //Serial.println();
         delay(2500); // Warten zwischen den Iterationen
     } 
 }
@@ -191,16 +185,6 @@ void TOF_Task(void *parameter)
     if(current_role){
         dev = new TofInitiator(INITIATOR_ADDR, dest_addr_list, sizeof(dest_addr_list)/sizeof(uwb_addr));
         digitalWrite(USER_1_LED, HIGH);
-
-        /*Start EKF Task on Initiator*/
-        xTaskCreatePinnedToCore( 
-         EKF_Task,
-         "ekf_task",
-         6000,
-         NULL,
-         configMAX_PRIORITIES-1,
-         &ekf_task_handle,
-         1);
     }else{
         uint8_t dev_id;
         EEPROM.get(DEVICE_ID, dev_id);
@@ -227,6 +211,7 @@ void BLE_Task(void *parameter)
     while(true)
     {
         if(my_loader.load_config_from_ble()){break;}
+        if(ble_kill_flag){break;}
         my_loader.save_config_to_ble();
         //my_loader.print_config();
         animate_leds();
@@ -240,26 +225,31 @@ void BLE_Task(void *parameter)
 
 void user_1_button(void)
 {
+    detachInterrupt(USER_1_BTN);
     uint8_t current_role;
     EEPROM.get(IS_INITIATOR, current_role);
-
     
-    //eTaskGetState(ble_task_handle);
-
-    if(current_role){
+    if(current_role && current_mode == uwb_mode)
+    {
+        current_mode = ble_mode;
         vTaskDelete(tof_task_handle);
         vTaskDelete(ekf_task_handle);
+        delay(1000);
 
         xTaskCreatePinnedToCore(
-         BLE_Task,
-         "ble_task",
-         6000,
-         NULL,
-         configMAX_PRIORITIES-1,
-         &ble_task_handle,
-         1);
+            BLE_Task,
+            "ble_task",
+            4096,
+            NULL,
+            configMAX_PRIORITIES-3,
+            &ble_task_handle,
+            1);
     }
-    
+    else if (current_role && current_mode == ble_mode)
+    {
+        ble_kill_flag = 0x01;
+    }
+    attachInterrupt(USER_1_BTN, user_1_button, FALLING);
     return;
 }
 
@@ -279,5 +269,18 @@ void animate_leds(void)
     digitalWrite(USER_2_LED, LOW);
     digitalWrite(USER_3_LED, HIGH);
     
+    return;
+}
+
+
+void preproduction_eeprom_settings(void)
+{
+    uint8_t dev_id = 0x01;
+    uint8_t initiator = 1;
+    /*Write correct device ID in EEPROM. Only need to do one time */
+    EEPROM.put(DEVICE_ID, dev_id);
+    EEPROM.commit();
+    EEPROM.put(IS_INITIATOR, initiator);
+    EEPROM.commit();
     return;
 }
