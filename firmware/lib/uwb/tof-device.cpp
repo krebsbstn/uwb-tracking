@@ -2,6 +2,7 @@
 
 TofDevice::TofDevice(uwb_addr src)
 : src_address(src)
+, my_watchdog((unsigned long)RNG_DELAY_MS * 2)
 {
     /* Reset DW IC */
     spiBegin(PIN_IRQ, PIN_RST);
@@ -72,6 +73,8 @@ void TofDevice::setup()
     /* Apply default antenna delay value. See NOTE 2 below. */
     dwt_setrxantennadelay(RX_ANT_DLY);
     dwt_settxantennadelay(TX_ANT_DLY);
+
+    my_watchdog.begin();
 }
 
 void TofDevice::enable_leds()
@@ -83,4 +86,7 @@ void TofDevice::enable_leds()
     dwt_setlnapamode(DWT_LNA_ENABLE | DWT_PA_ENABLE | DWT_TXRX_EN);
 }
 
-void TofDevice::loop(){}
+void TofDevice::loop()
+{
+    my_watchdog.resetTimer();
+}

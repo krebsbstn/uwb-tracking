@@ -1,6 +1,7 @@
 #pragma once
 #include <pin_config.h>
 #include <datatypes.h>
+#include "watchdog.h"
 #include <dw3000.h>
 #include <dw3000_mac_802_15_4.h>
 
@@ -41,6 +42,7 @@ public:
     char* get_type() {return const_cast<char*>(this->type.c_str());};
     
 protected:
+    Watchdog my_watchdog;
     /*defining the source and destination addresses*/
     uwb_addr src_address;
 
