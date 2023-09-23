@@ -64,8 +64,7 @@ uint8_t BleConfigLoader::load_config_from_ble()
     }
     catch(const std::exception& e)
     {
-        Serial.print("JSON Failed with: ");
-        Serial.println(e.what());  
+        //Received nothing exception
     }
 
     return 0;
