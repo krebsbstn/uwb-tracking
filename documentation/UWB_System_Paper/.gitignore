@@ -1,0 +1,8 @@
+#exclude all buildfiles
+*.aux
+*.log
+*.out
+*.pdf
+*.synctex.gz
+*.bbl
+*.blg

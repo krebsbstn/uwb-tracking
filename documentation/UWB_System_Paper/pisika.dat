@@ -1,0 +1,114 @@
+\usepackage{latexsym}      % needed math symbols
+\usepackage{hyperref}
+\hypersetup{
+ colorlinks=true,
+ citecolor=blue,
+ linkcolor=blue,
+ urlcolor=blue,
+ pdfpagemode=UseNone,
+ pdfstartview=FitH}
+\usepackage{graphicx}      % for importing eps figures
+\usepackage{amsmath}       % for advanced math symbols
+\usepackage[affil-it]{authblk} 			% found in preprint bundle package, http://ctan.org/pkg/preprint
+\usepackage[margin=2cm]{geometry} % paper and margin formats as set by SPP
+
+\parindent 0.5cm    % paragraphs indent
+
+% authblk style
+\renewcommand\Authfont{\large}
+\renewcommand\Affilfont{\normalsize	\itshape}
+\setlength{\affilsep}{5pt}
+
+% for abstract style
+\makeatletter
+\newbox\abstract@box
+\renewenvironment{abstract}
+  {\global\setbox\abstract@box=\vbox\bgroup
+     \hsize=\textwidth\linewidth=\textwidth
+    \small
+    \begin{center}%
+    {\bfseries \abstractname\vspace{-.5em}\vspace{\z@}}%
+    \end{center}%
+    \quotation}
+  {\endquotation\egroup}
+\expandafter\def\expandafter\@maketitle\expandafter{\@maketitle
+  \ifvoid\abstract@box\else\unvbox\abstract@box\if@twocolumn\vskip1.5em\fi\fi}
+\makeatother
+\providecommand{\keywords}[1]{\noindent \mdseries{{Stichworte:}} #1}
+\providecommand{\DOI}[1]{\vspace{1\baselineskip}}
+\providecommand{\dateline}[1]{\vspace*{-1\baselineskip}\normalsize Published: #1\vspace*{-1.5\baselineskip}}
+
+
+
+% for section formatting style
+\makeatletter
+\renewcommand\section{\@startsection
+   {section}{1}{0pt}%
+   {-\baselineskip}%
+   {0.1\baselineskip}%
+   {\normalfont\bfseries}}%
+\makeatother
+\renewcommand\thesection{\arabic{section}}
+
+% for subsection formatting style
+\makeatletter
+\renewcommand\subsection{\@startsection
+   {subsection}{2}{0pt}%
+   {-\baselineskip}%
+   {0.1\baselineskip}%
+   {\small\bfseries}}%
+\makeatother
+\renewcommand\thesection{\arabic{section}}
+
+% for subsubsection formatting style
+\makeatletter
+\renewcommand\subsubsection{\@startsection
+   {subsubsection}{3}{0pt}%
+   {-\baselineskip}%
+   {0.1\baselineskip}%
+   {\footnotesize\bfseries}}%
+\makeatother
+\renewcommand\thesection{\arabic{section}}
+
+% for the figure and tables, captions
+\usepackage{booktabs}
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
+\usepackage{caption}
+\captionsetup[table]{position=above,font={rm,small}}
+\captionsetup[figure]{font={rm,small}}
+
+% for citations formatting style
+\usepackage[numbers, square,sort&compress]{natbib}
+\setlength\bibsep{1pt}
+
+%%for first page styling 
+\usepackage{fancyhdr}
+\fancypagestyle{titlestyle}
+{
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhf[l]{{\scshape Published as the results of Research Project}}
+\fancyhf[c]{ }
+\fancyhf[r]{ }
+\fancyfoot[l]{\scshape HTWG Konstanz}
+\fancyfoot[c]{1}
+\fancyfoot[r]{\scshape Hochschule Konstanz}
+}
+
+% styling for the second page onwards
+\renewcommand{\headrulewidth}{0.1pt}
+\renewcommand{\footrulewidth}{0.1pt}
+\fancyhf[l]{\small{Published as the results of Research Project - Prof. Dr. Knievel} }
+\fancyhf[r]{\small \scshape \ShortAuthorList}
+\fancyhf[c]{ \small }
+\fancyfoot[l]{\small \scshape HTWG Konstanz}
+\fancyfoot[c]{\small \thepage}
+\fancyfoot[r]{\small }
+\pagestyle{fancy}
+
+% other packages and macros
+\usepackage{bm}
+\renewcommand{\vec}[1]{\text{\bfseries #1}}
+

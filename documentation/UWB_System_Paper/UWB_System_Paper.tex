@@ -1,0 +1,127 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+\usepackage[ngerman]{babel} 
+\usepackage{float}
+\usepackage{lipsum}  
+
+\input{pisika.dat}
+
+%  Editorial staff will uncomment the next line
+% \input{staff.hed}
+
+%% acronyms and glossary
+\usepackage[
+    single=true,
+    sort=true,
+    only-used=true
+]{acro}
+\input{acronym-definitions.tex}
+
+%% Pictures
+\renewcommand{\figurename}{Abbildung}
+
+\begin{document}
+
+%--------------------------------------------------------------------------
+%  fill in the paper's title, author(s), and corresponding institutions
+%--------------------------------------------------------------------------
+\providecommand{\ShortAuthorList}[0]{S. Krebs, T. Herter} % use "A.~M.~Surname \textit{et al}." for more than three authors.
+\title{Ultra-Wideband (UWB) Positioning System Based on ESP32 and DWM3000 Modules}
+\author[1]{Sebastian Krebs}
+\author[1]{Tom Herter}
+\affil[1]{HTWG Konstanz,\linebreak  Faculty of Electronics und Informationtechnologies,\linebreak Germany}
+%\affil[2]{Other Institute, XX University}
+
+\date{\dateline{\today}}
+
+\maketitle
+\vspace*{-1.3cm}
+%\thispagestyle{titlestyle}
+
+\section*{}
+%---------------------------------------------------------------------------
+%               Include abstract and keywords here
+%---------------------------------------------------------------------------
+\textbf{\textit{Abstract}} - \textbf{
+  In this paper, we introduce an innovative \ac{UWB} positioning system
+  that leverages six identical custom-designed boards,
+  each featuring an \ac{ESP32} microcontroller and integrated with \ac{DWM3000}
+  modules from Quorvo.}
+
+  \textbf{This system is capable of achieving precise localization through \ac{TWR}
+  measurements between one designated ''Tag'' board and five other ''Anchor'' boards.
+  The collected distance measurements are processed by an \ac{EKF} running locally
+  on the Tag board, enabling it to determine its own position with high accuracy,
+  relying on the fixed positions of the Anchor boards.}
+
+  \textbf{This paper presents a comprehensive overview of the system's architecture,
+  the key components, and the remarkable capabilities it offers for accurate
+  indoor positioning and tracking applications.}
+
+\vspace*{.28cm}
+\keywords{\textbf{RTLS, UWB, TOF, Positioning, Tracking}}
+
+%---------------------------------------------------------------------------
+%               the main text of your paper begins here
+%---------------------------------------------------------------------------
+
+\section{Introduction}\label{section:intro}
+Indoor positioning and tracking have gained significant importance in various domains,
+including logistics, healthcare, industrial automation, and smart infrastructure.
+Traditional positioning systems often face challenges in terms of accuracy, scalability,
+and robustness.
+To address these issues, we present an \ac{UWB} positioning system that capitalizes
+on advanced hardware and sophisticated algorithms,
+resulting in an exceptional level of accuracy and reliability.
+
+Our \ac{UWB} system comprises six identical boards,
+all based on the ESP32 microcontroller, a versatile and powerful platform known
+for its capabilities in wireless communication and processing.
+These boards are equipped with \ac{DWM3000} modules from Quorvo,
+renowned for their high-performance UWB capabilities.
+
+One of these boards is designated as the ''Tag'',
+responsible for initiating \ac{TWR} measurements with the remaining five ''Anchor'' boards.
+The innovative aspect of our system lies in its ability to perform accurate localization
+without reliance on external infrastructure or centralized processing.
+
+The heart of our UWB system is the \ac{EKF} implemented locally on the Tag board.
+This EKF takes the distance measurements obtained from TWR with the Anchor boards and,
+based on their known fixed positions, computes the real-time position of the Tag board
+with remarkable precision.
+This decentralized approach not only ensures rapid and reliable positioning but also
+offers scalability, making it suitable for various applications where real-time location
+data is crucial.
+
+In this paper, we will delve into the details of our \ac{UWB} system,
+explaining the hardware setup as well as the firmware architecture.
+
+\section{Measurement Priciple}\label{Section:principle}
+\lipsum[2-4]
+\section{System Architecture}\label{section:system_arch}
+
+Additionally, we are committed to fostering collaboration and knowledge-sharing
+within the community.
+Therefore, we have made the entire source code, along with all PCB design files,
+readily accessible to the public.
+You can find these resources, along with detailed documentation,
+on our project's GitHub repository, available at the following link:
+\url{https://github.com/krebsbstn/uwb-tracking}.
+
+\section{Hardware Design}\label{section:hardware}
+\lipsum[2-4]
+\section{Firmware Architecture}\label{section:firmware}
+\lipsum[2-4]
+\subsection{TOF-Task}\label{section:firmware-tof}
+\lipsum[2-4]
+\subsection{EKF-Task}\label{section:firmware-ekf}
+\lipsum[2-4]
+\section{Test Results}\label{section:tests}
+\lipsum[2-4]
+\section{Conclusion And Outlook}\label{section:conclusion}
+\lipsum[2-4]
+% Please use pisikabst.bst. You may your own *.bib file.
+\bibliographystyle{pisikabst}
+\bibliography{bibliography}
+
+\end{document}
