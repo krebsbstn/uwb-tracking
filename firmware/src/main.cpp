@@ -24,6 +24,7 @@
 
 double distances[NUM_LANDMARKS] = {0.0}; // Initialize and define distance
 uint8_t ble_kill_flag = 0;
+coordinate own_position;
 /* Define operating modes of a tag */
 enum{
     uwb_mode = 0,
@@ -58,6 +59,8 @@ void setup()
     UART_init();
     EEPROM.begin(256);
 
+    //preproduction_eeprom_settings();
+
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
     attachInterrupt(USER_1_BTN, user_1_button, FALLING);
@@ -89,10 +92,19 @@ void setup()
         xTaskCreatePinnedToCore( 
             EKF_Task,
             "ekf_task",
-            4096,
+            8192,
             NULL,
             configMAX_PRIORITIES-2,
             &ekf_task_handle,
+            1);
+        
+        xTaskCreatePinnedToCore(
+            BLE_Task,
+            "ble_task",
+            4096,
+            NULL,
+            configMAX_PRIORITIES-3,
+            &ble_task_handle,
             1);
     }
     
@@ -143,11 +155,17 @@ void EKF_Task(void *parameter)
 
         kalmanfilter.correctEkf(ekf::calculateMeasurement, vecZ, matR, matHj);
 
-        Serial.print("\nestimate: ");
-        for (int i = 0; i < DIM_X; i++) {
-            Serial.print(kalmanfilter.vecX()(i));
-            if(i<DIM_X-1){Serial.print(", ");};
-        }
+        own_position.x = kalmanfilter.vecX()(0);
+        own_position.y = kalmanfilter.vecX()(1);
+        own_position.z = kalmanfilter.vecX()(2);
+
+        Serial.println("Estimate:");
+        Serial.print(own_position.x);
+        Serial.print(", ");
+        Serial.print(own_position.y);
+        Serial.print(", ");
+        Serial.println(own_position.z);
+
         delay(2500); // Warten zwischen den Iterationen
     } 
 }
@@ -208,10 +226,17 @@ void BLE_Task(void *parameter)
     my_loader.load_config_from_eeprom();
     my_loader.save_config_to_ble();
 
+    while(current_mode == uwb_mode)
+    {
+        if(ble_kill_flag == 0x02){break;}
+        my_loader.send_position(own_position);
+        delay(2500);
+    }
+
     while(true)
     {
         if(my_loader.load_config_from_ble()){break;}
-        if(ble_kill_flag){break;}
+        if(ble_kill_flag == 0x01){break;}
         my_loader.save_config_to_ble();
         //my_loader.print_config();
         animate_leds();
@@ -231,24 +256,18 @@ void user_1_button(void)
     
     if(current_role && current_mode == uwb_mode)
     {
+        ble_kill_flag = 0x02;
         current_mode = ble_mode;
-        vTaskDelete(tof_task_handle);
-        vTaskDelete(ekf_task_handle);
+        //vTaskDelete(tof_task_handle);
+        //vTaskDelete(ekf_task_handle);
         delay(1000);
-
-        xTaskCreatePinnedToCore(
-            BLE_Task,
-            "ble_task",
-            4096,
-            NULL,
-            configMAX_PRIORITIES-3,
-            &ble_task_handle,
-            1);
     }
+        
     else if (current_role && current_mode == ble_mode)
     {
         ble_kill_flag = 0x01;
     }
+    
     attachInterrupt(USER_1_BTN, user_1_button, FALLING);
     return;
 }

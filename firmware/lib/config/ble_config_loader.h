@@ -16,6 +16,8 @@ public:
     
     void save_config_to_ble();
     uint8_t load_config_from_ble();
+
+    void send_position(coordinate own_position);
     
     void print_config();
 

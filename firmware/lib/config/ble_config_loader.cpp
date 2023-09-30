@@ -91,6 +91,13 @@ void BleConfigLoader::save_config_to_ble()
     my_server.send_value(BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID, landmarksString);
 }
 
+void BleConfigLoader::send_position(coordinate own_position)
+{
+    char position_string[100];
+    snprintf(position_string, sizeof(position_string), "%.2f,%.2f,%.2f", own_position.x, own_position.y, own_position.z);
+    my_server.send_value(BLE_CHARAKTERISTIK_OWN_POSITION_UUID, position_string);
+}
+
 void BleConfigLoader::print_config()
 {
 

@@ -4,6 +4,7 @@ from lib.widget import Widget
 from lib.ble_service_widget import BleServiceWidget
 from lib.ble_config_widget import BleConfigWidget
 from lib.serial_printer import SerialWidget
+from lib.ble_plot_position_widget import BlePlotPositionWidget
 import json
 
 class Dashboard(tk.Frame):
@@ -41,7 +42,7 @@ class Dashboard(tk.Frame):
             pass
 
     def add_widget(self):
-        widget_types = ["BleServiceWidget", "BleConfigWidget", "SerialWidget", "MasterWidget"]
+        widget_types = ["BleServiceWidget", "BleConfigWidget", "SerialWidget", "MasterWidget", "BlePlotPositionWidget"]
         dialog = MyDialog(self, "Select Widget Type", widget_types)
         result = dialog.result
         if result is not None:
@@ -58,6 +59,9 @@ class Dashboard(tk.Frame):
             elif result == "MasterWidget":
                 widget = Widget(self.canvas, name)
                 widget.place(x=0, y=0, width=150, height=100, anchor="nw")
+            elif result == "BlePlotPositionWidget":
+                widget = BlePlotPositionWidget(self.canvas, name)
+                widget.place(x=0, y=0, width=600, height=500, anchor="nw")
             self.widgets.append(widget)
             self.maxindex = self.maxindex + 1
 

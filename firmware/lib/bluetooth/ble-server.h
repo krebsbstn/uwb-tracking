@@ -17,8 +17,8 @@
 #define BLE_SERVICE_OUTPUT_UUID                     "76847a0a-2748-4fda-bcd7-74425f0e4a20"
 #define BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID    "76847a0a-2748-4fda-bcd7-74425f0e4a21"
 #define BLE_DESCRIPTOR_ANCHOR_POSITIONS_UUID        "76847a0a-2748-4fda-bcd7-74425f0e4a22"
-#define BLE_CHARAKTERISTIK_OWN_STATUS_UUID          "76847a0a-2748-4fda-bcd7-74425f0e4a23"
-#define BLE_DESCRIPTOR_OWN_STATUS_UUID              "76847a0a-2748-4fda-bcd7-74425f0e4a24"
+#define BLE_CHARAKTERISTIK_OWN_POSITION_UUID        "76847a0a-2748-4fda-bcd7-74425f0e4a23"
+#define BLE_DESCRIPTOR_OWN_POSITION_UUID            "76847a0a-2748-4fda-bcd7-74425f0e4a24"
 
 /*BLE Advertising-Intervalle*/
 #define BLE_MIN_INTERVAL 0x06
@@ -68,7 +68,7 @@ private:
         uuid : BLE_SERVICE_OUTPUT_UUID, 
         characteristics : {
           Characteristic{name : "Anchor Positions [Output only]", characteristic_uuid : BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID, descriptor_uuid : BLE_DESCRIPTOR_ANCHOR_POSITIONS_UUID}, 
-          //Characteristic{name : "my status", characteristic_uuid : BLE_CHARAKTERISTIK_OWN_STATUS_UUID, descriptor_uuid : BLE_DESCRIPTOR_OWN_STATUS_UUID}}},
+          Characteristic{name : "my position [i.e. x, y, z]", characteristic_uuid : BLE_CHARAKTERISTIK_OWN_POSITION_UUID, descriptor_uuid : BLE_DESCRIPTOR_OWN_POSITION_UUID},
         }
       }
         
