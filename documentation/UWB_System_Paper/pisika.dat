@@ -34,7 +34,7 @@
 \expandafter\def\expandafter\@maketitle\expandafter{\@maketitle
   \ifvoid\abstract@box\else\unvbox\abstract@box\if@twocolumn\vskip1.5em\fi\fi}
 \makeatother
-\providecommand{\keywords}[1]{\noindent \mdseries{{Stichworte:}} #1}
+\providecommand{\keywords}[1]{\noindent \mdseries{{Keywords:}} #1}
 \providecommand{\DOI}[1]{\vspace{1\baselineskip}}
 \providecommand{\dateline}[1]{\vspace*{-1\baselineskip}\normalsize Published: #1\vspace*{-1.5\baselineskip}}
 
