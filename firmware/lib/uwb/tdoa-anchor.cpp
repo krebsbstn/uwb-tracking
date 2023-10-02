@@ -55,13 +55,13 @@ void TdoaAnchor::loop()
     last_pdoa = pdoa;
 
     snprintf(this->pdoa_str, sizeof(pdoa_str), "PDOA: %d rad\n", pdoa);
-    UART_puts(this->pdoa_str);
+    Serial.println(this->pdoa_str);
     snprintf(this->toa_str, sizeof(toa_str), "TOA: %lld s\n", (long long)toa);
-    UART_puts(this->toa_str);
+    Serial.println(this->toa_str);
     snprintf(this->toa_str, sizeof(toa_str), "TDOA: %f s\n", (double)(toa-last_toa));
-    UART_puts(this->toa_str);
+    Serial.println(this->toa_str);
     snprintf(this->toa_str, sizeof(toa_str), "DIST: %f m\n\n", (double)(toa-last_toa)*SPEED_OF_LIGHT);
-    UART_puts(this->toa_str);
+    Serial.println(this->toa_str);
 }
 
 /**

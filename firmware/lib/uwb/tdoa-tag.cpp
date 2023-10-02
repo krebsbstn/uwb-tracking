@@ -56,7 +56,7 @@ void TdoaTag::loop() {
     * function to access it.*/
    uint32_t status = 0;
     while (!((status = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_TXFRS_BIT_MASK))
-        && (current_time-tx_time<=RNG_DELAY_MS))
+        && (current_time-tx_time<=RNG_DELAY_TDOA))
     {
         current_time = esp_timer_get_time() / 1000;
     }
@@ -68,7 +68,7 @@ void TdoaTag::loop() {
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
 
         /* Execute a delay between transmissions. */
-        delay(RNG_DELAY_MS);
+        delay(RNG_DELAY_TDOA);
 
         /* Increment the blink frame sequence number (modulo 256). */
         this->seq_cnt++;

@@ -25,9 +25,15 @@
 
 #define RX_BUF_LEN 127 /* The received frame cannot be bigger than 127 if STD PHR mode is used */
 
-#define RNG_DELAY_MS 250 /* Inter-ranging delay period, in milliseconds. */
+#define RNG_DELAY_TOF 250 /* Inter-ranging delay period, in milliseconds. */
+
+#ifndef TX_ANT_DLY
 #define TX_ANT_DLY 16400
+#endif
+
+#ifndef RX_ANT_DLY
 #define RX_ANT_DLY 16400
+#endif
 
 /* Values for the PG_DELAY and TX_POWER registers reflect the bandwidth and power of the spectrum at the current
  * temperature. These values can be calibrated prior to taking reference measurements.*/

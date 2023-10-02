@@ -91,7 +91,7 @@ void TofInitiator::loop() {
     }
 
     /* Execute a delay between ranging exchanges. */
-    delay(RNG_DELAY_MS);
+    delay(RNG_DELAY_TOF);
 }
 
 /**
@@ -122,11 +122,11 @@ void TofInitiator::send_tof_request(uwb_addr dest)
     
     /* Check for errors */
     if (this->status < 0){
-        UART_puts("TX AES length error\n");
+        Serial.println("TX AES length error");
         return;
     }
     else if (this->status & AES_ERRORS){
-        UART_puts("TX AES ERROR\n");
+        Serial.println("TX AES ERROR");
         return;
     }
 
@@ -176,19 +176,19 @@ void TofInitiator::process_tof_response()
         switch (this->status)
         {
         case AES_RES_ERROR_LENGTH:
-            UART_puts("AES length error.\n");
+            Serial.println("AES length error.");
             break;
         case AES_RES_ERROR:
-            UART_puts("ERROR AES.\n");
+            Serial.println("ERROR AES.");
             break;
         case AES_RES_ERROR_FRAME:
-            UART_puts("Error Frame.\n");
+            Serial.println("Error Frame.");
             break;
         case AES_RES_ERROR_IGNORE_FRAME:
-            UART_puts("Frame not for us.\n");
+            Serial.println("Frame not for us.");
             break;
         default:
-            UART_puts("Unhandled AES Error.\n");
+            Serial.println("Unhandled AES Error.");
         }
         return;
     }

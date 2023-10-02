@@ -1484,16 +1484,16 @@ int dwt_configure(dwt_config_t *config)
         deca_usleep(DELAY_20uUSec);
         if ((dwt_read8bitoffsetreg(SYS_STATUS_ID, 0) & SYS_STATUS_CP_LOCK_BIT_MASK))
         {//PLL is locked
-      UART_puts("PLL is locked..");
-      UART_puts("\r\n");
+      Serial.println("PLL is locked..");
+      Serial.println("\r\n");
             flag=0;
             break;
         }
     }
     if (flag)
     { 
-        UART_puts("PLL LOCKING ERROR");
-        UART_puts("\r\n");
+        Serial.println("PLL LOCKING ERROR");
+        Serial.println("\r\n");
         return  DWT_ERROR;
     }
 
@@ -1590,15 +1590,15 @@ int dwt_run_pgfcal(void)
         deca_usleep(DELAY_20uUSec);
         if(dwt_read8bitoffsetreg(RX_CAL_STS_ID, 0x0) == 1)
         {//PGF cal is complete
-      UART_puts("PGF cal complete..");
-      UART_puts("\r\n");      
+      Serial.println("PGF cal complete..");
+      Serial.println("\r\n");      
             flag=0;
             break;
         }
     }
     if (flag)
     {
-        UART_puts("PGF CAL ERROR");
+        Serial.println("PGF CAL ERROR");
         result = DWT_ERROR;
     }
 
@@ -1610,16 +1610,16 @@ int dwt_run_pgfcal(void)
     if (val == ERR_RX_CAL_FAIL)
     {
         //PGF I Cal Fail
-        UART_puts("PGF I CAL ERROR");
-        UART_puts("\r\n");
+        Serial.println("PGF I CAL ERROR");
+        Serial.println("\r\n");
         result = DWT_ERROR;
     }
     val = dwt_read32bitoffsetreg(RX_CAL_RESQ_ID, 0x0);
     if (val == ERR_RX_CAL_FAIL)
     {
         //PGF Q Cal Fail
-        UART_puts("PGF Q CAL ERROR");
-        UART_puts("\r\n");
+        Serial.println("PGF Q CAL ERROR");
+        Serial.println("\r\n");
         result = DWT_ERROR;
     }
     

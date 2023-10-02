@@ -18,9 +18,15 @@
 #define FRAME_LENGTH (sizeof(tx_msg) + FCS_LEN) // The real length that is going to be transmitted
 
 /* Inter-frame delay period, in milliseconds. */
-#define RNG_DELAY_MS 500 /* Inter-ranging delay period, in milliseconds. */
-#define TX_ANT_DLY 16385
-#define RX_ANT_DLY 16385
+#define RNG_DELAY_TDOA 500 /* Inter-ranging delay period, in milliseconds. */
+
+#ifndef TX_ANT_DLY
+#define TX_ANT_DLY 16400
+#endif
+
+#ifndef RX_ANT_DLY
+#define RX_ANT_DLY 16400
+#endif
 
 /* Values for the PG_DELAY and TX_POWER registers reflect the bandwidth and power of the spectrum at the current
  * temperature. These values can be calibrated prior to taking reference measurements.*/

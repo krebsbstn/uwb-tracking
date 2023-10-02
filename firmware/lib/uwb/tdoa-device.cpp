@@ -11,8 +11,9 @@
  */
 TdoaDevice::TdoaDevice(uwb_addr src)
 : src_address(src)
-, tx_msg({ 0xC5, 0, 'A', 'D', 'D', 'R', 'E', 'S', 'S', '0' })
 {
+    uint8_t tx_msg_temp[] = { 0xC5, 0, 'A', 'D', 'D', 'R', 'E', 'S', 'S', '0' };
+
     /* Reset DW IC */
     spiBegin(PIN_IRQ, PIN_RST);
     spiSelect(PIN_SS);
@@ -22,7 +23,7 @@ TdoaDevice::TdoaDevice(uwb_addr src)
     //// Need to make sure DW IC is in IDLE_RC before proceeding
     //while (!dwt_checkidlerc()) 
     //{
-    //    UART_puts("DWM3000 idle1 failed.\r\n");
+    //    Serial.println("DWM3000 idle1 failed.\r\n");
     //    while(1){};
     //}
     //dwt_softreset();
@@ -30,13 +31,13 @@ TdoaDevice::TdoaDevice(uwb_addr src)
     // Need to make sure DW IC is in IDLE_RC before proceeding
     while (!dwt_checkidlerc()) 
     {
-        UART_puts("DWM3000 idle failed.\r\n");
+        Serial.println("DWM3000 idle failed.");
         while(1){};
     }
 
     if (dwt_initialise(DWT_DW_INIT) == DWT_ERROR)
     {
-        UART_puts("DWM3000 init failed.\r\n");
+        Serial.println("DWM3000 init failed.");
         while (1){};
     }
 
@@ -69,7 +70,7 @@ void TdoaDevice::setup()
      * the PLL or RX calibration has failed the host should reset the device */
     if (dwt_configure(&this->config)) 
     {
-        UART_puts("DWM3000 config failed.\r\n");
+        Serial.println("DWM3000 config failed.");
         while (1){};
     }
 

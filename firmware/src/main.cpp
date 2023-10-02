@@ -64,7 +64,7 @@ void preproduction_eeprom_settings(uint8_t dev_id, uint8_t is_initiator);
  */
 void setup()
 {
-    UART_init();
+    Serial.begin(115200);
     EEPROM.begin(256);
 
     //Uncomment this when it is the first operation:

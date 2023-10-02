@@ -93,19 +93,19 @@ void TofResponder::loop()
         switch (this->status)
         {
         case AES_RES_ERROR_LENGTH:
-            UART_puts("AES length error.\n");
+            Serial.println("AES length error.");
             break;
         case AES_RES_ERROR:
-            UART_puts("ERROR AES.\n");
+            Serial.println("ERROR AES.");
             break;
         case AES_RES_ERROR_FRAME:
-            UART_puts("Error Frame.\n");
+            Serial.println("Error Frame.");
             break;
         case AES_RES_ERROR_IGNORE_FRAME:
-            UART_puts("Frame not for us.\n");
+            Serial.println("Frame not for us.");
             break;
         default:
-            UART_puts("Unhandled AES Error.\n");
+            Serial.println("Unhandled AES Error.");
         }
         return;
     }
@@ -165,12 +165,12 @@ void TofResponder::loop()
         this->status = dwt_do_aes(&this->aes_job_tx, this->aes_config.aes_core_type);
         if (this->status < 0)
         {
-            UART_puts("AES length error");
+            Serial.println("AES length error");
             return;
         }
         else if (this->status & AES_ERRORS)
         {
-            UART_puts("ERROR AES");
+            Serial.println("ERROR AES");
             return;
         }
 

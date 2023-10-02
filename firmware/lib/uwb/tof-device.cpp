@@ -7,7 +7,7 @@
 
 TofDevice::TofDevice(uwb_addr src)
 : src_address(src)
-, my_watchdog((unsigned long)RNG_DELAY_MS * 2)
+, my_watchdog((unsigned long)RNG_DELAY_TOF * 2)
 {
     /* Reset DW IC */
     spiBegin(PIN_IRQ, PIN_RST);
@@ -19,13 +19,13 @@ TofDevice::TofDevice(uwb_addr src)
     // Need to make sure DW IC is in IDLE_RC before proceeding
     while (!dwt_checkidlerc()) 
     {
-        UART_puts("DWM3000 idle failed.\r\n");
+        Serial.println("DWM3000 idle failed.\r\n");
         while(1){};
     }
 
     if (dwt_initialise(DWT_DW_INIT) == DWT_ERROR)
     {
-        UART_puts("DWM3000 init failed.\r\n");
+        Serial.println("DWM3000 init failed.\r\n");
         while (1){};
     }
 
@@ -71,7 +71,7 @@ void TofDevice::setup()
      * the PLL or RX calibration has failed the host should reset the device */
     if (dwt_configure(&this->config)) 
     {
-        UART_puts("DWM3000 config failed.\r\n");
+        Serial.println("DWM3000 config failed.");
         while (1){};
     }
 
