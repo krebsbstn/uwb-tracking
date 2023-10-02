@@ -3,11 +3,18 @@
 using namespace ekf;
 using namespace Eigen;
 
+/**
+ * @brief Default constructor for the EKF_Filter class.
+ * Initializes the EKF and reads the Anchor positions from EEPROM.
+ */
 EKF_Filter::EKF_Filter()
 {
     read_landmarks_from_eeprom();
 }
 
+/**
+ * @brief Reads landmarks from EEPROM and stores them in the landmarkPositions matrix.
+ */
 void EKF_Filter::read_landmarks_from_eeprom(void)
 {
     for(int i=0; i<NUM_LANDMARKS; i++)
@@ -19,23 +26,33 @@ void EKF_Filter::read_landmarks_from_eeprom(void)
     }
 }
 
+/**
+ * @brief Prediction model for the Extended Kalman Filter (EKF).
+ * @param currentState The current state vector.
+ * @return The predicted state vector.
+ */
 Matrix<double, DIM_X, 1> ekf::predictionModel(const Matrix<double, DIM_X, 1>& currentState)
 {
     Matrix<double, DIM_X, 1> result;
 
     uint32_t currentTime = millis();
-    double dt = (currentTime - lastTime) / 1000.0; // Zeitdifferenz in Sekunden
+    double dt = (currentTime - lastTime) / 1000.0; // Time difference in seconds
 
-    // Vorhergesagter Zustand basierend auf konstanter Geschwindigkeit
+    // Predicted state based on constant velocity
     result = currentState + x_kminus1 * dt;
 
-    // Aktualisierung der Werte
+    // Update values
     lastTime = currentTime;
     x_kminus1 = result - currentState;
 
     return result;
 }
 
+/**
+ * @brief Calculate the Jacobian matrix for the measurement model.
+ * @param vecX The state vector.
+ * @return The Jacobian matrix.
+ */
 Matrix<double, DIM_Z, DIM_X> ekf::calculateJacobianMatrix(const Matrix<double, DIM_X, 1>& vecX)
 {
     Matrix<double, DIM_Z, DIM_X> matHj;
@@ -55,7 +72,11 @@ Matrix<double, DIM_Z, DIM_X> ekf::calculateJacobianMatrix(const Matrix<double, D
     return matHj;
 }
 
-
+/**
+ * @brief Calculate the measurement vector.
+ * @param currentPosition The current position.
+ * @return The measurement vector.
+ */
 Matrix<double, DIM_Z, 1> ekf::calculateMeasurement(const Matrix<double, DIM_X, 1>& currentPosition)
 {
     Matrix<double, DIM_Z, 1> measurement;

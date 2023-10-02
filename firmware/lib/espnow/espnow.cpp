@@ -1,11 +1,23 @@
 #include "espnow.h"
 
-/* TODO: Implementation json file over ESPnow */
+/**
+ * @file espnow.cpp
+ * @brief Implementation of ESP-NOW communication library for peer-to-peer data transmission.
+ * 
+ * @TODO: Implementation Anchorsynchronsiation for TdoA over ESPnow
+ */
 
 uint8_t espnow_obj::received = 0;
 char espnow_obj::received_token[4] = {0};
 uint8_t espnow_obj::dst_address[6] = {0};
 
+/**
+ * @brief Initialize ESP-NOW communication.
+ * 
+ * This function initializes ESP-NOW communication and registers callbacks for sending and receiving data.
+ * 
+ * @param destination_address The MAC address of the destination device.
+ */
 void espnow_obj::init(uint8_t *destination_address)
 {
     /* Set device as a Wi-Fi Station */ 
@@ -36,6 +48,12 @@ void espnow_obj::init(uint8_t *destination_address)
     memcpy(dst_address, destination_address, 6);
 }
 
+/**
+ * @brief Get the MAC address of the local device.
+ * 
+ * @return The MAC address as an array of bytes.
+ */
+uint
 uint8_t* espnow_obj::get_own_mac_address()
 {
     static uint8_t address[6];
@@ -49,6 +67,11 @@ uint8_t* espnow_obj::get_own_mac_address()
     return address;
 }
 
+/**
+ * @brief Generate a unique ID based on the MAC address.
+ * 
+ * @return The generated unique ID.
+ */
 int64_t espnow_obj::generate_own_address()
 {
     uint8_t mac_address[8] = {0};
@@ -65,16 +88,33 @@ int64_t espnow_obj::generate_own_address()
     return own_id;
 }
 
+/**
+ * @brief Get the destination MAC address.
+ * 
+ * @return The destination MAC address as an array of bytes.
+ */
 uint8_t* espnow_obj::get_dst_address()
 {
     return dst_address;
 }
 
+/**
+ * @brief Set the destination MAC address.
+ * 
+ * @param destination_address The new destination MAC address.
+ */
 void espnow_obj::set_dst_address(uint8_t* destination_address)
 {
     memcpy(dst_address, destination_address, 6);
 }
 
+/**
+ * @brief Send a string message over ESP-NOW.
+ * 
+ * @param send_msg The message to send.
+ * @param num_of_char The number of characters in the message.
+ * @return 1 if the message was sent successfully, 0 otherwise.
+ */
 uint8_t espnow_obj::send_string(char* send_msg, uint8_t num_of_char)
 {
     uint8_t send_message[num_of_char];
@@ -95,8 +135,21 @@ uint8_t espnow_obj::send_string(char* send_msg, uint8_t num_of_char)
     }
 }
 
+/**
+ * @brief Callback function when data is sent over ESP-NOW.
+ * 
+ * @param mac_addr The MAC address of the recipient.
+ * @param status The send status.
+ */
 void espnow_obj::OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status){}
 
+/**
+ * @brief Callback function when data is received over ESP-NOW.
+ * 
+ * @param mac The MAC address of the sender.
+ * @param incomingData The received data.
+ * @param len The length of the received data.
+ */
 void espnow_obj::OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len)
 {
     memcpy(&received_token, incomingData, sizeof(received_token));

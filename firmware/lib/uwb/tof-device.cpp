@@ -1,5 +1,10 @@
 #include "tof-device.h"
 
+/**
+ * @file tof-device.cpp
+ * @brief Implementation of the TOFDevice class, a superclass for TOF initiators and responders.
+ */
+
 TofDevice::TofDevice(uwb_addr src)
 : src_address(src)
 , my_watchdog((unsigned long)RNG_DELAY_MS * 2)
@@ -9,7 +14,7 @@ TofDevice::TofDevice(uwb_addr src)
     spiSelect(PIN_SS);
 
     dwt_softreset();    //Set device to Idle RC for faster startup
-    delay(20); // Time needed for DW3000 to start up
+    delay(20);          // Time needed for DW3000 to start up
 
     // Need to make sure DW IC is in IDLE_RC before proceeding
     while (!dwt_checkidlerc()) 
@@ -57,6 +62,9 @@ TofDevice::TofDevice(uwb_addr src)
         0xFFEEDDCC, 0xBBAA9988, 0x77665544, 0x33221100, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
 }
 
+/**
+ * @brief Setup the TOF device.
+ */
 void TofDevice::setup()
 {
     /* If the dwt_configure returns DWT_ERROR either
@@ -77,6 +85,9 @@ void TofDevice::setup()
     my_watchdog.begin();
 }
 
+/**
+ * @brief Enable LEDs for debugging purposes.
+ */
 void TofDevice::enable_leds()
 {
     /* Enabling LEDs here for debug so that for each TX the LED will flash.
@@ -86,6 +97,9 @@ void TofDevice::enable_leds()
     dwt_setlnapamode(DWT_LNA_ENABLE | DWT_PA_ENABLE | DWT_TXRX_EN);
 }
 
+/**
+ * @brief Main loop of the TOF device.
+ */
 void TofDevice::loop()
 {
     my_watchdog.resetTimer();

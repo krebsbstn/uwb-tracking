@@ -1,0 +1,15 @@
+# Doxyfile 1.9.2
+
+# Projektname
+PROJECT_NAME           = "UWB-Tracking"
+
+# Das Verzeichnis, in dem der Quellcode liegt (relativer Pfad)
+INPUT                  = .
+
+# Das Verzeichnis, in dem die generierte Dokumentation gespeichert wird (automatisch erstellt)
+OUTPUT_DIRECTORY       = doxygen-output
+
+# Einstellungen für die Ausgabe
+GENERATE_HTML          = YES
+GENERATE_LATEX         = YES
+GENERATE_XML           = NO

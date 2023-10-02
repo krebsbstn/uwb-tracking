@@ -1,4 +1,10 @@
 #pragma once
+
+/**
+ * @file tof-device.h
+ * @brief Header file for the TOFDevice class, a superclass for TOF initiators and responders.
+ */
+
 #include <pin_config.h>
 #include <datatypes.h>
 #include "watchdog.h"
@@ -27,18 +33,42 @@
  * temperature. These values can be calibrated prior to taking reference measurements.*/
 extern dwt_txconfig_t txconfig_options;
 
+/**
+ * @brief The base class for Time-of-Flight (TOF) devices.
+ */
 class TofDevice
 {
 public:
+    /**
+     * @brief Constructor for the TofDevice class.
+     * @param src The source address for the TOF device.
+     */
     TofDevice(uwb_addr src);
+
+     /**
+     * @brief Destructor for the TofDevice class.
+     */
     ~TofDevice(){};
 
+    /**
+     * @brief Initialize and configure the TOF device.
+     */
     virtual void setup();
 
+    /**
+     * @brief Enable LEDs for debugging purposes.
+     */
     void enable_leds();
 
+    /**
+     * @brief Main loop of the TOF device.
+     */
     virtual void loop();
 
+    /**
+     * @brief Get the type of the TOF device.
+     * @return A pointer to the type string.
+     */
     char* get_type() {return const_cast<char*>(this->type.c_str());};
     
 protected:
@@ -49,8 +79,9 @@ protected:
     String type;
 
     mac_frame_802_15_4_format_t mac_frame;
-    uint8_t poll_msg[4] = {'P', 'o', 'l', 'l'};                     //first 8 bytes for last meassured distance
+    uint8_t poll_msg[4] = {'P', 'o', 'l', 'l'};
     uint8_t resp_msg[16] = {0, 0, 0, 0, 0, 0, 0, 0, 'R', 'e', 's', 'p', 'o', 'n', 's', 'e'}; //first 8 bytes for timestamps
+    
     /* Buffer to store received response message.
      * Its size is adjusted to longest frame that the code can handle. */
     uint8_t rx_buffer[RX_BUF_LEN];

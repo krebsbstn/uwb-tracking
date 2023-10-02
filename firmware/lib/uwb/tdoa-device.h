@@ -1,4 +1,10 @@
 #pragma once
+
+/**
+ * @file tdoa-device.h
+ * @brief Header file for the TDOADevice class, a superclass for TDOA tags and anchors.
+ */
+
 #include <pin_config.h>
 #include <datatypes.h>
 #include <dw3000.h>
@@ -20,18 +26,42 @@
  * temperature. These values can be calibrated prior to taking reference measurements.*/
 extern dwt_txconfig_t txconfig_options;
 
+/**
+ * @brief The base class for TDOA (Time Difference of Arrival) devices.
+ */
 class TdoaDevice
 {
 public:
+    /**
+     * @brief Constructor for the TdoaDevice class.
+     * @param src The source address of the TDOA device.
+     */
     TdoaDevice(uwb_addr src);
+
+    /**
+     * @brief Destructor for the TdoaDevice class.
+     */
     ~TdoaDevice(){};
 
+    /**
+     * @brief Perform setup and configuration of the TDOA device.
+     */
     virtual void setup();
 
+    /**
+     * @brief Enable LEDs on the TDOA device if available.
+     */
     void enable_leds();
 
+    /**
+     * @brief Main loop function for the TDOA device.
+     */
     virtual void loop();
 
+    /**
+     * @brief Get the type of the TDOA device.
+     * @return A pointer to a character array representing the device type.
+     */
     char* get_type() {return const_cast<char*>(this->type.c_str());};
     
 protected:
@@ -40,7 +70,7 @@ protected:
 
     String type;
 
-    /* The frame sent in this example is an 802.15.4e standard blink. It is a 12-byte frame composed of the following fields:
+    /* The frame sent in this code is an 802.15.4e standard blink. It is a 12-byte frame composed of the following fields:
     *     - byte 0: frame type (0xC5 for a blink).
     *     - byte 1: sequence number, incremented for each new frame.
     *     - byte 2 -> 9: device ID.
@@ -51,8 +81,18 @@ protected:
      * Its size is adjusted to longest frame that the code can handle. */
     uint8_t rx_buffer[FRAME_LENGTH];
 
+     /**
+     * @brief Status register value.
+     */
     uint32_t status_reg;
+
+    /**
+     * @brief Status variable indicating the device's current status.
+     */
     int8_t status;
 
+    /**
+     * @brief Configuration settings for the DW3000 device.
+     */
     dwt_config_t config;
 };

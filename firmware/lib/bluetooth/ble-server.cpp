@@ -28,9 +28,6 @@ void BleServer::init_server()
     pAdvertising->addServiceUUID(BLE_SERVICE_INPUT_UUID);
     pAdvertising->addServiceUUID(BLE_SERVICE_OUTPUT_UUID);
 
-    // Disable Scan Response
-    // pAdvertising->setScanResponse(false);
-
     // Set Advertising Intervals
     pAdvertising->setMinPreferred(BLE_MIN_INTERVAL);
     pAdvertising->setMaxPreferred(BLE_MAX_INTERVAL);

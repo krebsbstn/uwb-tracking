@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * @brief Main Code for UWB Device, combining functionality of Tags and Anchors.
+ */
+
 #include <esp_now.h>
 #include <WiFi.h>
 #include <Wire.h>
@@ -50,16 +55,20 @@ void TDOA_Task(void *parameter);
 void BLE_Task(void *parameter);
 void user_1_button(void);
 void animate_leds(void);
-void preproduction_eeprom_settings(void);
+void preproduction_eeprom_settings(uint8_t dev_id, uint8_t is_initiator);
 
-
-
+/**
+ * @brief Main setup function
+ * 
+ * This function initializes the hardware and starts various tasks for UWB operation.
+ */
 void setup()
 {
     UART_init();
     EEPROM.begin(256);
 
-    //preproduction_eeprom_settings();
+    //Uncomment this when it is the first operation:
+    //preproduction_eeprom_settings(0x01, 0x00); //depends on pcb
 
     /*Initialize Inputs*/
     pinMode(USER_1_BTN, INPUT_PULLUP);
@@ -88,7 +97,7 @@ void setup()
     uint8_t current_role;
     EEPROM.get(IS_INITIATOR, current_role);
     if(current_role){
-        delay(500); //let Initiator initiation
+        delay(500); //give dwm time for startup
         xTaskCreatePinnedToCore( 
             EKF_Task,
             "ekf_task",
@@ -107,20 +116,24 @@ void setup()
             &ble_task_handle,
             1);
     }
-    
-    //xTaskCreatePinnedToCore(
-    //    TDOA_Task,
-    //    "tdoa_task",
-    //    6000,
-    //    NULL,
-    //    configMAX_PRIORITIES-1,
-    //    &tdoa_task_handle,
-    //    1);
-
 }
 
+/**
+ * @brief Main loop function
+ * 
+ * This function is repeatedly called after setup is complete.
+ */
 void loop() {}
 
+/**
+ * @brief EKF Task
+ * 
+ * This task runs the Extended Kalman Filter (EKF) for position estimation.
+ * It uses a constant velocity model for prediction and updates the estimate
+ * based on measured distances to landmarks.
+ * 
+ * @param parameter - Pointer to task parameters (not used)
+ */
 void EKF_Task(void *parameter)
 {
     static ekf::EKF_Filter kalmanfilter;
@@ -170,9 +183,20 @@ void EKF_Task(void *parameter)
     } 
 }
 
-/*
+
+/**
+ * @brief TdoA Task
+ * 
+ * This task handles Time-difference-of-Arrival (TdoA) operations for UWB.
+ * It is still under development because a wireless synchronisation between
+ * different PCBs is necessary.
+ * Thus this Task is not used.
+ * 
+ * @param parameter - Pointer to task parameters (not used)
+ */
 void TDOA_Task(void *parameter)
 {
+    /*
     TdoaDevice* dev;
     uint8_t current_role;
     EEPROM.get(IS_INITIATOR, current_role);
@@ -191,10 +215,23 @@ void TDOA_Task(void *parameter)
     {
         dev->loop();
     }
+    */
 }
-*/
 
 
+/**
+ * @brief TOF Task
+ * 
+ * This task handles Time of Flight (TOF) operations for UWB.
+ * It is responsible for initiating or responding to TOF measurements.
+ * Contains a watchdog, which is triggering reboots in error cases.
+ * 
+ * @TODO: 
+ * Currently this system does not support multible responders
+ * because they would have the same addresss.
+ * 
+ * @param parameter - Pointer to task parameters (not used)
+ */
 void TOF_Task(void *parameter)
 {
     TofDevice* dev;
@@ -219,6 +256,14 @@ void TOF_Task(void *parameter)
     }
 }
 
+/**
+ * @brief BLE Task
+ * 
+ * This task handles Bluetooth Low Energy (BLE) operations.
+ * It loads and saves configurations to/from EEPROM and communicates over BLE.
+ * 
+ * @param parameter - Pointer to task parameters (not used)
+ */
 void BLE_Task(void *parameter)
 {
     BleConfigLoader my_loader;
@@ -248,6 +293,12 @@ void BLE_Task(void *parameter)
     esp_restart();
 }
 
+/**
+ * @brief User Button Interrupt Function
+ * 
+ * This function is called when the user presses a button. It toggles the operating mode
+ * between UWB mode and BLE mode.
+ */
 void user_1_button(void)
 {
     detachInterrupt(USER_1_BTN);
@@ -272,6 +323,11 @@ void user_1_button(void)
     return;
 }
 
+/**
+ * @brief LED Animation Function
+ * 
+ * This function animates LEDs in a sequence.
+ */
 void animate_leds(void)
 {
     digitalWrite(USER_1_LED, HIGH);
@@ -291,15 +347,20 @@ void animate_leds(void)
     return;
 }
 
-
-void preproduction_eeprom_settings(void)
+/**
+ * @brief Pre-production EEPROM settings
+ * 
+ * This function writes preset values into EEPROM, including device ID and role information.
+ * This is needed to do once a pcb is manufactured.
+ * The other Tasks depend on the settings given in the EEPROM.
+ * 
+ */
+void preproduction_eeprom_settings(uint8_t dev_id, uint8_t is_initiator)
 {
-    uint8_t dev_id = 0x01;
-    uint8_t initiator = 1;
     /*Write correct device ID in EEPROM. Only need to do one time */
     EEPROM.put(DEVICE_ID, dev_id);
     EEPROM.commit();
-    EEPROM.put(IS_INITIATOR, initiator);
+    EEPROM.put(IS_INITIATOR, is_initiator);
     EEPROM.commit();
     return;
 }

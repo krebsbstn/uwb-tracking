@@ -1,5 +1,12 @@
 #include "tdoa-tag.h"
 
+/**
+ * @brief Constructor for the TdoaTag class.
+ * 
+ * Initializes a TDOA tag device with the specified source address.
+ * 
+ * @param src The source address of the TDOA tag device.
+ */
 TdoaTag::TdoaTag(uwb_addr src)
     : TdoaDevice(src)
 {
@@ -7,11 +14,24 @@ TdoaTag::TdoaTag(uwb_addr src)
     this->seq_cnt = 0x00;
 }
 
+/**
+ * @brief Perform setup and configuration specific to the TDOA tag device.
+ * 
+ * Overrides the setup method from the base class (TdoaDevice).
+ */
 void TdoaTag::setup()
 {
     TdoaDevice::setup();
 }
 
+/**
+ * @brief Main loop function for the TDOA tag device.
+ * 
+ * Overrides the loop method from the base class (TdoaDevice).
+ * 
+ * This function prepares and transmits a frame using the DW IC and handles
+ * the transmission process, including checking for successful transmission.
+ */
 void TdoaTag::loop() {
     TdoaDevice::loop();
     /* Write frame data to DW IC and prepare transmission.*/

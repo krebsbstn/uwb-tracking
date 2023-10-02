@@ -1,4 +1,10 @@
 #pragma once
+
+/**
+ * @file tof-initiator.h
+ * @brief Header file for the TofInitiator class, a subclass of TofDevice.
+ */
+
 #include "tof-device.h"
 
 /* Delay between frames, in UWB microseconds.*/
@@ -8,14 +14,35 @@
 
 extern double distances[NUM_LANDMARKS];
 
+/**
+ * @brief The TofInitiator class represents a Time-of-Flight (TOF) initiator device.
+ */
 class TofInitiator : public TofDevice 
 {
 public:
+    /**
+     * @brief Constructor for the TofInitiator class.
+     * @param src The source address for the TOF initiator.
+     * @param dst An array of destination addresses for the responders.
+     * @param num_of_responders The number of responder devices.
+     */
     TofInitiator(uwb_addr src, uwb_addr* dst, uint8_t num_of_responders);
+
+    /**
+     * @brief Destructor for the TofInitiator class.
+     */
     ~TofInitiator(){};
 
+    /**
+     * @brief Initialize and configure the TOF initiator device.
+     */
     virtual void setup() override;
+    
+    /**
+     * @brief Main loop of the TOF initiator device.
+     */
     virtual void loop() override;
+
 private:
     uint32_t frame_cnt; /* See Note 13 */
     uint8_t seq_cnt; /* Frame sequence number, incremented after each transmission. */
@@ -30,6 +57,14 @@ private:
     double tof;
     double temp_distance;
 
+    /**
+     * @brief Send a TOF request to a specific destination address.
+     * @param dest The destination address of the responder.
+     */
     void send_tof_request(uwb_addr dest);
+
+    /**
+     * @brief Process the TOF response received from a responder.
+     */
     void process_tof_response();
 };

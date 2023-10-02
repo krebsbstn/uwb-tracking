@@ -1,16 +1,23 @@
 #include <ble_config_loader.h>
 
+/**
+ * @brief Constructor to create a BleConfigLoader instance.
+ */
 BleConfigLoader::BleConfigLoader()
 : my_server()
 {
     my_server.init_server();
 }
 
+/**
+ * @brief Save configuration settings to EEPROM.
+ */
 void BleConfigLoader::save_config_to_eeprom()
 {
     for(int i=0; i<NUM_LANDMARKS; i++)
     {
-        uint8_t address_base = ((i*3)+2)*sizeof(double);     //Calculates EEPROM addresses with increment of 8 per address (landmarkAddresses[i] is double)
+        //Calculates EEPROM addresses with increment of 8 per address (landmarkAddresses[i] is double)
+        uint8_t address_base = ((i*3)+2)*sizeof(double);     
         EEPROM.put(address_base, landmarkAddresses[i].x);
         EEPROM.commit();
         EEPROM.put(address_base+8, landmarkAddresses[i].y);
@@ -22,11 +29,15 @@ void BleConfigLoader::save_config_to_eeprom()
     return;
 }
 
+/**
+ * @brief Load configuration settings from EEPROM.
+ */
 void BleConfigLoader::load_config_from_eeprom()
 {
     for(int i=0; i<NUM_LANDMARKS; i++)
     {
-        uint8_t address_base = ((i*3)+2)*8;
+        //Calculates EEPROM addresses with increment of 8 per address (landmarkAddresses[i] is double)
+        uint8_t address_base = ((i*3)+2)*sizeof(double);
         EEPROM.get(address_base, landmarkAddresses[i].x);
         EEPROM.get(address_base+8, landmarkAddresses[i].y);
         EEPROM.get(address_base+16, landmarkAddresses[i].z);
@@ -36,6 +47,10 @@ void BleConfigLoader::load_config_from_eeprom()
     
 }
 
+/**
+ * @brief Load configuration settings from BLE.
+ * @return 1 if save_config flag is received over BLE, 0 otherwise.
+ */
 uint8_t BleConfigLoader::load_config_from_ble()
 {
     try
@@ -70,15 +85,18 @@ uint8_t BleConfigLoader::load_config_from_ble()
     return 0;
 }
 
+/**
+ * @brief Save configuration settings to BLE.
+ */
 void BleConfigLoader::save_config_to_ble()
 {
     size_t bufferSize = JSON_OBJECT_SIZE(NUM_LANDMARKS) + NUM_LANDMARKS * JSON_OBJECT_SIZE(3) * sizeof(double);
     DynamicJsonDocument jsonBuffer(bufferSize);
 
-    // Erstellen Sie das JSON-Objekt
+    // Create the JSON object
     JsonObject root = jsonBuffer.to<JsonObject>();
 
-    // Iterieren Sie über das Array landmarkAddresses und fügen Sie die Informationen in das JSON-Objekt ein
+    // Iterate over the landmarkAddresses array and insert the information into the JSON object
     for (int i = 0; i < NUM_LANDMARKS; i++) {
         JsonObject coordinate = root.createNestedObject(String("0x0") + String(i + 2));
         coordinate["x"] = landmarkAddresses[i].x;
@@ -91,6 +109,10 @@ void BleConfigLoader::save_config_to_ble()
     my_server.send_value(BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID, landmarksString);
 }
 
+/**
+ * @brief Send position data over BLE.
+ * @param own_position The coordinates to send.
+ */
 void BleConfigLoader::send_position(coordinate own_position)
 {
     char position_string[100];
@@ -98,6 +120,9 @@ void BleConfigLoader::send_position(coordinate own_position)
     my_server.send_value(BLE_CHARAKTERISTIK_OWN_POSITION_UUID, position_string);
 }
 
+/**
+ * @brief Print loaded configuration settings to Serial. For debug purpose.
+ */
 void BleConfigLoader::print_config()
 {
 

@@ -1,5 +1,10 @@
 #include "tof-responder.h"
 
+/**
+ * @brief Constructor for the TofResponder class.
+ * @param src The source address of the responder.
+ * @param dst The destination address of the initiator.
+ */
 TofResponder::TofResponder(uwb_addr src, uwb_addr dst)
     : TofDevice(src), dst_address(dst)
 {
@@ -7,6 +12,9 @@ TofResponder::TofResponder(uwb_addr src, uwb_addr dst)
     active_response = 0;
 }
 
+/**
+ * @brief Initialize and configure the TOF responder device.
+ */
 void TofResponder::setup()
 {
     TofDevice::setup();
@@ -37,6 +45,10 @@ void TofResponder::setup()
     port_set_dwic_isr(dwt_isr, PIN_IRQ);
 }
 
+
+/**
+ * @brief Main loop of the TOF responder device.
+ */
 void TofResponder::loop()
 {
     TofDevice::loop();
@@ -58,8 +70,8 @@ void TofResponder::loop()
     uint32_t frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
 
     /* A frame has been received: firstly need to read the MHR and check this frame is what we expect:
-     * the destination address should match our source address (frame filtering can be configured for this check,
-     * however that is not part of this example); then the header needs to have security enabled.
+     * the destination address should match our source address (frame filtering can be configured for this check);
+     * then the header needs to have security enabled.
      * If any of these checks fail the rx_aes_802_15_4 will return an error
      * */
     this->aes_config.mode = AES_Decrypt;                      /* configure for decryption*/
@@ -177,11 +189,14 @@ void TofResponder::loop()
             dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
         }
     }
-
     /* Clear RX error events in the DW IC status register. */
     dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_ERR);
 }
 
+/**
+ * @brief Static interrupt service routine (ISR) for successful frame reception.
+ * @param cb_data Callback data containing information about the received frame.
+ */
 void TofResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     active_response = 1;

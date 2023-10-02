@@ -1,5 +1,14 @@
 #include "tdoa-device.h"
 
+/**
+ * @file tdoa-device.cpp
+ * @brief Source file for the TDOADevice class, a superclass for TDOA tags and anchors.
+ */
+
+/**
+ * @brief Constructor for the TdoaDevice class.
+ * @param src The source address of the TDOA device.
+ */
 TdoaDevice::TdoaDevice(uwb_addr src)
 : src_address(src)
 , tx_msg({ 0xC5, 0, 'A', 'D', 'D', 'R', 'E', 'S', 'S', '0' })
@@ -51,6 +60,9 @@ TdoaDevice::TdoaDevice(uwb_addr src)
     *ptr = src_address;
 }
 
+/**
+ * @brief Perform setup and configuration of the TDOA device.
+ */
 void TdoaDevice::setup()
 {
     /* If the dwt_configure returns DWT_ERROR either
@@ -69,6 +81,9 @@ void TdoaDevice::setup()
     dwt_settxantennadelay(TX_ANT_DLY);
 }
 
+/**
+ * @brief Enable LEDs on the TDOA device if available.
+ */
 void TdoaDevice::enable_leds()
 {
     /* Enabling LEDs here for debug so that for each TX the LED will flash.
@@ -78,4 +93,7 @@ void TdoaDevice::enable_leds()
     dwt_setlnapamode(DWT_LNA_ENABLE | DWT_PA_ENABLE | DWT_TXRX_EN);
 }
 
+/**
+ * @brief Main loop function for the TDOA device.
+ */
 void TdoaDevice::loop(){}

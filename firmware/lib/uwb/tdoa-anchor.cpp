@@ -1,11 +1,26 @@
 #include "tdoa-anchor.h"
+/**
+ * @file tdoa-anchor.cpp
+ * @brief Implementation file for the TdoaAnchor class, representing a TDOA anchor device.
+ */
 
+/**
+ * @brief Constructor for the TdoaAnchor class.
+ * 
+ * @param src The source address of the TDOA anchor device.
+ */
 TdoaAnchor::TdoaAnchor(uwb_addr src) 
     : TdoaDevice(src)
 {
     this->type = "TdoaAnchor";
 }
 
+/**
+ * @brief Initialize the TDOA anchor device.
+ * 
+ * This function sets up the TDOA anchor device, registers callbacks, enables interrupts,
+ * and installs the IRQ handler.
+ */
 void TdoaAnchor::setup() 
 {
     TdoaDevice::setup();
@@ -25,6 +40,12 @@ void TdoaAnchor::setup()
     port_set_dwic_isr(dwt_isr, PIN_IRQ);
 }
 
+/**
+ * @brief Main loop for the TDOA anchor device.
+ * 
+ * This function represents the main loop of the TDOA anchor device.
+ * It waits for the reception of a new PdoA value and updates relevant information.
+ */
 void TdoaAnchor::loop() 
 {
     TdoaDevice::loop();
@@ -43,6 +64,14 @@ void TdoaAnchor::loop()
     UART_puts(this->toa_str);
 }
 
+/**
+ * @brief Callback function for successful RX operation.
+ * 
+ * This function is called when a successful RX operation occurs.
+ * It reads STS quality and STS status, updates PdoA and timestamp information, and activates reception.
+ * 
+ * @param cb_data A pointer to the callback data structure.
+ */
 void TdoaAnchor::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     int goodSts = 0; /* Used for checking STS quality in received signal */
@@ -66,6 +95,14 @@ void TdoaAnchor::rx_ok_cb(const dwt_cb_data_t *cb_data)
     dwt_rxenable(DWT_START_RX_IMMEDIATE);
 }
 
+/**
+ * @brief Callback function for RX error.
+ * 
+ * This function is called when an RX error occurs.
+ * It clears RX error events and activates reception.
+ * 
+ * @param cb_data A pointer to the callback data structure.
+ */
 void TdoaAnchor::rx_err_cb(const dwt_cb_data_t *cb_data)
 {
     (void)cb_data;
