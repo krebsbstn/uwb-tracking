@@ -29,7 +29,7 @@ extern "C" {
 #define FINAL_MSG_TS_LEN 4
 
 /* UWB microsecond (uus) to device time unit (dtu, around 15.65 ps) conversion factor.
- * 1 uus = 512 / 499.2 µs and 1 µs = 499.2 * 128 dtu. */
+ * 1 uus = 512 / 499.2 \mu s and 1 \mu s = 499.2 * 128 dtu. */
 #define UUS_TO_DWT_TIME 63898
 
 

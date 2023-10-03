@@ -3823,7 +3823,7 @@ void dwt_forcetrxoff(void)
  * @param enable - 1 to enable SNIFF mode, 0 to disable. When 0, all other parameters are not taken into account.
  * @param timeOn - duration of receiver ON phase, expressed in multiples of PAC size. The counter automatically adds 1 PAC
  *                 size to the value set. Min value that can be set is 1 (i.e. an ON time of 2 PAC size), max value is 15.
- * @param timeOff - duration of receiver OFF phase, expressed in multiples of 128/125 µs (~1 µs). Max value is 255.
+ * @param timeOff - duration of receiver OFF phase, expressed in multiples of 128/125 \mu s (~1 \mu s). Max value is 255.
  *
  * output parameters
  *
