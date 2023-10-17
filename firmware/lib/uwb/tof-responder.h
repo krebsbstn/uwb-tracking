@@ -23,7 +23,7 @@ public:
      * @param src The source address of the responder.
      * @param dst The destination address of the initiator.
      */
-    TofResponder(uwb_addr src, uwb_addr dst);
+    TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout);
     ~TofResponder(){};
 
     /**

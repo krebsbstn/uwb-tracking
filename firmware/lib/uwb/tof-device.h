@@ -25,8 +25,6 @@
 
 #define RX_BUF_LEN 127 /* The received frame cannot be bigger than 127 if STD PHR mode is used */
 
-#define RNG_DELAY_TOF 250 /* Inter-ranging delay period, in milliseconds. */
-
 #ifndef TX_ANT_DLY
 #define TX_ANT_DLY 16400
 #endif
@@ -49,7 +47,7 @@ public:
      * @brief Constructor for the TofDevice class.
      * @param src The source address for the TOF device.
      */
-    TofDevice(uwb_addr src);
+    TofDevice(uwb_addr src, unsigned long wdt_timeout);
 
      /**
      * @brief Destructor for the TofDevice class.
@@ -60,6 +58,11 @@ public:
      * @brief Initialize and configure the TOF device.
      */
     virtual void setup();
+
+    /**
+     * @brief Start the WDT to handle failure events.
+     */
+    void start_wdt();
 
     /**
      * @brief Enable LEDs for debugging purposes.
