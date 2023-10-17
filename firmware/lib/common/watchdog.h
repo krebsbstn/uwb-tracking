@@ -40,6 +40,11 @@ public:
      */
     void stop();
 
+    /**
+     * @brief Get the milliseconds of the Timeout.
+     */
+    unsigned long get_timeout();
+
 private:
     unsigned long timeoutMillis; ///< The timeout duration in milliseconds.
     TimerHandle_t timer; ///< Timer handle for the watchdog timer.

@@ -38,3 +38,11 @@ void Watchdog::stop()
         timer = NULL;
     }
 }
+
+/**
+ * @brief Get the timeout set on initialisation.
+ */
+unsigned long Watchdog::get_timeout()
+{
+    return timeoutMillis;
+}
