@@ -5,9 +5,9 @@
  * @brief Implementation of the TOFDevice class, a superclass for TOF initiators and responders.
  */
 
-TofDevice::TofDevice(uwb_addr src)
+TofDevice::TofDevice(uwb_addr src, unsigned long wdt_timeout)
 : src_address(src)
-, my_watchdog((unsigned long)RNG_DELAY_TOF * 2)
+, my_watchdog(wdt_timeout)
 {
     /* Reset DW IC */
     spiBegin(PIN_IRQ, PIN_RST);
@@ -81,7 +81,13 @@ void TofDevice::setup()
     /* Apply default antenna delay value. See NOTE 2 below. */
     dwt_setrxantennadelay(RX_ANT_DLY);
     dwt_settxantennadelay(TX_ANT_DLY);
+}
 
+/**
+ * @brief Start the Watchdog timer to reset controller if necessary
+ */
+void TofDevice::start_wdt()
+{
     my_watchdog.begin();
 }
 

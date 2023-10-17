@@ -6,8 +6,8 @@
  * @param dst An array of destination addresses for the responders.
  * @param num_of_responders The number of responder devices.
  */
-TofInitiator::TofInitiator(uwb_addr src, uwb_addr *dst, uint8_t num_of_responders)
-    : TofDevice(src)
+TofInitiator::TofInitiator(uwb_addr src, uwb_addr *dst, unsigned long wdt_timeout, uint8_t num_of_responders)
+    : TofDevice(src, wdt_timeout)
     , dst_address(dst)
     , total_responders(num_of_responders)
     , current_responder(0)
@@ -89,9 +89,6 @@ void TofInitiator::loop() {
         /* Clear RX error/timeout events in the DW IC status register. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
     }
-
-    /* Execute a delay between ranging exchanges. */
-    delay(RNG_DELAY_TOF);
 }
 
 /**

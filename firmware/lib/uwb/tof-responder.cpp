@@ -5,8 +5,9 @@
  * @param src The source address of the responder.
  * @param dst The destination address of the initiator.
  */
-TofResponder::TofResponder(uwb_addr src, uwb_addr dst)
-    : TofDevice(src), dst_address(dst)
+TofResponder::TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout)
+    : TofDevice(src, wdt_timeout)
+    , dst_address(dst)
 {
     this->type = "Responder";
     active_response = 0;
@@ -54,10 +55,20 @@ void TofResponder::loop()
     TofDevice::loop();
     /* Activate reception immediately. */
     dwt_rxenable(DWT_START_RX_IMMEDIATE);
+
+    /* save the start time of waiting state */
+    int64_t startTime = esp_timer_get_time();
     /*busy loop till rx_interrupt is triggered*/
     while (!active_response)
     {
-        delay(1);
+        vTaskDelay(1);
+
+        /*Add Logic to escape if the watchdog is almost expired.*/
+        double duration = (double)(esp_timer_get_time()-startTime) / 1000;
+        if(duration > (TofDevice::my_watchdog.get_timeout() - 100))
+        {
+            return;
+        }
     }
     active_response = 0;
 
@@ -113,6 +124,8 @@ void TofResponder::loop()
     /* Check that the frame is the expected poll from the tof-initiator.*/
     if (memcmp(this->rx_buffer, this->poll_msg, this->aes_job_rx.payload_len) == 0)
     {
+        Serial.println("Frame for us.");
+
         uint32_t resp_tx_time;
         int ret;
         uint8_t nonce[13];

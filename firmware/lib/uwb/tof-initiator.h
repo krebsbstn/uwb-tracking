@@ -26,7 +26,7 @@ public:
      * @param dst An array of destination addresses for the responders.
      * @param num_of_responders The number of responder devices.
      */
-    TofInitiator(uwb_addr src, uwb_addr* dst, uint8_t num_of_responders);
+    TofInitiator(uwb_addr src, uwb_addr* dst, unsigned long wdt_timeout, uint8_t num_of_responders);
 
     /**
      * @brief Destructor for the TofInitiator class.
