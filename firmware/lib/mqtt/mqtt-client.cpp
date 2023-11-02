@@ -8,13 +8,13 @@ using namespace mqtt;
  * @param message The message payload.
  * @param length The length of the message.
  */
-void subscribe_callback(char* message, uint16_t length)
+void subscribe_callback(char* topic, byte* payload, unsigned int length)
 {
     // Implement your message parsing logic here.
     Serial.println("I received the following mqtt-message:");
     for (unsigned int i = 0; i < length; i++)
     {
-        Serial.print((char)message[i]);
+        Serial.print((char)payload[i]);
     }
     Serial.println(); // Newline for formatting.
 }
@@ -29,16 +29,16 @@ void subscribe_callback(char* message, uint16_t length)
  * @param wifi_pwd The WiFi password for network connection.
  */
 MqttClient::MqttClient(const char* topic, const char *mqtt_server,
-                       const int mqtt_port, const char *wifi_ssid, const char *wifi_pwd)
-    : client(&espClient, mqtt_server, mqtt_port, "", "")
-    , subscription(Adafruit_MQTT_Subscribe(&client, topic))
+                       uint16_t mqtt_port, const char *wifi_ssid, const char *wifi_pwd, String device_id, uint16_t buffer_size)
+    : client(espClient)
+    , dev_id(device_id)
+    , topic(topic)
 {
+    this->client.setServer(mqtt_server, mqtt_port);
+    this->client.setCallback(subscribe_callback);
+    client.setBufferSize(buffer_size);
     // Connect to WiFi and subscribe to topics.
     setup_wifi(wifi_ssid, wifi_pwd);
-
-    subscription.setCallback(subscribe_callback);
-    client.subscribe(&subscription);
-
     reconnect();
 }
 
@@ -85,17 +85,10 @@ void MqttClient::setup_wifi(const char *wifi_ssid, const char *wifi_pwd)
  */
 void MqttClient::update()
 {
-    reconnect(); // Reconnect using Adafruit MQTT's reconnect method.
-
-    // Run the Adafruit MQTT event loop.
-    client.processPackets(100);
-
-    if(!client.ping())
-    {
-        Serial.println("MQTT disconnect.");
-        client.disconnect();
-    }
+    reconnect();
+    client.loop(); // Handle MQTT client events.
 }
+
 
 /**
  * @brief Reconnects the MQTT client to the broker.
@@ -109,15 +102,15 @@ void MqttClient::reconnect()
     if (client.connected()){return;}
 
     Serial.print("Connecting to MQTT... ");
-    uint8_t retries = 3;
-    while ((ret = client.connect()) != 0)
-    { // connect will return 0 for connected
-        Serial.println(client.connectErrorString(ret));
+
+    while (!client.connected())
+    {
+        if(client.connect(this->dev_id.c_str())){break;};
         Serial.println("Retrying MQTT connection in 10 seconds...");
+        vTaskDelay(10000); // wait 10 seconds
         client.disconnect();
-        vTaskDelay(1000); // wait 1 second
-        retries--;
     }
+    client.subscribe(this->topic);
     Serial.println("MQTT Connected!");
 }
 
@@ -126,15 +119,15 @@ void MqttClient::reconnect()
  * @param topic The MQTT topic to publish to.
  * @param msg The message to publish.
  */
-void MqttClient::publish(const char *topic, const char *msg)
+void MqttClient::publish(char *topic, char *msg, unsigned int plength)
 {
-    // Use the Adafruit MQTT client's publish method to send a message.
-    if (client.publish(topic, msg))
+    try
     {
-        //Serial.println("Message published successfully.");
+        client.publish(topic, msg, plength);
     }
-    else
+    catch(const std::exception& e)
     {
-        //Serial.println("Failed to publish message.");
+        Serial.println("Failed to publish message.");
+        Serial.println(e.what());
     }
 }
