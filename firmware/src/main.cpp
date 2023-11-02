@@ -42,7 +42,11 @@
 
 double distances[NUM_LANDMARKS] = {0.0}; // Initialize and define distance
 uint8_t ble_kill_flag = 0;
+
+/* State Variables used for inter Task communication. */
 coordinate own_position;
+DynamicJsonDocument latest_rx_diagnostics = DynamicJsonDocument(0);
+
 /* Define operating modes of a tag */
 enum
 {
@@ -82,6 +86,7 @@ void setup()
 {
     Serial.begin(115200);
     EEPROM.begin(256);
+    SPIFFS.begin();
 
     // Uncomment this when it is the first operation:
     // preproduction_eeprom_settings(0x01, 0x00); //depends on pcb
@@ -132,7 +137,7 @@ void setup()
             NULL,
             configMAX_PRIORITIES - 2,
             &ekf_task_handle,
-            1);
+            0);
 
         xTaskCreatePinnedToCore(
             BLE_Task,
@@ -142,6 +147,27 @@ void setup()
             configMAX_PRIORITIES - 3,
             &ble_task_handle,
             1);
+    }
+    else
+    {
+        File jsonFile = SPIFFS.open("/uwb_diacnostic_type.json", "r");
+        /* Give some extraspace for storing values */
+        latest_rx_diagnostics = DynamicJsonDocument(jsonFile.size() * 3);
+        // read JSON-File into DynamicJsonDocument
+        DeserializationError error = deserializeJson(latest_rx_diagnostics, jsonFile);
+        if (error)
+        {
+            Serial.print("Error occured while deserializing JSON: ");
+            Serial.println(error.c_str());
+        }
+        else
+        {
+            Serial.print("Successfully inserted JSON-Template.");
+        }
+        jsonFile.close();
+        uint8_t dev_id;
+        EEPROM.get(DEVICE_ID, dev_id);
+        latest_rx_diagnostics["DeviceId"] = dev_id;
     }
 }
 
@@ -272,7 +298,7 @@ void TOF_Task(void *parameter)
     {
         uint8_t dev_id;
         EEPROM.get(DEVICE_ID, dev_id);
-        dev = new TofResponder(dest_addr_list[dev_id - 2], INITIATOR_ADDR, RNG_DELAY_TOF * 5);
+        dev = new TofResponder(dest_addr_list[dev_id - 2], INITIATOR_ADDR, RNG_DELAY_TOF * 5, &latest_rx_diagnostics);
         digitalWrite(USER_1_LED, LOW);
     }
 
@@ -283,7 +309,7 @@ void TOF_Task(void *parameter)
     while (true)
     {
         dev->loop();
-        vTaskDelay(current_role?RNG_DELAY_TOF:0);
+        vTaskDelay(current_role ? RNG_DELAY_TOF : 0);
     }
 }
 
@@ -344,35 +370,43 @@ void BLE_Task(void *parameter)
  */
 void MQTT_Task(void *parameter)
 {
+    uint16_t buffer_size = 500;
+    // read the device id and role out of the eeprom
+    uint8_t dev_id, is_initiator;
+    EEPROM.get(DEVICE_ID, dev_id);
+    EEPROM.get(IS_INITIATOR, is_initiator);
+
+    // Create a client ID
+    String clientId = "UWBDevice-";
+    clientId += String(dev_id, HEX);
+
     mqtt::MqttClient mqttClient(
-        "uwb_devices", MQTT_SERVER, MQTT_PORT, WIFI_SSID, WIFI_PWD);
+        "uwb_devices", MQTT_SERVER, MQTT_PORT, WIFI_SSID, WIFI_PWD, clientId, buffer_size);
     while (true)
     {
         // Update the MQTT client to maintain the connection.
         mqttClient.update();
 
-        // read the device id and role out of the eeprom
-        uint8_t dev_id, is_initiator;
-        EEPROM.get(DEVICE_ID, dev_id);
-        EEPROM.get(IS_INITIATOR, is_initiator);
-
         // Publish all messages on the device-specific topic
         char topic[20];
         char msg[100];
+        String rx_diag;
         switch (is_initiator)
         {
         case 1:
-            snprintf(topic, sizeof(topic), "tag/%d/mac", dev_id);
-            mqttClient.publish(topic, mqttClient.get_mac().c_str());
+            // snprintf(topic, sizeof(topic), "tag/%d/mac", dev_id);
+            // mqttClient.publish(topic, mqttClient.get_mac().c_str());
             snprintf(topic, sizeof(topic), "tag/%d/position", dev_id);
             snprintf(msg, sizeof(msg), "{\"x\":%f, \"y\":%f, \"z\":%f}", own_position.x, own_position.y, own_position.z);
-            mqttClient.publish(topic, msg);
+            mqttClient.publish(topic, msg, sizeof(msg));
             break;
         case 0:
-            snprintf(topic, sizeof(topic), "anchor/%d/mac", dev_id);
-            mqttClient.publish(topic, mqttClient.get_mac().c_str());
+            // snprintf(topic, sizeof(topic), "anchor/%d/mac", dev_id);
+            // mqttClient.publish(topic, mqttClient.get_mac().c_str());
             snprintf(topic, sizeof(topic), "anchor/%d/uwb_info", dev_id);
-            mqttClient.publish(topic, "test");
+            serializeJson(latest_rx_diagnostics, rx_diag);
+            mqttClient.publish(topic, (char *)rx_diag.c_str(), rx_diag.length());
+            break;
         default:
             break;
         }

@@ -2,8 +2,7 @@
 
 #include <WiFi.h>
 #include <Wire.h>
-#include "Adafruit_MQTT.h"
-#include "Adafruit_MQTT_Client.h"
+#include <PubSubClient.h>
 #include <Arduino.h>
 #include <vector>
 
@@ -13,7 +12,7 @@
  * @param message The message payload.
  * @param length The length of the message.
  */
-void subscribe_callback(char* message, uint16_t length);
+void subscribe_callback(char* topic, byte* payload, unsigned int length);
 
 namespace mqtt {
 
@@ -33,9 +32,11 @@ public:
     MqttClient(
         const char* topic,
         const char* mqtt_server,
-        const int mqtt_port,
+        uint16_t mqtt_port,
         const char* wifi_ssid,
-        const char* wifi_pwd);
+        const char* wifi_pwd,
+        String dev_id,
+        uint16_t buffer_size);
 
     /**
      * @brief Must be called frequently to allow the callback function to handle incoming messages.
@@ -47,7 +48,7 @@ public:
      * @param topic The MQTT topic to publish to.
      * @param msg The message to publish.
      */
-    void publish(const char topic[], const char msg[]);
+    void publish(char* topic, char* msg, unsigned int plength);
 
     /**
      * @brief Checks if the MQTT client is connected.
@@ -63,9 +64,9 @@ public:
 
 private:
     WiFiClient espClient;   ///< Used to establish the WiFi connection.
-    Adafruit_MQTT_Client client;    ///< Used to send MQTT commands.
-
-    Adafruit_MQTT_Subscribe subscription;
+    PubSubClient client;    ///< Used to send MQTT commands.
+    String dev_id;
+    const char* topic;
 
     /**
      * @brief Reconnects the MQTT client to the broker.

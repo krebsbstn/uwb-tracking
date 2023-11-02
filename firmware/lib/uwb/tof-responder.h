@@ -1,16 +1,19 @@
 #pragma once
 #include "tof-device.h"
+#include <ArduinoJson.h>
+#include <FS.h>
+#include <SPIFFS.h>
 
 /**
  * @brief Delay between frames, in UWB microseconds.
  * This includes the poll frame length (~240 us).
  */
-#define POLL_RX_TO_RESP_TX_DLY_UUS 2500
+#define POLL_RX_TO_RESP_TX_DLY_UUS 2600
 
 /**
- * @brief Static variable to track active responses.
+ * @brief A FreeRTOS Mutex type to protekt task from getting interupted while tof mesuring.
  */
-static uint8_t active_response = 0;
+static portMUX_TYPE taskMutex = portMUX_INITIALIZER_UNLOCKED;
 
 /**
  * @brief The TofResponder class represents a TOF responder device.
@@ -23,7 +26,7 @@ public:
      * @param src The source address of the responder.
      * @param dst The destination address of the initiator.
      */
-    TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout);
+    TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout, DynamicJsonDocument* rx_diagnostics);
     ~TofResponder(){};
 
     /**
@@ -51,6 +54,21 @@ private:
      * @brief Timestamp of response frame transmission.
      */
     uint64_t resp_tx_ts;
+
+    /**
+     * @brief JSON holding the rx diagnostic information with style like uwb_diagnostic.json.
+     */
+    DynamicJsonDocument * rx_diagnostics_json;
+
+    /**
+     * @brief FreeRTOS Semaphore to indicate a active response.
+     */
+    static SemaphoreHandle_t responseSemaphore;
+
+    /**
+     * @brief updates the value of rx_diagnostics.
+     */
+    void update_rx_diagnostics();
     
     /**
      * @brief Static interrupt service routine (ISR) for successful frame reception.
