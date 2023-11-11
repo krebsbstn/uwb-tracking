@@ -40,7 +40,7 @@ TofDevice::TofDevice(uwb_addr src, unsigned long wdt_timeout)
         DWT_PHRMODE_STD,  /* PHY header mode. */
         DWT_PHRRATE_STD,  /* PHY header rate. */
         (129 + 8 - 8),    /* SFD timeout (preamble length + 1 + SFD length - PAC size). Used in RX only. */
-        DWT_STS_MODE_OFF, /* STS disabled */
+        DWT_STS_MODE_1 | DWT_STS_MODE_SDC, /* STS disabled */
         DWT_STS_LEN_64,   /* STS length see allowed values in Enum dwt_sts_lengths_e */
         DWT_PDOA_M0};     /* PDOA mode off */
 
