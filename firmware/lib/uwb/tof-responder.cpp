@@ -5,7 +5,6 @@
  */
 SemaphoreHandle_t TofResponder::responseSemaphore = NULL;
 
-
 /**
  * @brief Constructor for the TofResponder class.
  * @param src The source address of the responder.
@@ -23,7 +22,6 @@ TofResponder::TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout
         Serial.println("Error creating response semaphore.");
     }
     xSemaphoreTake(responseSemaphore, 0); // Semaphore starts as unavailable
-    
 }
 
 /**
@@ -57,6 +55,8 @@ void TofResponder::setup()
 
     /* Install DW IC IRQ handler. */
     port_set_dwic_isr(dwt_isr, PIN_IRQ);
+
+    dwt_configciadiag(1);
 }
 
 
@@ -71,7 +71,7 @@ void TofResponder::loop()
 
     if(xSemaphoreTake(responseSemaphore, portMAX_DELAY) == pdTRUE)
     {
-
+        
         /* Clear good RX frame event in the DW IC status register. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
 
@@ -131,9 +131,6 @@ void TofResponder::loop()
             /* Retrieve poll reception timestamp. */
             this->poll_rx_ts = get_rx_timestamp_u64();
 
-            /* Use FreeRTOS Function to protect tof measurement from getting interrupted*/
-            taskENTER_CRITICAL(&taskMutex);
-            
             /* Compute response message transmission time.*/
             resp_tx_time =
                 (this->poll_rx_ts + (POLL_RX_TO_RESP_TX_DLY_UUS * UUS_TO_DWT_TIME)) >> 8;
@@ -202,15 +199,13 @@ void TofResponder::loop()
                 /* Clear TXFRS event. */
                 dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
             }
-            taskEXIT_CRITICAL(&taskMutex);
         }
         /* Clear RX error events in the DW IC status register. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_ERR);
-        
+
         /* Update RxDiagnostics */
         update_rx_diagnostics();
-       // An active response is available; proceed with your logic
-    } 
+    }
 }
 
 void TofResponder::update_rx_diagnostics()

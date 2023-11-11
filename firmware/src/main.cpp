@@ -20,15 +20,17 @@
 #include <tof-responder.h>
 #include <ble_config_loader.h>
 #include <mqtt-client.h>
-
+#include <ArduinoJson.h>
+#include <FS.h>
+#include <SPIFFS.h>
 #include <extended-kalman.h>
 #include <ArduinoEigen.h>
 
 /* Network specific Settings*/
-#define MQTT_SERVER "xxx"
+#define MQTT_SERVER "XXX"
 #define MQTT_PORT 1883
-#define WIFI_SSID "xxx"
-#define WIFI_PWD "xxx"
+#define WIFI_SSID "XXX"
+#define WIFI_PWD "XXX"
 
 /* EEPROM-Addresses*/
 #define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
@@ -226,12 +228,17 @@ void EKF_Task(void *parameter)
         own_position.y = kalmanfilter.vecX()(1);
         own_position.z = kalmanfilter.vecX()(2);
 
+        /*
         Serial.println("Estimate:");
         Serial.print(own_position.x);
         Serial.print(", ");
         Serial.print(own_position.y);
         Serial.print(", ");
         Serial.println(own_position.z);
+        */
+        
+        Serial.print("Distance: ");
+        Serial.println(distances[4]);
 
         vTaskDelay(DIM_Z * RNG_DELAY_TOF); // Warten zwischen den Iterationen
     }
