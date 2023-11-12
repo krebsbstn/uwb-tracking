@@ -1,11 +1,21 @@
-- name: Doxygen Action
-  # You may pin to the exact commit or the version.
-  # uses: mattnotmitt/doxygen-action@411df0c62acb5b96b8a93d93a7bf4b753c47ea05
-  uses: mattnotmitt/doxygen-action@1.9.5
-  with:
-    # Path to Doxyfile
-    doxyfile-path: ./firmware/Doxyfile
-    # Working directory
-    working-directory: ./firmware/doxygen-output
-    # Generate latex documentation
-    enable-latex: False
+name: Doxygen Action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Run Doxygen
+      uses: mattnotmitt/doxygen-action@1.9.5
+      with:
+        doxyfile-path: ./firmware/Doxyfile
+        working-directory: ./firmware/doxygen-output
+        enable-latex: false
