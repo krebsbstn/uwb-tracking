@@ -25,6 +25,8 @@ public:
      * @brief Constructor for the TofResponder class.
      * @param src The source address of the responder.
      * @param dst The destination address of the initiator.
+     * @param wdt_timeout Time for the Watchdog, wdt triggers reboot.
+     * @param rx_diagnostics Pointer to a JSON where the uwb diagnostics are stored.
      */
     TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout, DynamicJsonDocument* rx_diagnostics);
     ~TofResponder(){};

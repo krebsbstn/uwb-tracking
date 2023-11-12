@@ -28,7 +28,8 @@ class EKF_Filter
 { 
 public:
     /**
-     * @brief Initalisation of Kalman-Filter Object
+     * @brief Default constructor for the EKF_Filter class.
+     * Initializes the EKF and reads the Anchor positions from EEPROM.
      */
     EKF_Filter();
 
@@ -125,6 +126,9 @@ private:
     Matrix<double, DIM_X, 1> m_vecX{ Matrix<double, DIM_X, 1>::Zero() }; /// @brief estimated state vector
     Matrix<double, DIM_X, DIM_X> m_matP{ Matrix<double, DIM_X, DIM_X>::Zero() }; /// @brief state covariance matrix
 
+    /**
+     * @brief Reads landmarks from EEPROM and stores them in the landmarkPositions matrix.
+     */
     void read_landmarks_from_eeprom(void);
 };
 
@@ -134,7 +138,7 @@ static Matrix<double, DIM_X, 1> x_kminus1 = (Eigen::Matrix<double, DIM_X, 1>() <
 static Matrix<double, NUM_LANDMARKS, 3> landmarkPositions { Matrix<double, NUM_LANDMARKS, 3>::Zero() };
 
 /**
- * @brief Prediction model for the EKF.
+ * @brief Prediction model for the Extended Kalman Filter (EKF).
  * @param currentState The current state vector.
  * @return The predicted state vector.
  */

@@ -1,16 +1,10 @@
 #include "watchdog.h"
 
-/**
- * @brief Reset the timer to the initial timeout value.
- */
 void Watchdog::resetTimer()
 {
     xTimerReset(timer, 0);
 }
 
-/**
- * @brief Start the watchdog timer.
- */
 void Watchdog::begin()
 {
     timer = xTimerCreate("WatchdogTimer", pdMS_TO_TICKS(timeoutMillis), pdTRUE, (void *)0, timerCallback);
@@ -27,9 +21,6 @@ void Watchdog::begin()
     }
 }
 
-/**
- * @brief Stop and release the watchdog timer.
- */
 void Watchdog::stop()
 {
     if (timer != NULL) {
@@ -39,9 +30,6 @@ void Watchdog::stop()
     }
 }
 
-/**
- * @brief Get the timeout set on initialisation.
- */
 unsigned long Watchdog::get_timeout()
 {
     return timeoutMillis;

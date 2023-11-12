@@ -22,6 +22,8 @@ public:
     /**
      * @brief Initialize ESP-NOW communication.
      * 
+     * This function initializes ESP-NOW communication and registers callbacks for sending and receiving data.
+     * 
      * @param destination_address The MAC address of the destination device.
      */
     void init(uint8_t *destination_address);

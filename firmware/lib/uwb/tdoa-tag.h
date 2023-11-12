@@ -14,6 +14,8 @@ public:
     /**
      * @brief Constructor for the TdoaTag class.
      * 
+     * Initializes a TDOA tag device with the specified source address.
+     * 
      * @param src The source address of the TDOA tag device.
      */
     TdoaTag(uwb_addr src);
@@ -35,6 +37,9 @@ public:
      * @brief Main loop function for the TDOA tag device.
      * 
      * Overrides the loop method from the base class (TdoaDevice).
+     * 
+     * This function prepares and transmits a frame using the DW IC and handles
+     * the transmission process, including checking for successful transmission.
      */
     virtual void loop() override;
 

@@ -50,16 +50,18 @@ public:
     ~TdoaAnchor(){};
 
     /**
-     * @brief Perform setup and configuration specific to the TDOA anchor device.
+     * @brief Initialize the TDOA anchor device.
      * 
-     * Overrides the setup method from the base class (TdoaDevice).
+     * This function sets up the TDOA anchor device, registers callbacks, enables interrupts,
+     * and installs the IRQ handler.
      */
     virtual void setup() override;
 
-     /**
-     * @brief Main loop function for the TDOA anchor device.
+    /**
+     * @brief Main loop for the TDOA anchor device.
      * 
-     * Overrides the loop method from the base class (TdoaDevice).
+     * This function represents the main loop of the TDOA anchor device.
+     * It waits for the reception of a new PdoA value and updates relevant information.
      */
     virtual void loop() override;
 
@@ -75,16 +77,22 @@ private:
     char toa_str[50] = {0};
 
     /**
-     * @brief Static ISR (Interrupt Service Routine) for handling successful frame reception.
+     * @brief Callback function for successful RX operation.
      * 
-     * @param cb_data Pointer to callback data provided by the DW IC.
+     * This function is called when a successful RX operation occurs.
+     * It reads STS quality and STS status, updates PdoA and timestamp information, and activates reception.
+     * 
+     * @param cb_data A pointer to the callback data structure.
      */
     static void rx_ok_cb(const dwt_cb_data_t *cb_data);
 
     /**
-     * @brief Static ISR (Interrupt Service Routine) for handling frame reception errors.
+     * @brief Callback function for RX error.
      * 
-     * @param cb_data Pointer to callback data provided by the DW IC.
+     * This function is called when an RX error occurs.
+     * It clears RX error events and activates reception.
+     * 
+     * @param cb_data A pointer to the callback data structure.
      */
     static void rx_err_cb(const dwt_cb_data_t *cb_data);
 };

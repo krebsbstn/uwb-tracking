@@ -3,6 +3,7 @@
 /**
  * @file tof-device.cpp
  * @brief Implementation of the TOFDevice class, a superclass for TOF initiators and responders.
+ * 
  */
 
 TofDevice::TofDevice(uwb_addr src, unsigned long wdt_timeout)

@@ -1,11 +1,5 @@
 #include "tof-initiator.h"
 
-/**
- * @brief Constructor for the TofInitiator class.
- * @param src The source address for the TOF initiator.
- * @param dst An array of destination addresses for the responders.
- * @param num_of_responders The number of responder devices.
- */
 TofInitiator::TofInitiator(uwb_addr src, uwb_addr *dst, unsigned long wdt_timeout, uint8_t num_of_responders)
     : TofDevice(src, wdt_timeout)
     , dst_address(dst)
@@ -26,9 +20,6 @@ TofInitiator::TofInitiator(uwb_addr src, uwb_addr *dst, unsigned long wdt_timeou
         0x00};
 }
 
-/**
- * @brief Initialize and configure the TOF initiator device.
- */
 void TofInitiator::setup() {
     TofDevice::setup();
     /* Set expected response's delay and timeout.
@@ -56,9 +47,6 @@ void TofInitiator::setup() {
     this->aes_job_rx.payload = this->rx_buffer;        /* pointer to where the decrypted data will be copied to when read from the IC*/
 }
 
-/**
- * @brief Main loop of the TOF initiator device.
- */
 void TofInitiator::loop() {
     TofDevice::loop();
 
@@ -91,10 +79,6 @@ void TofInitiator::loop() {
     }
 }
 
-/**
- * @brief Send a TOF request to a specific destination address.
- * @param dest The destination address of the responder.
- */
 void TofInitiator::send_tof_request(uwb_addr dest)
 {
     /* Program the correct key to be used */
@@ -137,10 +121,6 @@ void TofInitiator::send_tof_request(uwb_addr dest)
     dwt_starttx(DWT_START_TX_IMMEDIATE | DWT_RESPONSE_EXPECTED);
 }
 
-/**
- * @brief Process the TOF response received from a responder.
- * The calculated distance is stored into temp_distance.
- */
 void TofInitiator::process_tof_response()
 {
     uint32_t frame_len;

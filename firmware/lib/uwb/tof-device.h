@@ -46,6 +46,7 @@ public:
     /**
      * @brief Constructor for the TofDevice class.
      * @param src The source address for the TOF device.
+     * @param wdt_timeout Time for the Watchdog, wdt triggers reboot.
      */
     TofDevice(uwb_addr src, unsigned long wdt_timeout);
 
