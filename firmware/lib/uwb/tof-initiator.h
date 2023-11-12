@@ -8,9 +8,9 @@
 #include "tof-device.h"
 
 /* Delay between frames, in UWB microseconds.*/
-#define POLL_TX_TO_RESP_RX_DLY_UUS 2220
+#define POLL_TX_TO_RESP_RX_DLY_UUS 2100
 /* Receive response timeout.*/
-#define RESP_RX_TIMEOUT_UUS 250
+#define RESP_RX_TIMEOUT_UUS 300
 
 extern double distances[NUM_LANDMARKS];
 
