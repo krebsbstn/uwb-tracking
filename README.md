@@ -1,3 +1,5 @@
+[![Doxygen Action](https://github.com/krebsbstn/uwb-tracking/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/krebsbstn/uwb-tracking/actions/workflows/main.yml)
+
 # UWB-Ranging-Based Tracking Technology
 This repository contains the code, documentation, and resources for the development of a Trekking Technology based on Ultra-Wideband (UWB) Ranging. The project is part of the Master of Electrical Systems and aims to create a system that can accurately track the movement of mobile tags in indoor environments.
 
