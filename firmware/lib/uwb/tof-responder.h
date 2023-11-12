@@ -8,7 +8,7 @@
  * @brief Delay between frames, in UWB microseconds.
  * This includes the poll frame length (~240 us).
  */
-#define POLL_RX_TO_RESP_TX_DLY_UUS 2500
+#define POLL_RX_TO_RESP_TX_DLY_UUS 2400
 
 /**
  * @brief A FreeRTOS Mutex type to protekt task from getting interupted while tof mesuring.
