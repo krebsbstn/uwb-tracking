@@ -1,0 +1,168 @@
+\chapter{Main Structure}
+This chapter outlines the structure and organization of the main.cpp file of the UWB Project that runs on all of the UWB devices.
+
+\section{Identification Parameters}
+All UWB devices, irrespective of their function as anchors or tags, utilize the same codebase during the flashing process. 
+The differentiation between these devices relies on two critical parameters configured during the initial flashing procedure. 
+These parameters serve a dual purpose: defining the device's role as a tag or anchor and assigning a unique device identifier.
+\vspace{4pt}
+\newline
+In essence, these parameters not only dictate whether a device acts as a tag or an anchor but also bestow each device with a distinctive identifier, enabling them to autonomously determine their respective addresses. 
+This configuration approach ensures versatility and individuality among the UWB devices while maintaining a unified codebase.
+
+\subsection{Set Identification Parameters}
+The configuration of each device is primarily defined by two key parameters: the device ID and its designated role. 
+To establish these parameters, a setup process is executed through the \yellowconsolas{preproduction\_eeprom\_settings} function, which is integrated into the setup section of the main.cpp file. 
+This function accepts the current role and device ID as uint8\_t variables and records them in the EEPROM memory at an arbitrary position.
+\vspace{4pt}
+\newline
+It is important to note that this setup process should only be performed once per device, typically during the initial configuration. 
+Once the parameters are set and saved in the EEPROM, there is no need to invoke the \yellowconsolas{preproduction\_eeprom\_settings} function again during subsequent flashing processes unless a change in device configuration is desired. 
+This approach streamlines the device setup procedure and ensures the persistence of the specified parameters across device power cycles.
+
+\subsubsection{Role}
+The role parameter is pivotal in determining whether a device functions as a tag or an anchor within the system. 
+This parameter is stored in the EEPROM memory at address 0 and is represented by a binary value of 0 or 1. 
+Throughout the codebase, this parameter is accessed and utilized through the \blueconsolas{IS\_INITIATOR} constant.
+\vspace{4pt}
+\newline
+If the value stored at EEPROM address 0 is 1, the device is configured to act as a tag. 
+In this mode, it typically takes on the role of initiating UWB messages and serves specific functions accordingly. Conversely, if the value is 0, the device operates as an anchor. 
+In this capacity, it primarily responds to incoming UWB messages, contributing to the overall UWB system by providing reference points and data to other devices.
+\vspace{4pt}
+\newline
+This parameterization approach allows for dynamic role assignment and behavior based on a single value, making the system flexible and adaptive to the needs of each device.
+
+\subsubsection{Device ID}
+The device ID is also stored in the EEPROM, and it serves the crucial function of assigning a unique address to each device. 
+This individualized addressing is essential for facilitating clear and unambiguous communication through UWB packages within the system. 
+Each device must possess a distinct device ID to ensure that messages are accurately addressed to the intended recipient, and that devices can be uniquely identified in the network.
+\vspace{4pt}
+\newline
+By storing the device ID in EEPROM, the ID can persist across power cycles and reboots, maintaining consistent identification for each device in the system. 
+This approach is vital for seamless and reliable communication and data exchange between UWB devices, ensuring that messages reach their intended destinations without ambiguity.
+
+\subsection{Address}
+To ensure the secure and accurate encryption of UWB packages using the Advanced Encryption Standard (AES), each device requires a unique 32-bit address. 
+This address is essential for enabling precise encryption and decryption processes. 
+By encrypting a message with the destination address, the system guarantees that only the designated receiver can successfully decrypt the message. 
+As a result, every device, both anchors and tags, must be aware of their own unique address.
+\vspace{4pt}
+\newline
+For anchors, their individual addresses are directly determined by their respective device IDs. 
+Each anchor selects its address from a predefined list based on its specific device ID. 
+In contrast, the address for tags remains constant and is universally known across all devices as the global constant \blueconsolas{INITIATOR\_ADDR}. 
+This address assignment methodology ensures that each device can securely encrypt and decrypt messages using the appropriate addresses, contributing to the overall data security and integrity of the UWB communication system.
+
+\section{User Input}
+User input to change the current operating mode is facilitated through User Button 1. 
+By associating an interrupt with this button, the \blueconsolas{ble\_kill\_flag} is set, and the \blueconsolas{current\_mode} variable is updated accordingly. 
+For a comprehensive understanding of how these components are managed, please refer to section \ref{sec:Ble_Task}. 
+This section will delve into the specifics of how the interrupt, \blueconsolas{ble\_kill\_flag}, and \blueconsolas{current\_mode} variable interact to facilitate seamless mode switching in the tag device's operation. 
+
+
+\section{Scheduler}
+To efficiently measure distances to multiple anchors simultaneously, calculate their respective positions, and transmit the data to the software running on the devices, a scheduling system is implemented. 
+This scheduling system is powered by the FreeRTOS library, an open-source real-time operating system, which leverages the dual-kernel capabilities of the ESP32 microcontroller.
+\vspace{4pt}
+\newline
+The dual-kernel architecture ensures that critical tasks, like estimating distances, remain uninterrupted, reducing the risk of producing corrupted data. 
+All tasks are initialized, started, and halted within the 'main.cpp' file, creating a well-structured and organized framework for managing these essential operations.
+
+\subsection{TOF\_Task}
+\label{chap:tof_task}
+
+In the context of TOF-Task, it plays a pivotal role in the overall system, particularly in the domain of Time-of-Flight (TOF) distance measurement and positioning. This section outlines the primary functions of TOF-Task in a narrative form.
+\vspace{4pt}
+\newline
+The initial task for TOF-Task is to identify the device's role within the system, specifically whether it should operate as a TofInitiator or a TofResponder. This role assignment is crucial as it dictates the device's behavior and responsibilities throughout the entire process.
+\vspace{4pt}
+\newline
+Once the device's role is established, TOF-Task proceeds to create an instance of the appropriate object, either TofInitiator or TofResponder, and initializes it. This instantiated object assumes the critical responsibility of managing the distance measurement process.
+\vspace{4pt}
+\newline
+At the core of TOF-Task's operation lies the facilitation of distance measurements. If the device takes on the role of a responder, it remains in a passive stance during the measurement process, awaiting initiation from another device. Conversely, when the device serves as an initiator, it leads the way in conducting distance measurements.
+\vspace{4pt}
+\newline
+In scenarios where the device functions as the initiator, a crucial user feedback mechanism comes into play. User LED 1 is activated to provide visual feedback, signaling that this particular device is taking the initiative in distance measurement and position estimation. Such feedback proves invaluable, especially in systems involving multiple devices, ensuring users are aware of which device is actively involved in determining the position.
+\vspace{4pt}
+\newline
+For the initiator role, TOF-Task manages the storage of calculated distances. These distances, representing measurements to each anchor, are stored within the "double distances[]" array. This array serves as a vital source of information for the subsequent stages of the positioning algorithm.
+\vspace{4pt}
+\newline
+In summary, TOF-Task serves as the central orchestrator, dynamically allocating roles to devices as initiators or responders and configuring the corresponding objects to execute distance measurements. This dynamic allocation of tasks ensures the effective functioning of the system, and when necessary, it offers user feedback to enhance the transparency of the positioning process.
+
+\subsection{EKF-Task}
+The EKF task is a critical component of the system, running exclusively on the tag device. 
+Its primary purpose is to leverage the information provided by the "double distances[]" array, which contains the distances to all available anchors. 
+With this data, the EKF task performs calculations to estimate the tag's position. 
+This estimation process is triggered every 2.5 seconds, ensuring that the system continually updates its understanding of the tag's location.
+\vspace{4pt}
+\newline
+The EKF algorithm, a cornerstone of this task, incorporates statistical techniques and dynamic models to refine the accuracy of the position estimate. 
+By doing so, it can effectively handle factors like noise and uncertainties, making it a robust solution for real-time positioning.
+\vspace{4pt}
+\newline
+Once the EKF-task completes its calculations, the resulting X and Y coordinate values are transmitted through the UART (Universal Asynchronous Receiver-Transmitter) interface. 
+This communication method allows for the seamless exchange of data with other components of the system or external devices. 
+\vspace{4pt}
+\newline
+For a comprehensive understanding of the theory and principles that underpin the Extended Kalman Filter and its role in this system, you'll find in-depth coverage in Chapter \ref{chap:EKF_Handling}. 
+This chapter will delve into the mathematical and conceptual foundations of the EKF, ensuring that readers gain a clear grasp of how it operates and contributes to the overall functionality of the system.
+
+\subsection{BLE\_Task}
+\label{sec:Ble_Task}
+Similar to the EKF-Task, the BLE-Task is designed to run exclusively on the tag device, and it serves two primary objectives.
+\vspace{4pt}
+\newline
+The first objective is to facilitate device configuration, a process carried out through Bluetooth connectivity with the dedicated ``UWB Configuration`` desktop software. This configuration process entails defining the coordinates of each anchor device and saving these values in the device's EEPROM. A comprehensive guide on how to connect the tag device with the desktop software can be found in the UWB User Guide.
+\vspace{4pt}
+\newline
+The second objective of the BLE-Task is to relay the current position of the tag device via Bluetooth to the corresponding desktop software. The software then plots these positions in an X-Y coordinate system, providing a real-time visual representation of the tag's movements.
+\vspace{4pt}
+\newline
+When the BLE-Task is first initialized, it instantiates the BleConfigLoader class. The workings of this class, along with the broader Bluetooth management process, will be expounded upon in the forthcoming chapter, referenced as \ref{chap:Bluetooth_Handling}.
+\vspace{4pt}
+\newline
+The tag device operates in two distinct modes saved in the \blueconsolas{current\_mode} variable. The first is the uwb\_mode, which serves as its standard operating mode. In this mode, the device performs distance measurements, calculates its own position, and transmits this information via UART, as previously described in \ref{chap:tof_task}.
+\vspace{4pt}
+\newline
+The other operational mode is the ble\_mode, which is exclusively focused on maintaining a connection with the desktop software. 
+In this mode the device waits for the trigger from the UWB Configuration software to take in the newly inputted anchor positions and save them into the EEPROM. 
+It also outputs the currently saved anchor positions so that they can be displayed and changed in the UWB Configuration desktop software. 
+
+\subsubsection{Output current position}
+In the default startup scenario, where the uwb\_mode is automatically selected without any additional user input, the BLE-Task is responsible for taking the currently estimated position from the global own\_position variable and transmitting it via Bluetooth. 
+This transmission is achieved using the \yellowconsolas{send\_position} method of the BleConfigLoader class. Detailed insight into the functionality of this process will be provided in the forthcoming chapter, referenced as \ref{chap:Bluetooth_Handling}.
+\vspace{4pt}
+\newline
+This continuous updating procedure persists indefinitely, with the current position being sent every 2.5 seconds, unless the \blueconsolas{ble\_kill\_flag} is triggered. 
+The flag is set when a user initiates a mode change to ble\_mode by pressing user button 1.
+\vspace{4pt}
+\newline
+This mode-switching functionality ensures that the device can seamlessly transition between its primary operating modes based on user input. 
+
+\subsubsection{Configuration}
+When the user triggers a mode change to ble\_mode by pressing button 1, the \blueconsolas{ble\_kill\_flag} is activated, which effectively terminates the loop responsible for continuously transmitting the current position.
+\vspace{4pt}
+\newline
+In the ble\_mode, the device first retrieves its current configuration, encompassing all previously saved anchor positions, from the EEPROM. This retrieval process is achieved through the \yellowconsolas{load\_config\_from\_eeprom} method of the BleConfigLoader class. 
+Subsequently, the device compiles this configuration data into a string formatted as a JSON object and transmits it via Bluetooth, using the \yellowconsolas{save\_config\_to\_ble} method. 
+This JSON-formatted data includes the anchor positions.
+\vspace{4pt}
+\newline
+Following this configuration update transmission, a new loop commences. In this loop, the device continually receives the most up-to-date anchor positions sent from the configurator device via Bluetooth. 
+These positions are then saved locally on the tag device, and the new anchor configuration is conveyed back to the configurator device, ensuring that the positions are received and updated accurately.
+\vspace{4pt}
+\newline
+In addition to this configuration exchange, the \yellowconsolas{animate\_leds} function is invoked, causing the user LEDs to flash in a distinct pattern. 
+This visual feedback serves as an indicator to the user that the device is in Bluetooth configuration mode.
+\vspace{4pt}
+\newline
+The configuration loop persists until the "Save Config" button is pressed within the UWB Configuration desktop GUI. 
+This action initiates the sending of a character to the tag device, triggering the \yellowconsolas{save\_config\_to\_eeprom} method. 
+This method is responsible for writing the updated anchor coordinates into the EEPROM of the device and subsequently restarting the device with the new configuration in place. 
+This completes the process of updating and saving anchor positions for the tag device during its operation in ble\_mode.
+
+
+

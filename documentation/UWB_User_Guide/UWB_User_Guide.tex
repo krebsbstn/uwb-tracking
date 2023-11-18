@@ -56,8 +56,8 @@
 \usepackage{float} % use H option to force placement
 
 %% used for bytefields
-%\usepackage{bytefield}
-%\usepackage{rotating}
+\usepackage{bytefield}
+\usepackage{rotating}
 
 \pgfplotsset{compat=newest}
 \pgfplotsset{compat=1.9}
@@ -69,8 +69,8 @@
 
 %% units & Symbols
 \usepackage{siunitx}
-%\usepackage{textcomp} % Fix undefined symbols warnings for gensymb, see https://latex.org/forum/viewtopic.php?f=4&t=3364#p13124
-%\usepackage{gensymb}
+\usepackage{textcomp} % Fix undefined symbols warnings for gensymb, see https://latex.org/forum/viewtopic.php?f=4&t=3364#p13124
+\usepackage{gensymb}
 
 %% unifying quote marks when using different languages
 %% NOTE: Fixes warning concerning polyglossia when including biblatex
@@ -85,10 +85,6 @@
 \setkomafont{pagehead}{\normalfont\small\sffamily}
 \setkomafont{pagefoot}{\small}
 \setkomafont{pagenumber}{\normalfont\bfseries}
-
-\usepackage{xcolor}
-\newcommand{\blueconsolas}[1]{{\color{blue}\texttt{#1}}}
-\newcommand{\yellowconsolas}[1]{{\color{orange}\texttt{#1}}}
 
 \automark[chapter]{chapter}
 %\automark[section]{section}
@@ -174,11 +170,10 @@
 \setcounter{tocdepth}{1}
 \setcounter{secnumdepth}{2} % default value for 'report' class is "2"
 
-\input{sections/01_Introduction.tex}
-\input{sections/02_main.tex}
-\input{sections/03_uwb.tex}
-\input{sections/04_ekf.tex}
-\input{sections/05_bluetooth.tex}
-\input{sections/06_tuneable_parameters.tex}
+{\let\clearpage\relax \input{sections/01_Introduction.tex}}
+{\let\clearpage\relax \input{sections/02_Hardware_Requirements.tex}}
+\input{sections/03_Getting_Started.tex}
+{\let\clearpage\relax \input{sections/04_Widgets.tex}}
+
 
 \end{document}

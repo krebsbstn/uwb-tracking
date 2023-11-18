@@ -1,0 +1,57 @@
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.nls
+*.out
+*.toc
+*.fmt
+*.ent
+*.acr
+*.rst
+*.pygtex
+*.pygstyle
+*.nav
+*.snm
+*.vrb
+**/svg*
+
+## Intermediate documents:
+*.dvi
+*-converted-to.*
+# these rules might exclude image files for figures etc.
+# *.ps
+# *.eps
+*.pdf
+
+## Bibliography auxiliary files (bibtex/biblatex/biber):
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.brf
+*.run.xml
+
+## Build tool auxiliary files:
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+## todonotes
+*.tdo
+
+## git files
+*.orig
+
+## Additional Excludes
+notes
+!table_of_contents.tex
+**/.vscode/
+
+## exclude all Lofiles because of the size
+*.ifl

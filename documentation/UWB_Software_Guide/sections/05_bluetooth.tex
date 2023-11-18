@@ -1,0 +1,49 @@
+\chapter{Bluetooth Handling}
+\label{chap:Bluetooth_Handling}
+In this project, Bluetooth Low Energy (BLE) connectivity is utilized to enable the programming of new anchor values onto the tag device from a desktop application, while also facilitating the reception and visualization of the tag's current position. To achieve this, the project includes the "NimBLEDevice.h" header file, which is crucial for configuring and controlling the BLE functionality. It offers important functions and macros for configuring the BLE device, such as specifying the device's name, appearance, and advertising settings.
+\vspace{4pt}
+\newline
+The structure and behavior of the BLE server used in this project are defined in the "ble-server.h" and "ble-server.cpp" files. These files play a pivotal role in managing the communication and interaction between the tag device and the desktop software, allowing for the seamless exchange of anchor values and real-time positioning data over the BLE connection. 
+\vspace{4pt}
+\newline
+Since the data to be transmitted only affects the tag, it is the only device in the setup to host an BLE server. 
+
+\section{Server structure}
+\label{sec:Server_Structure}
+In a Bluetooth Low Energy (BLE) server, services are discrete components that house related data and functionality, and each service is composed of one or more characteristics, each representing a specific aspect of that service. In this particular project, the tag device's server is configured with two distinct services: an input service and an output service.
+\vspace{4pt}
+\newline
+The input service is designated for transferring data between the tag device and an external computer running UWB desktop software, enabling data input from the computer to the device, while the output service facilitates the opposite data flow, allowing the tag device to communicate data back to the computer. This separation of services streamlines the bidirectional data exchange process, effectively handling data transfer in both directions between the tag device and the external computer, enhancing the project's functionality and versatility.
+
+\subsubsection{Input Service}
+The input service serves as a crucial configuration tool for the tag device, allowing the adjustment of various parameters, particularly the positions of multiple anchors. This service is uniquely identified by the UUID "76847a0a-2748-4fda-bcd7-74425f0e4a10" and comprises two essential characteristics.
+\vspace{4pt}
+\newline
+The \blueconsolas{DEVICE\_POSITION} characteristic is responsible for defining anchor positions, represented as strings that contain the x, y, and z coordinates. This characteristic acts as a means to input and update the spatial information of each anchor, facilitating precise location setup.
+\vspace{4pt}
+\newline
+The \blueconsolas{SAVE\_CONFIG} characteristic is employed to initiate the saving process, which is responsible for persistently storing all updated anchor positions in the tag device's EEPROM (Electrically Erasable Programmable Read-Only Memory). This ensures that configuration changes to anchor positions are retained, even after power cycles, maintaining the device's accuracy and functionality.
+
+\subsubsection{Output Service}
+The output service plays a vital role in transmitting both the currently stored anchor positions and the tag device's own estimated position to the UWB configuration desktop software, which acts as the configuration device. This service is uniquely identified by the UUID "76847a0a-2748-4fda-bcd7-74425f0e4a20" and, similar to the input service, comprises two key characteristics.
+\vspace{4pt}
+\newline
+The \blueconsolas{ANCHOR\_POSITIONS} characteristic is responsible for encapsulating all the presently saved anchor positions. This data is structured as a JSON file and serialized into a string. The process involves iterating through the locally stored landmarks and populating the JSON object with this information, along with their corresponding device IDs. This characteristic enables the transmission of anchor positions for configuration or reference.
+\vspace{4pt}
+\newline
+The \blueconsolas{OWN\_POSITION} characteristic holds the tag device's own estimated X, Y, and Z coordinates. These coordinates are bundled into a string format and transmitted. This feature allows the tag device to relay its real-time positional information to the configuration device, which can be valuable for various location-based applications.
+
+\section{BleConfigLoader Class}
+The BleConfigLoader class serves as a fundamental component in the tag device, responsible for initializing and managing the server structure previously discussed in Section \ref{sec:Server_Structure}. During its initialization, it activates the server and periodically broadcasts its presence at intervals defined by the constants \blueconsolas{BLE\_MIN\_INTERVAL} and \blueconsolas{BLE\_MAX\_INTERVAL} in the ble-server.h file.
+\vspace{4pt}
+\newline
+Within this class, there are methods for extracting anchor position information from incoming BLE characteristics, saving this data locally, and writing it to the device's EEPROM for persistent storage. Additionally, it includes methods for sending individual characteristics when called. For a more comprehensive understanding of these methods, please consult the DOXYGEN Documentation.
+\vspace{4pt}
+\newline
+In the main.cpp file, an instance of the BleConfigLoader object is created, and its methods are invoked to enable the tag device's Bluetooth functionality. The actual invocation occurs within the \blueconsolas{BLE\_Task}, as detailed in Section \ref{sec:Ble_Task}. This class encapsulates the core BLE configuration and communication logic, facilitating seamless operation and data exchange in the tag device.
+
+
+
+
+
+
