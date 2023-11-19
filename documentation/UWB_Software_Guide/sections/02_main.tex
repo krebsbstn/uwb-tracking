@@ -60,6 +60,94 @@ By associating an interrupt with this button, the \blueconsolas{ble\_kill\_flag}
 For a comprehensive understanding of how these components are managed, please refer to section \ref{sec:Ble_Task}. 
 This section will delve into the specifics of how the interrupt, \blueconsolas{ble\_kill\_flag}, and \blueconsolas{current\_mode} variable interact to facilitate seamless mode switching in the tag device's operation. 
 
+\section{Main Identifiers}
+
+\subsection{Main Constants}
+
+\begin{itemize}
+	\item \textbf{MQTT\_SERVER}
+	\newline
+	desc
+	
+	\item \textbf{MQTT\_PORT}
+	\newline
+	desc
+	
+	\item \textbf{WIFI\_SSID}
+	\newline
+	desc
+	
+	\item \textbf{WIFI\_PWD}
+	\newline
+	desc
+	
+	\item \textbf{IS\_INITIATOR}
+	\newline
+	desc
+	
+	\item \textbf{DEVICE\_ID}
+	\newline
+	desc
+	
+	\item \textbf{INITIATOR\_ADDR}
+	\newline
+	desc
+	
+	\item \textbf{RNG\_DELAY\_TOF}
+	\newline
+	desc
+\end{itemize}
+
+\subsection{Main Variables}
+
+\begin{itemize}
+	\item \textbf{double distances[NUM\_LANDMARKS]}
+	\newline
+	desc
+	
+	\item \textbf{uint8\_t ble\_kill\_flag}
+	\newline
+	desc
+	
+	\item \textbf{coordinate own\_position}
+	\newline
+	desc
+	
+	\item \textbf{DynamicJsonDocument latest\_rx\_diagnostics}
+	\newline
+	desc
+	
+	\item \textbf{uint8\_t current\_mode}
+	\newline
+	desc
+	
+	\item \textbf{uwb\_addr dest\_addr\_list[]}
+	\newline
+	desc
+	
+	\item \textbf{TaskHandle\_t ekf\_task\_handle}
+	\newline
+	desc
+	
+	\item \textbf{TaskHandle\_t tdoa\_task\_handle}
+	\newline
+	desc
+	
+	\item \textbf{TaskHandle\_t tof\_task\_handle}
+	\newline
+	desc
+	
+	\item \textbf{TaskHandle\_t ble\_task\_handle}
+	\newline
+	desc
+	
+	\item \textbf{TaskHandle\_t mqtt\_task\_handle}
+	\newline
+	desc
+\end{itemize}
+
+
+
 
 \section{Scheduler}
 To efficiently measure distances to multiple anchors simultaneously, calculate their respective positions, and transmit the data to the software running on the devices, a scheduling system is implemented. 
