@@ -60,96 +60,85 @@ By associating an interrupt with this button, the \blueconsolas{ble\_kill\_flag}
 For a comprehensive understanding of how these components are managed, please refer to section \ref{sec:Ble_Task}. 
 This section will delve into the specifics of how the interrupt, \blueconsolas{ble\_kill\_flag}, and \blueconsolas{current\_mode} variable interact to facilitate seamless mode switching in the tag device's operation. 
 
-\section{Main Identifiers}
-
-\subsection{Main Constants}
-
-\begin{itemize}
-	\item \textbf{MQTT\_SERVER}
-	\newline
-	desc
-	
-	\item \textbf{MQTT\_PORT}
-	\newline
-	desc
-	
-	\item \textbf{WIFI\_SSID}
-	\newline
-	desc
-	
-	\item \textbf{WIFI\_PWD}
-	\newline
-	desc
-	
-	\item \textbf{IS\_INITIATOR}
-	\newline
-	desc
-	
-	\item \textbf{DEVICE\_ID}
-	\newline
-	desc
-	
-	\item \textbf{INITIATOR\_ADDR}
-	\newline
-	desc
-	
-	\item \textbf{RNG\_DELAY\_TOF}
-	\newline
-	desc
-\end{itemize}
-
-\subsection{Main Variables}
-
+\section{Main Variables}
 \begin{itemize}
 	\item \textbf{double distances[NUM\_LANDMARKS]}
 	\newline
-	desc
+	This array stores the measured distances to landmarks, providing input for the Extended Kalman Filter (EKF) used for position estimation.
+	It is constantly updated by an instance of the TofInitiator class. 
 	
 	\item \textbf{uint8\_t ble\_kill\_flag}
 	\newline
-	desc
+	A flag used to control the operation of the BLE-Task, allowing for a smooth transition between operational and config mode.
 	
 	\item \textbf{coordinate own\_position}
 	\newline
-	desc
+	A coordinate structure that holds the estimated 3D position of the UWB device, which is continuously updated by the EKF-Task. 
 	
 	\item \textbf{DynamicJsonDocument latest\_rx\_diagnostics}
 	\newline
-	desc
+	This JSON document stores the most recent diagnostics information received from other UWB devices. It is utilized in UWB anchor mode to share information to an MQTT broker.
 	
 	\item \textbf{uint8\_t current\_mode}
 	\newline
-	desc
+	Represents the operating mode of the UWB device, distinguishing between config and operational mode. It is toggled based on user input and controls the execution of relevant tasks.
 	
 	\item \textbf{uwb\_addr dest\_addr\_list[]}
 	\newline
-	desc
+	An array containing UWB addresses of responder devices. 
+	In UWB initiator mode, this list is used for initiating TOF measurements with multiple responder devices.
 	
-	\item \textbf{TaskHandle\_t ekf\_task\_handle}
+	\item \textbf{Task handles (ekf\_task\_handle, tdoa\_task\_handle, tof\_task\_handle, ble\_task\_handle, mqtt\_task\_handle)}
 	\newline
-	desc
-	
-	\item \textbf{TaskHandle\_t tdoa\_task\_handle}
-	\newline
-	desc
-	
-	\item \textbf{TaskHandle\_t tof\_task\_handle}
-	\newline
-	desc
-	
-	\item \textbf{TaskHandle\_t ble\_task\_handle}
-	\newline
-	desc
-	
-	\item \textbf{TaskHandle\_t mqtt\_task\_handle}
-	\newline
-	desc
+	These handles are used to manage and control the execution of different FreeRTOS tasks responsible for specific functionalities in the UWB device.
 \end{itemize}
 
+\section{Main Functions}
+\label{sec:Main_Functions}
 
+\subsection{setup}
+\label{subsec:setup}
+The setup function in the UWB device code serves as the initialization routine that is run first when the ESP32 is powered on. 
+It begins by configuring serial communication for debugging and EEPROM for persistent data storage. 
+The pin where the user button 1 is connected to is set as an input and the user\_1\_button function is attached to it as an interrupt routine. 
+Furthermore the three pins for the user LEDs are defined as output and all set to zero upon initialization. 
+The current mode is set to "uwb\_mode" and the MQTT- as well as the TOF-Task are started. 
+\vspace{4pt}
+\newline
+The the function checks if the device it is running on is defined as an initiator. 
+If so the BLE- and EKF-Task are started as well. 
+\vspace{4pt}
+\newline
+If the device is defined as a responder reads the JSON file named "uwb\_diacnostic\_type.json" from the SPIFFS on the ESP32.
+It then creates a DynamicJsonDocument object (latest\_rx\_diagnostics) with three times the size of the JSON file, providing extra space for storing communication channel data.
+The code proceeds to deserialize the contents of the JSON file into the latest\_rx\_diagnostics object. If there's an error during deserialization, it prints an error message to the serial monitor; otherwise, it indicates successful insertion of the JSON template. The file is then closed. Finally, the device ID is retrieved from EEPROM, and the "DeviceId" field in the latest\_rx\_diagnostics JSON document is set to this device ID so the MQTT broker can tell where from what responder the data came from. 
 
+\subsection{user\_1\_button}
+\label{subsec:user_1_button}
+The user\_1\_button function serves as an interrupt routine arrached to the user button 1. 
+First the interrupt is detached. 
+If the device is an initiator and in uwb\_mode it will toggle the ble\_kill\_flag and set to current mode to ble\_mode. 
+If it is in ble\_mode it will toggle the ble\_kill\_flag and set to current mode to uwb\_mode. 
+Lastly the interrupt gets attached back to the user button 1. 
+
+\subsection{animate\_leds}
+\label{subsec:animate_leds}
+This function sequentially illuminates and extinguishes LEDs in a predefined pattern, creating a visual animation. 
+It provides a quick and noticeable indication of a specific mode. 
+The LEDs involved in the animation are typically connected to GPIO pins on the UWB device. 
+
+\subsection{preproduction\_eeprom\_settings}
+\label{subsec:preproduction_eeprom_settings}
+This function takes two parameters - dev\_id representing the unique device identifier and is\_initiator indicating whether the device operates as an initiator or not. 
+It writes these values into EEPROM, ensuring that the correct device ID and role information are stored persistently. This initialization process is crucial for the proper functioning of other tasks and functionalities in the UWB device, as they depend on the settings retrieved from EEPROM.
+
+\subsection{Freertos Tasks}
+\label{subsec:Freertos_Tasks}
+The functions for the TOF-, MQTT-, BLE-, and EKF-Task are handeled by FreeRTOS to ensure concurrent and parallel execution of those functionalities within the device since they are the most critical to the operation. 
+There functions are handled separately in section \ref{kp} - \ref{kp}. 
 
 \section{Scheduler}
+\label{sec:Scheduler}
 To efficiently measure distances to multiple anchors simultaneously, calculate their respective positions, and transmit the data to the software running on the devices, a scheduling system is implemented. 
 This scheduling system is powered by the FreeRTOS library, an open-source real-time operating system, which leverages the dual-kernel capabilities of the ESP32 microcontroller.
 \vspace{4pt}

@@ -1,6 +1,7 @@
 \chapter{UWB Handling}
 
 \section{Distance Measurement}
+\label{sec:Distance_Measurement}
 The distance measurements in this system are conducted using a Time-of-Flight (ToF) methodology. This means that the time taken for an Ultra-Wideband (UWB) message to be transmitted from one device and received by another is a crucial factor. By subtracting the time when the UWB message is transmitted from the time it is received, we obtain the flight time. This represents the duration it took for the electromagnetic field to propagate from the sender to the receiver. This time is typically measured in seconds.
 \vspace{4pt}
 \newline
@@ -297,44 +298,117 @@ After sending the method checks certain bits in the status\_reg variable to ensu
 The method then enters a loop until it detects a response message being received by checking the SYS\_STATUS\_RXFCG\_BIT\_MASK masked in the status\_reg variable. 
 Then the method processes the response by calling the process\_tof\_response described in \ref{subsec:TofInitiator_process_tof_response} and puts it in the distances array. 
 
-\subsection{void send\_tof\_request TBE}
+\subsection{void send\_tof\_request}
 \label{subsec:TofInitiator_send_tof_request}
-The send\_tof\_request method in the TofInitiator class is responsible for initiating and sending a Time-of-Flight (TOF) request to a specific destination address (responder). Here's a description without bullet points:
+The send\_tof\_request method is responsible for initiating and sending a TOF request to a specific destination address (responder) and is called in the loop function \ref{subsec:TofInitiator_loop}. 
+It method sets the correction key, assembles the MAC frame and configures and initiates the AES encryption. 
+If the encryption is unsuccessful, a error message will be printed on the serial monitor and the method ends. 
+Otherwise the frame is assembled and the transmission is stated using the dwt\_starttx function. 
+By setting the two masked bits DWT\_START\_TX\_IMMEDIATE and DWT\_RESPONSE\_EXPECTED the message is sent without a delay and the initiator is set to wait for a response.  
 
-The send\_tof\_request method configures the necessary parameters, such as encryption keys and nonce, in preparation for the TOF request. It encrypts the TOF request payload using AES encryption, sets up the frame control, and triggers the transmission. The method ensures that the TOF initiator communicates securely with the designated responder, facilitating the exchange of information essential for subsequent TOF calculations.
-
-\subsection{void process\_tof\_response TBE}
+\subsection{void process\_tof\_response}
 \label{subsec:TofInitiator_process_tof_response}
-The process\_tof\_response method in the TofInitiator class is responsible for handling and extracting relevant information from a Time-of-Flight (TOF) response received from a responder device. Here's a description without bullet points:
-
-The process\_tof\_response method begins by clearing the indication of a good received frame in the status register. It then reads the length of the received frame and proceeds to decrypt the payload of the response using AES decryption. The method validates and checks for potential errors in the decryption process.
-
-Upon successful decryption, the method verifies that the received frame matches the expected response from the TOF responder. It extracts the relevant timestamps from the response payload, computes the Time-of-Flight (TOF) and distance based on these timestamps, and updates the tof and temp\_distance variables.
-
-The process\_tof\_response method plays a crucial role in interpreting the TOF response, ensuring data integrity, and facilitating the accurate calculation of distances for localization or positioning purposes within the Time-of-Flight communication system.
-
+The process\_tof\_response method is responsible for handling and extracting relevant information from a TOF response received from a responder device. 
+It method begins by clearing the indication of a good received frame in the status register. It then reads the length of the received frame and proceeds to decrypt the payload of the response using AES decryption after putting it in the rx\_buffer variable. 
+The method checks for potential errors in the decryption process and throws error messages over the serial monitor if so. 
+\vspace{4pt}
+\newline
+Upon successful decryption, the method verifies that the received frame matches the expected response from the TOF responder. It extracts the relevant timestamps from the response payload, computes the Time-of-Flight (TOF) and distance based on these timestamps, and updates the tof and temp\_distance variables like discussed in the Distance Measurement section \ref{sec:Distance_Measurement}. 
 
 \section{TofResponder}
 \label{sec:TofResponder}
+The TofResponder class extends the TofDevice class and is responsible for configuring and operating as a TOF responder device. 
+It includes methods for setup and continuous operation in the main loop. 
+The class utilizes AES encryption for secure communication and employs interrupts to handle successful frame reception. 
+Additionally, it maintains a FreeRTOS Semaphore (responseSemaphore) to coordinate the response process, and it updates RX diagnostics information during operation.
 
 \subsection{TofResponder Variables}
 \label{subsec:TofResponder_Variables}
+\subsubsection{Private Variables}
+\begin{itemize}
+	\item \textbf{uwb\_addr dst\_address}
+	\newline
+	The 32-bit dst\_address variable of type long long holds the destination address to which the responder sends its response. This address is set during the instantiation of a TofResponder object and is used to ensure that the response is sent to the initiator device.
+	
+	\item \textbf{uint64\_t poll\_rx\_ts}
+	\newline
+	The poll\_rx\_ts variable holds the timestamp when the TOF responder receives a poll frame from the TOF initiator. This timestamp is essential for calculating the time of flight and is put in the response frame. 
+	
+	\item \textbf{uint64\_t resp\_tx\_ts}
+	\newline
+	The resp\_tx\_ts variable holds the timestamp when the TOF responder transmits the response frame to the TOF initiator. 
+	This timestamp is used in conjunction with the poll\_rx\_ts to calculate the time-of-flight and derive accurate distance measurements in the initiator. 
+	Therefore it is also sent back in the response frame
+	
+	\item \textbf{DynamicJsonDocument* rx\_diagnostics\_json}
+	\newline
+	The rx\_diagnostics\_json is a pointer to a DynamicJsonDocument object. 
+	This object is used to store diagnostic information, such as timing and status parameters, related to the reception of frames by the TOF responder. 
+	The use of a JSON document allows for flexible and structured storage of diagnostic data, facilitating analysis and debugging.
+	
+	\item \textbf{static SemaphoreHandle\_t responseSemaphore}
+	\newline
+	The responseSemaphore is a static semaphore in the TofResponder class, implemented using FreeRTOS. 
+	It serves as a mechanism to control the flow of the program, specifically signaling the main loop when it's time to send a response. 
+	The semaphore is initially unavailable, and it is given (made available) from within the ISR (rx\_ok\_cb) when a valid frame is received, allowing the main loop to proceed with handling the response.
+	
+\end{itemize}
 
 \subsection{TofResponder Constructor/Dectructor}
 \label{subsec:TofResponder_Constructor}
+The TofResponder constructor takes four parameters: uwb\_addr src (source address of the specific responder), uwb\_addr dst (destination address of the initiator), unsigned long wdt\_timeout (watchdog timeout in milliseconds), and DynamicJsonDocument* rx\_diagnostics (pointer to a JSON document for receive diagnostics), setting it up with the rx\_diagnostics\_json member variable. 
+\vspace{4pt}
+\newline
+The constructor sets the type member variable to "Responder", creates a static semaphore (responseSemaphore) for synchronization and initializes it as unavailable. 
+If the semaphore creation fails an error message is printed on the serial monitor. 
 
 \subsection{virtual void setup}
 \label{subsec:TofResponder_setup}
+The setup method first calls the TofDevice::setup() method described in \ref{subsec:TofDevice_setup} to perform general setup tasks. 
+Then, it configures the Transmit (TX) and Receive (RX) Advanced Encryption Standard (AES) jobs for encryption and decryption tasks, respectively. 
+Subsequently it sets the rx\_ok\_cb method described in \ref{subsec:TofResponder_rx_ok_cb} as a callback function for a UWB message being received using the dwt\_setcallbacks function and then configures the DWM3000 to throw an interrupt whenever a good frame is received using the dwt\_setinterrupt and port\_set\_dwic\_isr functions. 
+Lastly the method configures additional diagnostics using the dwt\_configciadiag allowing channel state informations being extracted after each received frame. 
 
 \subsection{virtual void loop}
 \label{subsec:TofResponder_loop}
+The loop method is the main operational loop for the TOF responder device. 
+It begins by invoking the TofDevice::loop() method to reset the watchdog timer. 
+Subsequently, it activates reception immediately using dwt\_rxenable(DWT\_START\_RX\_IMMEDIATE). 
+The method then waits for a semaphore signal (responseSemaphore) to indicate an active response, and upon receiving the signal, it proceeds to process the received frame as follows.
+\vspace{4pt}
+\newline
+Within the response processing section, the method checks if the received frame matches the expected poll from the TOF initiator. 
+If the message can not be decypted correctly, for example when the poll message is destined at another responder device, an error message is thrown on the serial monitor and the function returns immediately. 
+\vspace{4pt}
+\newline
+If the check passes, the message is put in the rx\_buffer and a response message is assembled by getting the timestamp when the poll was received (poll\_rx\_ts) and calculating a time when the response is estimated to be sent (resp\_tx\_ts). 
+This requires the POLL\_RX\_TO\_RESP\_TX\_DLY\_UUS parameter to be well tuned like explained in chapter \ref{chap:Tuneable Parameters} as well as the antenna delay also being added. 
+\vspace{4pt}
+\newline
+Then the message is assembled by putting the two times poll\_rx\_ts and resp\_tx\_ts and generating the MAC frame. 
+With that being done the AES is configured and the message is encrypted. 
+When encrypting is done the UWB message is sent using the dwt\_starttx function and its return value is examined if any errors occurred. 
+If so, the device will enter a loop, otherwise the corresponding registers are cleared and the update\_rx\_diagnostics (referenced in \ref{subsec:TofResponder_update_rx_diagnostics}) function is called. 
 
 \subsection{void update\_rx\_diagnostics}
 \label{subsec:TofResponder_update_rx_diagnostics}
+The update\_rx\_diagnostics method is responsible for updating the receiver diagnostics information. 
+It extracts relevant diagnostic data from the DWM3000 module and updates a JSON document (rx\_diagnostics\_json) with this information. 
+The diagnostic data includes parameters such as reception times, status, phase of arrival, power levels, frequency-related information, and other accumulated counts.
+\vspace{4pt}
+\newline
+The method employs the dwt\_readdiagnostics function to retrieve the relevant diagnostic data. 
+It then populates the corresponding fields in the JSON document with the retrieved values. 
+This updated diagnostic information can be utilized for monitoring and analysis of the TOF responder's receiver performance. 
 
 \subsection{static void rx\_ok\_cb}
 \label{subsec:TofResponder_rx_ok_cb}
-
+The rx\_ok\_cb method is a static interrupt service routine (ISR) for handling the event of a successful frame reception. 
+This callback is registered with the DW3000 IC and is invoked when a good frame is received. 
+Its primary purpose is to release a FreeRTOS semaphore (responseSemaphore) to indicate that an active response is available for further processing in the main loop.
+\vspace{4pt}
+\newline
+Upon receiving a good frame, the method calls xSemaphoreGiveFromISR to release the semaphore. This allows the main loop, which is potentially waiting for a response, to proceed with processing the received frame. Additionally, the method checks whether a higher-priority task needs to be woken up, and if so, it requests a context switch using portYIELD\_FROM\_ISR.
 
 \section{Watchdog Handling}
 \label{sec:Watchdog_Handling}
