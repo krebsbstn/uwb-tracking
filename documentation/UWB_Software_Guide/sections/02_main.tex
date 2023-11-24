@@ -1,4 +1,4 @@
-\chapter{Main Structure}
+\chapter{Main File Structure}
 This chapter outlines the structure and organization of the main.cpp file of the UWB Project that runs on all of the UWB devices.
 
 \section{Identification Parameters}
@@ -113,7 +113,7 @@ If the device is defined as a responder reads the JSON file named "uwb\_diacnost
 It then creates a DynamicJsonDocument object (latest\_rx\_diagnostics) with three times the size of the JSON file, providing extra space for storing communication channel data.
 The code proceeds to deserialize the contents of the JSON file into the latest\_rx\_diagnostics object. If there's an error during deserialization, it prints an error message to the serial monitor; otherwise, it indicates successful insertion of the JSON template. The file is then closed. Finally, the device ID is retrieved from EEPROM, and the "DeviceId" field in the latest\_rx\_diagnostics JSON document is set to this device ID so the MQTT broker can tell where from what responder the data came from. 
 
-\subsection{user\_1\_button}
+\subsection{void user\_1\_button(void)}
 \label{subsec:user_1_button}
 The user\_1\_button function serves as an interrupt routine arrached to the user button 1. 
 First the interrupt is detached. 
@@ -121,13 +121,13 @@ If the device is an initiator and in uwb\_mode it will toggle the ble\_kill\_fla
 If it is in ble\_mode it will toggle the ble\_kill\_flag and set to current mode to uwb\_mode. 
 Lastly the interrupt gets attached back to the user button 1. 
 
-\subsection{animate\_leds}
+\subsection{void animate\_leds(void)}
 \label{subsec:animate_leds}
 This function sequentially illuminates and extinguishes LEDs in a predefined pattern, creating a visual animation. 
 It provides a quick and noticeable indication of a specific mode. 
 The LEDs involved in the animation are typically connected to GPIO pins on the UWB device. 
 
-\subsection{preproduction\_eeprom\_settings}
+\subsection{void preproduction\_eeprom\_settings(uint8\_t dev\_id, uint8\_t is\_initiator)}
 \label{subsec:preproduction_eeprom_settings}
 This function takes two parameters - dev\_id representing the unique device identifier and is\_initiator indicating whether the device operates as an initiator or not. 
 It writes these values into EEPROM, ensuring that the correct device ID and role information are stored persistently. This initialization process is crucial for the proper functioning of other tasks and functionalities in the UWB device, as they depend on the settings retrieved from EEPROM.

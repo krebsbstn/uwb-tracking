@@ -1,6 +1,9 @@
 \chapter{EKF Handling}
 \label{chap:EKF_Handling}
 
+\section{Estimation Process}
+\label{sec:Estimation_Process}
+
 In the realm of EKF handling, the primary objective is to estimate the current position coordinates (X, Y, Z). The EKF\_Task, exclusively running on the Tag, initializes an instance of the EKF\_Filter class. During initialization, it reads anchor positions from EEPROM and stores them in the static \blueconsolas{landmarkPositions} matrix.
 \vspace{4pt}
 \newline
@@ -48,11 +51,86 @@ Preparatory to the correction step, the measurement noise covariance matrix \blu
 	\label{eq:matR}
 \end{equation}
 
-The Extended Kalman Filter correction step involves the \yellowconsolas{correctEkf} method (\ref{sub:calculateMeasurement}). It takes a callback function for the measurement model, the measurement vector \blueconsolas{vecZ}, noise covariance matrix \blueconsolas{matR}, and the calculated Measurement Jacobian matrix \blueconsolas{matHj}. An Innovation Covariance Matrix and Kalman Gain are calculated, leading to the updated state vector (\blueconsolas{m\_vecX}) and state covariance matrix (\blueconsolas{m\_matP}).
+The Extended Kalman Filter correction step uses the \yellowconsolas{correctEkf} method (\ref{sub:correctEkf}) to refine the previously taken estimation. 
 
-The updated state vector is determined by subtracting the measurement model from the measurement vector, multiplying it by the Kalman Gain, and adding it to the last estimated state vector. The new state covariance matrix is computed by adjusting the previous estimation based on the Kalman Gain.
+\section{EKF\_Filter Class}
+\label{sec:EKF_Filter Class}
 
-\section{predictionModel}
+\subsection{EKF\_Filter Variables}
+\label{sub:EKF_Filter_Variables}
+
+\subsubsection{Private Variables}
+
+\begin{itemize}
+	\item \textbf{Matrix<double, DIM\_X, 1> m\_vecX}
+	\newline
+	The m\_vecX variable is a 1x3 column vector that holds the X-, Y- and Z-Coordinates of the Tag that the EKF estimated in the most recent calculation.
+	It is initialized as a zero vector. 
+	
+	\item \textbf{Matrix<double, DIM\_X, DIM\_X> m\_matP}
+	\newline
+	The m\_matP variable is a 3x3 matrix and represents the state covariance matrix of the last estimation. 
+	
+	\item \textbf{static uint32\_t lastTime}
+	\newline
+	The lastTime a static variable is representing the timestamp in milliseconds of the last update. 
+	It is used to calculate the time difference between consecutive predictions in the Extended Kalman Filter. 
+	
+	\item \textbf{static Matrix<double, DIM\_X, 1> x\_kminus1}
+	\newline
+	x\_kminus1 is a static variable representing the predicted state vector from the previous time step in the Extended Kalman Filter. 
+	It is a key element in the EKF's prediction step, storing the predicted state to be used as the initial estimate for the subsequent prediction. 
+	The variable is updated during each prediction to reflect the evolving state of the system.
+	
+	\item \textbf{static Matrix<double, NUM\_LANDMARKS, 3> landmarkPositions}
+	\newline
+	landmarkPositions is a static matrix representing the positions of landmarks in a three-dimensional space. 
+	It is of type Matrix<double, NUM\_LANDMARKS, 3> and is used within the Extended Kalman Filter implementation to calculate the Jacobian matrix and measurement vector for the measurement model. 
+	The matrix is initialized to a zero matrix and later filled with landmark positions read from EEPROM in the read\_landmarks\_from\_eeprom function described in \ref{sub:read_landmarks_from_eeprom}.
+\end{itemize}
+
+\subsection{Matrix<double, DIM\_X, 1>\& vecX()}
+\label{sub:vecX}
+vecX() is a getter function that returns the current m\_vecX matrix. 
+
+\subsection{Matrix<double, DIM\_X, DIM\_X>\& matP()}
+\label{sub:matP}
+matP() is a getter function that returns the current m\_matP matrix. 
+
+\subsection{predict}
+\label{sub:predict}
+The predict method performs the prediction step of the filter. 
+It takes as input the state transition matrix (matF) and the process noise covariance matrix (matQ). 
+The prediction step for the state vector (m\_vecX) is cone by multiplying it with the state transition matrix. 
+The presiction of the state covariance matrix (m\_matP) is done by multiplying it with the state transition matrix and the transpose of the multiplying it with the state transition matrix then adding the process noise covariance matrix. 
+
+
+The method updates the estimated state vector (m\_vecX) and the state covariance matrix (m\_matP) based on the provided matrices, representing the prediction of the system's state in the absence of new measurements.
+
+\subsection{correct}
+\label{sub:correct}
+In the correct method . 
+Parameters are the measurement vector (vecZ) represents the actual sensor measurements, the measurement noise covariance matrix (matR) that characterizes the uncertainty in these measurements, and the measurement Jacobian matrix (matH) relates the state vector to the measurement space. 
+\vspace{4pt}
+\newline
+The method computes the innovation covariance (matSk), Kalman Gain (matKk), and updates the state vector and covariance matrix based on the difference between the predicted and actual measurements. This correction step refines the state estimate by assimilating new information from sensor measurements while accounting for measurement uncertainties.
+
+\subsection{predictEkf}
+\label{sub:predictEkf}
+The predictEkf method is almost identical to the predict method. 
+It differs from it in this respect that it does not take the actual measurement vector vecZ but rather uses the predictionModel methodn to predict an vecZ from the state vector m\_vecX. 
+
+\subsection{correctEkf}
+\label{sub:correctEkf}
+The correctEkf method is almost identical to the correct method. 
+It differs from it in this respect that it does not take the actual measurement vector vecZ but rather uses the predictionModel method to predict an vecZ from the state vector m\_vecX. 
+
+\subsection{read\_landmarks\_from\_eeprom}
+\label{sub:read_landmarks_from_eeprom}
+The read\_landmarks\_from\_eeprom method reads landmark positions from EEPROM and populates the landmarkPositions matrix. It iterates over the landmarks, calculates the EEPROM addresses, and retrieves the stored x, y, and z coordinates. 
+The method is part of the EKF initialization process, ensuring the filter has access to landmark positions stored in non-volatile memory.
+
+\subsection{predictionModel}
 \label{sub:predictionModel}
 The \yellowconsolas{predictionModel} method is a component of the Extended Kalman Filter (EKF). It predicts the next state of the system based on the current state and a linear motion model. 
 As input it takes the current state vector and outputs a new state vector, representing the predicted state of the system. 
@@ -68,7 +146,7 @@ This assumes a simple linear motion model where the system's position changes li
 \newline
 Lastly he method updates internal variables, such as the last recorded time and transition vector, to ensure accurate time tracking.
 
-\section{calculateJacobianMatrix}
+\subsection{calculateJacobianMatrix}
 \label{sub:calculateJacobianMatrix}
 The  \yellowconsolas{calculateJacobianMatrix} method, as its name implies, is responsible for computing the Jacobian matrix (\blueconsolas{matHj}) used in the correction step of the Extended Kalman Filter (EKF). When operating in three dimensions with the utilization of five anchors, the dimension of \blueconsolas{matHj} is 5x3.
 \vspace{4pt}
@@ -91,7 +169,7 @@ The resulting \blueconsolas{matHj} matrix is populated following the structure s
 	\label{eq:matHj}
 \end{equation}
 
-\section{calculateMeasurement}
+\subsection{calculateMeasurement}
 \label{sub:calculateMeasurement}
 The \yellowconsolas{calculateMeasurement} function, akin to \yellowconsolas{calculateJacobianMatrix}, also contributes to the correction step within the Extended Kalman Filter. 
 Its role involves taking the current state vector, which includes the last outputted state vector coordinates, and determining the offset in the X-, Y-, and Z-directions. Subsequently, it calculates the Euclidean distance to every landmark.
@@ -113,3 +191,8 @@ Moving forward, the calculated Euclidean distances undergo a transformation. The
 	\end{centering}
 	\label{eq:calculateMeasurement}
 \end{equation}
+
+
+
+
+

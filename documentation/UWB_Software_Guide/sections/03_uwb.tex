@@ -65,43 +65,6 @@ Additionally, it includes parameters and configurations specific to the DW3000 c
 \subsection{TofDevice Variables}
 \label{subsec:TofDevice_Variables}
 
-\subsubsection{Constants}
-\begin{itemize}
-	\item \textbf{DEST\_PAN\_ID}
-	\newline
-	desc
-	\item \textbf{START\_RECEIVE\_DATA\_LOCATION}
-	\newline
-	desc
-	\item \textbf{ALL\_MSG\_SN\_IDX}
-	\newline
-	desc
-	\item \textbf{RESP\_MSG\_POLL\_RX\_TS\_IDX}
-	\newline
-	desc
-	\item \textbf{RESP\_MSG\_RESP\_TX\_TS\_IDX}
-	\newline
-	desc
-	\item \textbf{RESP\_MSG\_TS\_LEN}
-	\newline
-	desc
-	\item \textbf{INITIATOR\_KEY\_INDEX}
-	\newline
-	desc
-	\item \textbf{RESPONDER\_KEY\_INDEX}
-	\newline
-	desc
-	\item \textbf{RX\_BUF\_LEN}
-	\newline
-	desc
-	\item \textbf{TX\_ANT\_DLY}
-	\newline
-	desc
-	\item \textbf{RX\_ANT\_DLY}
-	\newline
-	desc
-\end{itemize}
-
 \subsubsection{Private Variables}
 \begin{itemize}
 	\item \textbf{Watchdog my\_watchdog}
@@ -176,23 +139,23 @@ The method then initializes the DW3000 chip using the dwt\_initialise function.
 If any of these steps fail, it prints error messages and enter a loop indicating failure. 
 Lastly the config data for the operation of the DWM and the AES encryption as well as are the keys\_options set in the corresponding variables config, aes\_config and keys\_options are set
 
-\subsection{virtual void setup}
+\subsection{virtual void setup()}
 \label{subsec:TofDevice_setup}
 The setup method in the TofDevice class serves as the initialization routine for the TOF device. 
 It uses the dwt\_configure function to configure the DWM3000 with the config options set in the constructor describes in \ref{subsec:TofDevice_Constructor}. 
 If this fails it will print an error message and go in a loop. 
 The configuration of the transmission spectrum parameters is handled by dwt\_configuretxrf, and default antenna delay values are applied through dwt\_setrxantennadelay and dwt\_settxantennadelay. 
 
-\subsection{void start\_wdt}
+\subsection{void start\_wdt()}
 \label{subsec:TofDevice_start_wdt}
 The start\_wdt method in the TofDevice class initiates the watchdog timer associated with the TOF device using the begin method of the Watchdog class targeted in \ref{subsec:Watchdog_begin}. This method is responsible for commencing the timer, which monitors the execution of the device's main loop. 
 
-\subsection{void enable\_leds}
+\subsection{void enable\_leds()}
 \label{subsec:TofDevice_enable_leds}
 The enable\_leds method activates the RX and TX LEDs for debugging purposes. 
 By enabling the LEDs, each transmission triggers a visual indication of sent and received messages, aiding in the debugging process. Note that in practical low-power applications, LEDs might be disabled to conserve power, but in a debug scenario or when the device is hooked up to a stable supply like the main grid. 
 
-\subsection{virtual void loop}
+\subsection{virtual void loop()}
 \label{subsec:TofDevice_loop}
 The loop method represents the main operational loop for the TOF device. 
 Within this loop, the device continually resets the watchdog timer using the resetTimer method, ensuring that the device remains within its expected operational timeframe. 
@@ -278,13 +241,13 @@ The TofInitiator constructor takes parameters representing the source address fo
 It sets the type String variable to "Initiator" indicating its role, initializes tof, temp\_distance and frame\_cnt with 0 and seq\_cnt to 10 (0x0A). 
 Latly the MAC-Frame is assembled. 
 
-\subsection{virtual void setup}
+\subsection{virtual void setup()}
 \label{subsec:TofInitiator_setup}
 The setup method initializes the TOF initiator by calling the base class's setup method to configure basic parameters descibed in \ref{subsec:TofDevice_setup}. 
 It then sets the expected response delay and timeout using the dwt\_setrxaftertxdelay and dwt\_setrxtimeout functions. 
 After that the parameters for the AES are set for rx encryption and tx decryption. 
 
-\subsection{virtual void loop}
+\subsection{virtual void loop()}
 \label{subsec:TofInitiator_loop}
 The loop method serves as the central processing hub, orchestrating the continuous operation of the TOF initiator device. 
 It begins by invoking the base class loop method, decribed in \ref{subsec:TofDevice_loop}, which includes resetting the watchdog timer to prevent system resets due to potential failures. 
@@ -298,7 +261,7 @@ After sending the method checks certain bits in the status\_reg variable to ensu
 The method then enters a loop until it detects a response message being received by checking the SYS\_STATUS\_RXFCG\_BIT\_MASK masked in the status\_reg variable. 
 Then the method processes the response by calling the process\_tof\_response described in \ref{subsec:TofInitiator_process_tof_response} and puts it in the distances array. 
 
-\subsection{void send\_tof\_request}
+\subsection{void send\_tof\_request(uwb\_addr dest)}
 \label{subsec:TofInitiator_send_tof_request}
 The send\_tof\_request method is responsible for initiating and sending a TOF request to a specific destination address (responder) and is called in the loop function \ref{subsec:TofInitiator_loop}. 
 It method sets the correction key, assembles the MAC frame and configures and initiates the AES encryption. 
@@ -306,7 +269,7 @@ If the encryption is unsuccessful, a error message will be printed on the serial
 Otherwise the frame is assembled and the transmission is stated using the dwt\_starttx function. 
 By setting the two masked bits DWT\_START\_TX\_IMMEDIATE and DWT\_RESPONSE\_EXPECTED the message is sent without a delay and the initiator is set to wait for a response.  
 
-\subsection{void process\_tof\_response}
+\subsection{void process\_tof\_response()}
 \label{subsec:TofInitiator_process_tof_response}
 The process\_tof\_response method is responsible for handling and extracting relevant information from a TOF response received from a responder device. 
 It method begins by clearing the indication of a good received frame in the status register. It then reads the length of the received frame and proceeds to decrypt the payload of the response using AES decryption after putting it in the rx\_buffer variable. 
@@ -362,14 +325,14 @@ The TofResponder constructor takes four parameters: uwb\_addr src (source addres
 The constructor sets the type member variable to "Responder", creates a static semaphore (responseSemaphore) for synchronization and initializes it as unavailable. 
 If the semaphore creation fails an error message is printed on the serial monitor. 
 
-\subsection{virtual void setup}
+\subsection{virtual void setup()}
 \label{subsec:TofResponder_setup}
 The setup method first calls the TofDevice::setup() method described in \ref{subsec:TofDevice_setup} to perform general setup tasks. 
 Then, it configures the Transmit (TX) and Receive (RX) Advanced Encryption Standard (AES) jobs for encryption and decryption tasks, respectively. 
 Subsequently it sets the rx\_ok\_cb method described in \ref{subsec:TofResponder_rx_ok_cb} as a callback function for a UWB message being received using the dwt\_setcallbacks function and then configures the DWM3000 to throw an interrupt whenever a good frame is received using the dwt\_setinterrupt and port\_set\_dwic\_isr functions. 
 Lastly the method configures additional diagnostics using the dwt\_configciadiag allowing channel state informations being extracted after each received frame. 
 
-\subsection{virtual void loop}
+\subsection{virtual void loop()}
 \label{subsec:TofResponder_loop}
 The loop method is the main operational loop for the TOF responder device. 
 It begins by invoking the TofDevice::loop() method to reset the watchdog timer. 
@@ -390,7 +353,7 @@ With that being done the AES is configured and the message is encrypted.
 When encrypting is done the UWB message is sent using the dwt\_starttx function and its return value is examined if any errors occurred. 
 If so, the device will enter a loop, otherwise the corresponding registers are cleared and the update\_rx\_diagnostics (referenced in \ref{subsec:TofResponder_update_rx_diagnostics}) function is called. 
 
-\subsection{void update\_rx\_diagnostics}
+\subsection{void update\_rx\_diagnostics()}
 \label{subsec:TofResponder_update_rx_diagnostics}
 The update\_rx\_diagnostics method is responsible for updating the receiver diagnostics information. 
 It extracts relevant diagnostic data from the DWM3000 module and updates a JSON document (rx\_diagnostics\_json) with this information. 
@@ -401,7 +364,7 @@ The method employs the dwt\_readdiagnostics function to retrieve the relevant di
 It then populates the corresponding fields in the JSON document with the retrieved values. 
 This updated diagnostic information can be utilized for monitoring and analysis of the TOF responder's receiver performance. 
 
-\subsection{static void rx\_ok\_cb}
+\subsection{static void rx\_ok\_cb(const dwt\_cb\_data\_t *cb\_data)}
 \label{subsec:TofResponder_rx_ok_cb}
 The rx\_ok\_cb method is a static interrupt service routine (ISR) for handling the event of a successful frame reception. 
 This callback is registered with the DW3000 IC and is invoked when a good frame is received. 
@@ -433,27 +396,27 @@ The timer used is given by FreeRTOS xTimer functionality.
 \label{subsec:Watchdog_Constructor}
 When constructing a Watchdog object the constructor takes in the timeoutMillis variable of type unsigned long and assigns it. 
 
-\subsection{void resetTimer}
+\subsection{void resetTimer()}
 \label{subsec:Watchdog_resetTimer}
 The resetTimer Method takes in no parameters and resets the timer object of type TimerHandle\_t to 0 using the FreeRTOS xTimerReset function. 
 
-\subsection{void begin}
+\subsection{void begin()}
 \label{subsec:Watchdog_begin}
 The begin Method creates the timer of type TimerHandle\_t using the FreeRTOS xTimerCreate fuction. 
 It assigns the name "WatchdogTimer", the timeout period and the timerCallback method as a callback dunction that is fired once the designated time is elapsed. 
 Then it is checked if the timer creation was successful and the timer is started using FreeRTOS function xTimerStart. 
 If the timer creation as unsuccessful an error message will be outputted via UART. 
 
-\subsection{void stop}
+\subsection{void stop()}
 \label{subsec:Watchdog_stop}
 The stop method checks if a timer object is present. 
 If so it is stopped and deleted by the FreeRTOS functions xTimerStop and xTimerDelete. 
 
-\subsection{unsigned long get\_timeout}
+\subsection{unsigned long get\_timeout()}
 \label{subsec:Watchdog_get_timeout}
 The get\_timeout method, when called, acts as a getter function and returns the current timeout period saved in the timeoutMillis variable of type unsigned long. 
 
-\subsection{static void timerCallback}
+\subsection{static void timerCallback(TimerHandle\_t xTimer)}
 \label{subsec:Watchdog_timerCallback}
 The timerCallback function is called every time duration in timeoutMillis is elapsed. 
 When called the function prints a serial message that the watchdog timer has elapsed and then restarts the esp device using the esp\_restart function. 
