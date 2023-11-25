@@ -219,6 +219,31 @@ The flag is set when a user initiates a mode change to ble\_mode by pressing use
 \newline
 This mode-switching functionality ensures that the device can seamlessly transition between its primary operating modes based on user input. 
 
+\subsection{MQTT\_Task}
+\label{sub:MQTT_Task}
+The MQTT\_Task function handles all the MQTT communication. 
+It first determines if it is run by the tag or any responder and figuring out its device ID by reading the EEPROM. 
+Then it creates a string identifier (String clientId) containing its device ID so the MQTT messages can be told apart from where they originated from. 
+\vspace{4pt}
+\newline
+Subsequently, the function creates an instance of the MqttClient class, encapsulating the essential functionality for MQTT communication. 
+This includes setting up the MQTT topic ("uwb\_devices"), specifying the MQTT server details, providing WiFi credentials, and configuring a buffer size for efficient data handling.
+\vspace{4pt}
+\newline
+Within the core of the function lies an infinite loop that serves as the heartbeat of the MQTT communication task. 
+The primary objective of this loop is to ensure the persistent operation of the MQTT client. 
+Consequently, the mqttClient.update() method is called at every iteration, allowing the client to handle incoming messages and maintain the MQTT connection.
+\vspace{4pt}
+\newline
+As part of the communication strategy, the MQTT\_Task function publishes messages to specific MQTT topics based on the device's role. 
+In cases where the device is an initiator (is\_initiator = 1), it publishes position information, formatted as a JSON string, to the "tag/{dev\_id}/position" topic. 
+Conversely, if the device is not an initiator (is\_initiator = 0), it publishes UWB diagnostics information, serialized into JSON, to the "anchor/{dev\_id}/uwb\_info" topic.
+\vspace{4pt}
+\newline
+This task structure enables the integration of the device into a larger Ultra-Wideband (UWB) communication system. 
+It showcases the capability to disseminate critical information, such as device positions or UWB diagnostics, via the MQTT protocol. 
+The inclusion of delays between message publications controls the communication frequency, aligning with the specific requirements of the UWB communication system. 
+
 \subsubsection{Configuration}
 When the user triggers a mode change to ble\_mode by pressing button 1, the \blueconsolas{ble\_kill\_flag} is activated, which effectively terminates the loop responsible for continuously transmitting the current position.
 \vspace{4pt}
