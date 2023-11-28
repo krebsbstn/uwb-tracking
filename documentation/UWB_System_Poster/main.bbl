@@ -1,0 +1,22 @@
+\begin{thebibliography}{1}
+
+\bibitem{FreeRTOS_2023}
+FreeRTOS Homepage.
+\newblock \url{https://www.freertos.org/index.html}, Aug 2023.
+
+\bibitem{Makerfabs_2023}
+Makerfabs Homepage.
+\newblock \url{https://www.makerfabs.com/esp32-uwb-dw3000.html}, 2023.
+
+\bibitem{uwb-tracking}
+S.~Krebs and T.~Herter.
+\newblock uwb-tracking.
+\newblock \url{https://github.com/krebsbstn/uwb-tracking}, 2023.
+
+\bibitem{Kalman}
+Qiang Li, Ranyang Li, Kaifan Ji, and Wei Dai.
+\newblock Kalman filter and its application.
+\newblock In {\em 2015 8th International Conference on Intelligent Networks and
+  Intelligent Systems (ICINIS)}, pages 74--77, 2015.
+
+\end{thebibliography}
