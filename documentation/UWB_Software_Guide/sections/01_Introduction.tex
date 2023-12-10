@@ -34,6 +34,26 @@ This filter algorithm plays a pivotal role in refining and enhancing the accurac
 	\label{fig:setup_sketch}
 \end{figure}
 
+\section{Flow of Information}
+
+In Figure \ref{fig:information_flow} the information flow of the entire system is pictured. 
+The most important component are the UWB ranging messages exchanged between the Tag and every Anchor that are ultimately used to estimate the Tag's position. 
+With every sent UWB message from the Tag to an Anchor the channel parameters are extracted and transmitted via WiFi to an MQTT-Server. 
+The UWB Tag itself also transmits its coordinates over MQTT to a different topic. 
+The MQTT mechanics are further discussed in \ref{chap:MQTT_Handling}. 
+\vspace{4pt}
+\newline
+The configuration of the Tag, meaning putting in the coordinate of each anchor to the EEPROM, is executed via Bluetooth by a Bluetooth-Capable device running the configuration software. 
+Additionally the Tag sends its position via Bluetooth where the configuration software has the ability to display it in a 2D plot in real time. 
+Bluetooth Handling techniques are further elaborated in \ref{chap:Bluetooth_Handling}. 
+
+\begin{figure}[!hbt]
+	\centering
+	\includegraphics[width=0.6\textwidth]{pictures/information_flow.pdf}
+	\caption{Sketch of the complete setup.}
+	\label{fig:information_flow}
+\end{figure}
+
 
 
 
