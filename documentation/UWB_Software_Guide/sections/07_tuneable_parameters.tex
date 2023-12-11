@@ -2,3 +2,36 @@
 \label{chap:Tuneable Parameters}
 
 
+\section{RNG\_DELAY\_TOF}
+RNG\_DELAY\_TOF is the constant representing the delay between consecutive Time of Flight measurements. 
+The value of RNG\_DELAY\_TOF directly affects the overall round-trip time for TOF measurements and can be adjusted for system performance tuning based on specific application requirements. 
+Obviously it cannot be set infinitely small because each measurement takes its time to be processed. 
+In performance tests plausible measurement results could be obtained with a RNG\_DELAY\_TOF down to 30ms. 
+
+\section{POLL\_RX\_TO\_RESP\_TX\_DLY\_UUS}
+The POLL\_RX\_TO\_RESP\_TX\_DLY\_UUS value is a constant defined in the tof-responder header file used to account for the time it takes for the Responder to process the received "Poll" message and prepare the "Response" message for transmission. 
+This delay could include processing time, computation time, and any other factors that contribute to the time between receiving the "Poll" and sending the "Response."
+\vspace{4pt}
+\newline
+For example, if POLL\_RX\_TO\_RESP\_TX\_DLY\_UUS is set to 1000 microseconds, it means that the system expects the Responder to start transmitting the "Response" message approximately 1000 microseconds after successfully receiving the "Poll" message.
+\vspace{4pt}
+\newline
+Altering the code for processing the response requires this value to be adapted accordingly. 
+
+\section{POLL\_TX\_TO\_RESP\_RX\_DLY\_UUS}
+POLL\_TX\_TO\_RESP\_RX\_DLY\_UUS is a constant defined in the tof-initiator header file, representing the delay between the transmission of a poll message and the expected reception of the corresponding response message in the UWB communication system. 
+This delay is specified in UWB microseconds and is a critical parameter for the proper functioning of the communication protocol. 
+The value of POLL\_TX\_TO\_RESP\_RX\_DLY\_UUS influences the timing synchronization between initiator and responder devices, ensuring that the response is expected at the correct time after the poll transmission. 
+\vspace{4pt}
+\newline
+Adjusting this constant may be necessary based on system requirements and environmental factors to optimize the reliability and accuracy of TOF measurements when altering the UWB sequence.
+
+\section{RESP\_RX\_TIMEOUT\_UUS}
+RESP\_RX\_TIMEOUT\_UUS is a constant defined in the tof-initiator header file, representing the timeout duration for receiving a response in the UWB communication system. 
+This timeout is specified in UWB microseconds and is a critical parameter for determining how long the system will wait for a response after the transmission of a poll message.
+\vspace{4pt}
+\newline
+In the context of the code you provided, the RESP\_RX\_TIMEOUT\_UUS constant is used to set the timeout for receiving a response frame. If a response is not received within this specified timeout duration, the system may consider the operation as unsuccessful or trigger error handling procedures.
+\vspace{4pt}
+\newline
+The value of RESP\_RX\_TIMEOUT\_UUS is crucial for the proper functioning of the communication protocol, and it needs to be carefully chosen based on the expected time of flight, system latency, and other environmental factors. Adjusting this constant allows for fine-tuning the system's responsiveness and reliability in different operating conditions.
