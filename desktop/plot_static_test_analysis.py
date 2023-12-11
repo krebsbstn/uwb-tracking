@@ -6,6 +6,7 @@ import math
 import json
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
+from scipy.interpolate import griddata
 from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 from matplotlib import cm
@@ -21,7 +22,7 @@ class PositionData:
     time = []
 
 #Plot-Function, visualizes Latitude and Longitude in single subplots
-def plot_x_y(positions : PositionData, path : str):
+def plot_x_y(positions : PositionData, path : str, save_fig=False):
     plt.figure("x-Y-Plot")
     plt.subplot(2, 1, 1)
     plt.xlabel("Zeit [s]")
@@ -35,10 +36,11 @@ def plot_x_y(positions : PositionData, path : str):
     plt.plot(positions.time, [statistics.mean(positions.y)]*len(positions.y))
     plt.suptitle('X-Y-Plot', fontsize=16)
     plt.subplots_adjust(hspace=0.3)
-    plt.savefig(path.replace(".txt", "") + "_xy_plot.png", bbox_inches='tight')
+    if save_fig:
+        plt.savefig(path.replace(".txt", "") + "_xy_plot.png", bbox_inches='tight')
 
 #Plot-Function, visualizes histogram for latitude and longitude
-def plot_histogram(positions : PositionData, path : str):
+def plot_histogram(positions : PositionData, path : str, save_fig=False):
     plt.figure("Histogram für X-Achse und Y-Achse")
     plt.subplot(2, 1, 1)
     plt.xlabel("X [m]")
@@ -50,10 +52,11 @@ def plot_histogram(positions : PositionData, path : str):
     pd.Series(positions.x).hist(bins=25)
     plt.suptitle('Histogram für den Verlauf der X und Y-Koordinaten', fontsize=16)
     plt.subplots_adjust(hspace=0.3)
-    plt.savefig(path.replace(".txt", "") + "_histogram_plot.png", bbox_inches='tight')
+    if save_fig:
+        plt.savefig(path.replace(".txt", "") + "_histogram_plot.png", bbox_inches='tight')
 
 #Plot Function, allowes to plot probability distribution
-def plot_probability(positions : PositionData, path : str,  real_pos : tuple):
+def plot_probability(positions : PositionData, path : str,  real_pos : tuple, save_fig=False):
     plt.figure("probability distribution of measurement")
     ax = plt.axes(projection ='3d')
 
@@ -80,10 +83,11 @@ def plot_probability(positions : PositionData, path : str,  real_pos : tuple):
     ax.set_ylabel('Y-Koordinate')
     ax.set_zlabel('Wahrscheinlichkeit')
     ax.set_title('Wahrscheinlichkeitsverteilung')
-    plt.savefig(path.replace(".txt", "") + "_probability_distribution.png", bbox_inches='tight')
+    if save_fig:
+        plt.savefig(path.replace(".txt", "") + "_probability_distribution.png", bbox_inches='tight')
 
 #Plot Function, plots the sigma Ellipses
-def plot_sigma_ellipses(positions : PositionData, path : str, real_pos : tuple):
+def plot_sigma_ellipses(positions : PositionData, path : str, real_pos : tuple, save_fig=False):
     plt.figure("Sigma-Ellipsen")
     ax_nstd = plt.axes()
     x,y = get_vectors_kartesian(zip(positions.x, positions.y), real_pos)
@@ -105,10 +109,11 @@ def plot_sigma_ellipses(positions : PositionData, path : str, real_pos : tuple):
     ax_nstd.legend()
     ax_nstd.set_xlabel("X [m]")
     ax_nstd.set_ylabel("Y [m]")
-    plt.savefig(path.replace(".txt", "") + "_ellipses.png", bbox_inches='tight')
+    if save_fig:
+        plt.savefig(path.replace(".txt", "") + "_ellipses.png", bbox_inches='tight')
 
 #Plot-Function, visualizes Deviation Length and Angle in single subplots
-def plot_deviation(positions : PositionData, path : str, real_pos : tuple):
+def plot_deviation(positions : PositionData, path : str, real_pos : tuple, save_fig=False):
     measured_pos = zip(positions.x, positions.y)
     plt.figure("Abweichung der Position")
     angle, length = get_vectors_euler(measured_pos, real_pos)
@@ -126,7 +131,70 @@ def plot_deviation(positions : PositionData, path : str, real_pos : tuple):
     plt.plot(positions.time, [statistics.mean(angle)]*len(angle))
     plt.suptitle('Abweichung der Position', fontsize=16)
     plt.subplots_adjust(hspace=0.3)
-    plt.savefig(path.replace(".txt", "") + "_deviation_plot.png", bbox_inches='tight')
+    if save_fig:
+        plt.savefig(path.replace(".txt", "") + "_deviation_plot.png", bbox_inches='tight')
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from scipy.interpolate import griddata
+
+######def plot_3d_sigma_variances(positions_list, real_pos_list, save_fig=False):
+######    fig = plt.figure("3D Sigma Variance Plot")
+######    ax_3d = fig.add_subplot(111, projection='3d')
+######
+######    # Create a DataFrame outside the loop
+######    xyz_list = []
+######    for positions, real_pos in zip(positions_list, real_pos_list):
+######        angle, length = get_vectors_euler(zip(positions.x, positions.y), real_pos)
+######        x = np.array(positions.x)
+######        y = np.array(positions.y)
+######        d = np.array(length)
+######        xyz_list.append({'x': x, 'y': y, 'd': d})
+######
+######    # Combine data into a single DataFrame
+######    df = pd.DataFrame(xyz_list)
+######    # Create the meshgrid directly from the DataFrame values
+######    grid_x, grid_y = np.mgrid[0:1:8j, 0:1:8j]
+######    points = (positions.x, positions.y)
+######    # Flatten the coordinates for use in griddata
+######    grid_z = griddata(points, length, (grid_x, grid_y), method='nearest')
+######    surf = ax_3d.plot_surface(grid_x, grid_y, grid_z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+######    fig.colorbar(surf, shrink=0.5, aspect=5)
+######
+######    if save_fig:
+######        plt.savefig("3d_variance_plot.png", bbox_inches='tight')
+def plot_3d_sigma_variances(positions_list, real_pos_list, save_fig=False):
+    fig = plt.figure("3D Sigma Variance Plot")
+    ax_3d = fig.add_subplot(111, projection='3d')
+
+    # Create a DataFrame outside the loop
+    xyz_list = []
+
+    i = 0
+    for real_pos in real_pos_list:
+        # TODO, hier stimmt die berechnete length nicht.
+        print(len(positions_list[i].x))
+        angle, length = get_vectors_euler(zip(positions_list[i].x, positions_list[i].y), real_pos)
+        i += 1
+        x = np.array(real_pos[0])  # Use real_pos for x
+        y = np.array(real_pos[1])  # Use real_pos for y
+        d = np.mean(length)       # Use mean(length) for z
+        print(f" realpos {real_pos}, d {d}, len(length) {len(length)}")
+        xyz_list.append({'x': x, 'y': y, 'd': d})
+
+    # Combine data into a single DataFrame
+    df = pd.DataFrame(xyz_list)
+    
+    #surf = ax_3d.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    surf = ax_3d.plot(df["x"], df["y"], df["d"], "o")
+
+    if save_fig:
+        plt.savefig("3d_variance_plot.png", bbox_inches='tight')
+
+
 
 #Function returning two lists for angle and length compared to fixpoint
 def get_vectors_kartesian(measured_pos: List[tuple], real_pos: tuple):
@@ -259,6 +327,17 @@ def read_txt(file):
 
     return positions
 
+def extract_numbers_from_filename(file_name):
+    # example
+    # filename: 4m5x3m6x2m_10min.txt
+    # cut underscore: 4m5x3m6x2m
+    # replace m by .: 4.5x3.6x2.
+    # numbers: [4.5, 3.6, 2.0]
+    without_underscore = file_name.split('_')[0]
+    replaced_m = without_underscore.replace('m', '.')
+    numbers = (float(num) for num in replaced_m.split('x'))
+    return numbers
+
 def print_values(lengths : List):
     st_dev = statistics.pstdev(lengths)
     print("Standard deviation of the length: " + str(st_dev) + " meters")
@@ -268,15 +347,37 @@ def print_values(lengths : List):
 
 #Entrence Point
 def main(args):
-    with open(os.path.abspath(args.path)) as txtdatei:
-        positions = read_txt(txtdatei)
-    plot_x_y(positions, args.path)
-    plot_histogram(positions,args.path)
-    plot_deviation(positions, args.path, (args.x, args.y))   
-    plot_probability(positions, args.path, (args.x, args.y))
-    plot_sigma_ellipses(positions, args.path, (args.x, args.y))
-    if (args.show):
-        plt.show()
+    path = os.path.abspath(args.path)
+
+    # Process a directory by calling ellipses plot for every logfile.
+    if os.path.isdir(path):
+        positions_list = []
+        real_positions = []
+        for file_name in os.listdir(path):
+            if file_name.endswith('.txt') and file_name.count('m') == 4 and file_name.count('_') == 1 and file_name.count('x') == 3:
+                file_path = os.path.join(path, file_name)
+                (x,y,z) = extract_numbers_from_filename(file_name)
+                with open(file_path) as txtdatei:
+                    positions = read_txt(txtdatei)
+                positions_list.append(positions)
+                real_positions.append((x,y,z))
+        print(real_positions)
+        plot_3d_sigma_variances(positions_list, real_positions, save_fig=False)
+
+    # Process a single file by plotting everything related to one position.
+    elif os.path.isfile(path):
+        with open(path) as txtdatei:
+            positions = read_txt(txtdatei)
+        plot_x_y(positions, args.path, save_fig=args.save)
+        plot_histogram(positions, args.path, save_fig=args.save)
+        plot_deviation(positions, args.path, (args.x, args.y), save_fig=args.save)
+        plot_probability(positions, args.path, (args.x, args.y), save_fig=args.save)
+        plot_sigma_ellipses(positions, args.path, (args.x, args.y), save_fig=args.save)
+    else:
+        print(f"The specified path '{path}' does not exist.")
+        return
+    
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -289,9 +390,9 @@ if __name__ == '__main__':
                            type=str,
                            help="path to txt files")
 
-    my_parser.add_argument("-s", "--show",
+    my_parser.add_argument("-s", "--save",
                            action="store_true",
-                           dest="show",
+                           dest="save",
                            help="an optional argument")
 
     my_parser.add_argument("-x", "--xaxis",
