@@ -6,7 +6,7 @@ import math
 import json
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
-from scipy.interpolate import griddata
+from scipy.spatial import Delaunay
 from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 from matplotlib import cm
@@ -17,9 +17,15 @@ from typing import List
 
 # Data Structure holding the positions-Information
 class PositionData:
-    x = []
-    y = []
-    time = []
+    def __init__(self):
+        self.x = []
+        self.y = []
+        self.time = []
+
+    def clear(self):
+        self.x.clear()
+        self.y.clear()
+        self.time.clear()
 
 #Plot-Function, visualizes Latitude and Longitude in single subplots
 def plot_x_y(positions : PositionData, path : str, save_fig=False):
@@ -134,63 +140,26 @@ def plot_deviation(positions : PositionData, path : str, real_pos : tuple, save_
     if save_fig:
         plt.savefig(path.replace(".txt", "") + "_deviation_plot.png", bbox_inches='tight')
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from scipy.interpolate import griddata
-
-######def plot_3d_sigma_variances(positions_list, real_pos_list, save_fig=False):
-######    fig = plt.figure("3D Sigma Variance Plot")
-######    ax_3d = fig.add_subplot(111, projection='3d')
-######
-######    # Create a DataFrame outside the loop
-######    xyz_list = []
-######    for positions, real_pos in zip(positions_list, real_pos_list):
-######        angle, length = get_vectors_euler(zip(positions.x, positions.y), real_pos)
-######        x = np.array(positions.x)
-######        y = np.array(positions.y)
-######        d = np.array(length)
-######        xyz_list.append({'x': x, 'y': y, 'd': d})
-######
-######    # Combine data into a single DataFrame
-######    df = pd.DataFrame(xyz_list)
-######    # Create the meshgrid directly from the DataFrame values
-######    grid_x, grid_y = np.mgrid[0:1:8j, 0:1:8j]
-######    points = (positions.x, positions.y)
-######    # Flatten the coordinates for use in griddata
-######    grid_z = griddata(points, length, (grid_x, grid_y), method='nearest')
-######    surf = ax_3d.plot_surface(grid_x, grid_y, grid_z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-######    fig.colorbar(surf, shrink=0.5, aspect=5)
-######
-######    if save_fig:
-######        plt.savefig("3d_variance_plot.png", bbox_inches='tight')
-def plot_3d_sigma_variances(positions_list, real_pos_list, save_fig=False):
+def plot_3d_deviation(positions_list, save_fig=False):
     fig = plt.figure("3D Sigma Variance Plot")
     ax_3d = fig.add_subplot(111, projection='3d')
-
-    # Create a DataFrame outside the loop
     xyz_list = []
-
-    i = 0
-    for real_pos in real_pos_list:
-        # TODO, hier stimmt die berechnete length nicht.
-        print(len(positions_list[i].x))
-        angle, length = get_vectors_euler(zip(positions_list[i].x, positions_list[i].y), real_pos)
-        i += 1
-        x = np.array(real_pos[0])  # Use real_pos for x
-        y = np.array(real_pos[1])  # Use real_pos for y
-        d = np.mean(length)       # Use mean(length) for z
-        print(f" realpos {real_pos}, d {d}, len(length) {len(length)}")
-        xyz_list.append({'x': x, 'y': y, 'd': d})
+    for positions, real_pos in positions_list:        
+        angle, length = get_vectors_euler(zip(positions.x, positions.y), real_pos)
+        xyz_list.append({'x': -real_pos[0], 'y': real_pos[1], 'd': np.mean(length)})
 
     # Combine data into a single DataFrame
     df = pd.DataFrame(xyz_list)
-    
-    #surf = ax_3d.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-    surf = ax_3d.plot(df["x"], df["y"], df["d"], "o")
+    anchors_df = pd.DataFrame(anchor_positions, columns=["x", "y", "d"])
 
+    # Create a Delaunay triangulation
+    triangulation = Delaunay(df[["x", "y"]])
+
+    # Plot the triangular surface
+    ax_3d.plot_trisurf(df["x"], df["y"], df["d"], triangles=triangulation.simplices, cmap=cm.coolwarm)
+    ax_3d.scatter(-anchors_df["x"], anchors_df["y"], anchors_df["d"], color='red', s=50, label='Anchors')
+    #surf = ax_3d.scatter(df["x"], df["y"], df["d"], cmap=cm.coolwarm, antialiased=False)
+    #surf = ax_3d.plot(df["x"], df["y"], df["d"], "o")
     if save_fig:
         plt.savefig("3d_variance_plot.png", bbox_inches='tight')
 
@@ -352,17 +321,16 @@ def main(args):
     # Process a directory by calling ellipses plot for every logfile.
     if os.path.isdir(path):
         positions_list = []
-        real_positions = []
         for file_name in os.listdir(path):
             if file_name.endswith('.txt') and file_name.count('m') == 4 and file_name.count('_') == 1 and file_name.count('x') == 3:
                 file_path = os.path.join(path, file_name)
-                (x,y,z) = extract_numbers_from_filename(file_name)
+                (real_x,real_y,real_z) = extract_numbers_from_filename(file_name)
+                positions = PositionData()
+                positions.clear()
                 with open(file_path) as txtdatei:
                     positions = read_txt(txtdatei)
-                positions_list.append(positions)
-                real_positions.append((x,y,z))
-        print(real_positions)
-        plot_3d_sigma_variances(positions_list, real_positions, save_fig=False)
+                positions_list.append((positions, (real_x,real_y,real_z)))
+        plot_3d_deviation(positions_list, save_fig=False)
 
     # Process a single file by plotting everything related to one position.
     elif os.path.isfile(path):
@@ -381,6 +349,14 @@ def main(args):
 
 
 if __name__ == '__main__':
+    # Save fixed Anchotpositions
+    anchor_positions = [
+        [0.5, 0.5, 4.0],
+        [0.5, 5.5, 4.0],
+        [7, 1.5, 4.0],
+        [7, 6.5, 4.0],
+        [4, 0.1, 1.2]
+    ]
     # Create the parser
     my_parser = argparse.ArgumentParser(description=main.__doc__)
 
