@@ -12,18 +12,18 @@ This configuration approach ensures versatility and individuality among the UWB 
 
 \subsection{Set Identification Parameters}
 The configuration of each device is primarily defined by two key parameters: the device ID and its designated role. 
-To establish these parameters, a setup process is executed through the \yellowconsolas{preproduction\_eeprom\_settings} function, which is integrated into the setup section of the main.cpp file. 
+To establish these parameters, a setup process is executed through the preproduction\_eeprom\_settings function, which is integrated into the setup section of the main.cpp file. 
 This function accepts the current role and device ID as uint8\_t variables and records them in the EEPROM memory at an arbitrary position.
 \vspace{4pt}
 \newline
 It is important to note that this setup process should only be performed once per device, typically during the initial configuration. 
-Once the parameters are set and saved in the EEPROM, there is no need to invoke the \yellowconsolas{preproduction\_eeprom\_settings} function again during subsequent flashing processes unless a change in device configuration is desired. 
+Once the parameters are set and saved in the EEPROM, there is no need to invoke the preproduction\_eeprom\_settings function again during subsequent flashing processes unless a change in device configuration is desired. 
 This approach streamlines the device setup procedure and ensures the persistence of the specified parameters across device power cycles.
 
 \subsubsection{Role}
 The role parameter is pivotal in determining whether a device functions as a tag or an anchor within the system. 
 This parameter is stored in the EEPROM memory at address 0 and is represented by a binary value of 0 or 1. 
-Throughout the codebase, this parameter is accessed and utilized through the \blueconsolas{IS\_INITIATOR} constant.
+Throughout the codebase, this parameter is accessed and utilized through the IS\_INITIATOR constant.
 \vspace{4pt}
 \newline
 If the value stored at EEPROM address 0 is 1, the device is configured to act as a tag. 
@@ -51,14 +51,14 @@ As a result, every device, both anchors and tags, must be aware of their own uni
 \newline
 For anchors, their individual addresses are directly determined by their respective device IDs. 
 Each anchor selects its address from a predefined list based on its specific device ID. 
-In contrast, the address for tags remains constant and is universally known across all devices as the global constant \blueconsolas{INITIATOR\_ADDR}. 
+In contrast, the address for tags remains constant and is universally known across all devices as the global constant INITIATOR\_ADDR. 
 This address assignment methodology ensures that each device can securely encrypt and decrypt messages using the appropriate addresses, contributing to the overall data security and integrity of the UWB communication system.
 
 \section{User Input}
 User input to change the current operating mode is facilitated through User Button 1. 
-By associating an interrupt with this button, the \blueconsolas{ble\_kill\_flag} is set, and the \blueconsolas{current\_mode} variable is updated accordingly. 
+By associating an interrupt with this button, the ble\_kill\_flag is set, and the current\_mode variable is updated accordingly. 
 For a comprehensive understanding of how these components are managed, please refer to section \ref{sec:Ble_Task}. 
-This section will delve into the specifics of how the interrupt, \blueconsolas{ble\_kill\_flag}, and \blueconsolas{current\_mode} variable interact to facilitate seamless mode switching in the tag device's operation. 
+This section will delve into the specifics of how the interrupt, ble\_kill\_flag, and current\_mode variable interact to facilitate seamless mode switching in the tag device's operation. 
 
 \section{Main Variables}
 \begin{itemize}
@@ -105,15 +105,17 @@ Furthermore the three pins for the user LEDs are defined as output and all set t
 The current mode is set to "uwb\_mode" and the MQTT- as well as the TOF-Task are started. 
 \vspace{4pt}
 \newline
-The the function checks if the device it is running on is defined as an initiator. 
+The function then checks if the device, it is running on, is defined as an initiator. 
 If so the BLE- and EKF-Task are started as well. 
 \vspace{4pt}
 \newline
-If the device is defined as a responder reads the JSON file named "uwb\_diacnostic\_type.json" from the SPIFFS on the ESP32.
+If the device is defined as a responder, it reads the JSON file named 
+\newline
+"uwb\_diacnostic\_type.json" from the SPIFFS on the ESP32.
 It then creates a DynamicJsonDocument object (latest\_rx\_diagnostics) with three times the size of the JSON file, providing extra space for storing communication channel data.
-The code proceeds to deserialize the contents of the JSON file into the latest\_rx\_diagnostics object. If there's an error during deserialization, it prints an error message to the serial monitor; otherwise, it indicates successful insertion of the JSON template. The file is then closed. Finally, the device ID is retrieved from EEPROM, and the "DeviceId" field in the latest\_rx\_diagnostics JSON document is set to this device ID so the MQTT broker can tell where from what responder the data came from. 
+The code proceeds to deserialize the contents of the JSON file into the latest\_rx\_diagnostics object. If there's an error during deserialization, it prints an error message to the serial monitor; otherwise, it indicates successful insertion of the JSON template. The file is then closed. Finally, the device ID is retrieved from EEPROM, and the "DeviceId" field in the latest\_rx\_diagnostics JSON document is set to this device ID so the MQTT broker can tell where from what responder the data originated. 
 
-\subsection{void user\_1\_button(void)}
+\subsection{void user\_1\_button}
 \label{subsec:user_1_button}
 The user\_1\_button function serves as an interrupt routine arrached to the user button 1. 
 First the interrupt is detached. 
@@ -121,13 +123,13 @@ If the device is an initiator and in uwb\_mode it will toggle the ble\_kill\_fla
 If it is in ble\_mode it will toggle the ble\_kill\_flag and set to current mode to uwb\_mode. 
 Lastly the interrupt gets attached back to the user button 1. 
 
-\subsection{void animate\_leds(void)}
+\subsection{void animate\_leds}
 \label{subsec:animate_leds}
 This function sequentially illuminates and extinguishes LEDs in a predefined pattern, creating a visual animation. 
 It provides a quick and noticeable indication of a specific mode. 
-The LEDs involved in the animation are typically connected to GPIO pins on the UWB device. 
+The LEDs involved in the animation are connected to GPIO pins on the ESP32. 
 
-\subsection{void preproduction\_eeprom\_settings(uint8\_t dev\_id, uint8\_t is\_initiator)}
+\subsection{void preproduction\_eeprom\_settings}
 \label{subsec:preproduction_eeprom_settings}
 This function takes two parameters - dev\_id representing the unique device identifier and is\_initiator indicating whether the device operates as an initiator or not. 
 It writes these values into EEPROM, ensuring that the correct device ID and role information are stored persistently. This initialization process is crucial for the proper functioning of other tasks and functionalities in the UWB device, as they depend on the settings retrieved from EEPROM.
@@ -135,7 +137,7 @@ It writes these values into EEPROM, ensuring that the correct device ID and role
 \subsection{Freertos Tasks}
 \label{subsec:Freertos_Tasks}
 The functions for the TOF-, MQTT-, BLE-, and EKF-Task are handeled by FreeRTOS to ensure concurrent and parallel execution of those functionalities within the device since they are the most critical to the operation. 
-There functions are handled separately in section \ref{kp} - \ref{kp}. 
+There functions are handled separately in the sections \ref{chap:tof_task} - \ref{sub:MQTT_Task}. 
 
 \section{Scheduler}
 \label{sec:Scheduler}
@@ -173,15 +175,14 @@ In summary, TOF-Task serves as the central orchestrator, dynamically allocating 
 The EKF task is a critical component of the system, running exclusively on the tag device. 
 Its primary purpose is to leverage the information provided by the "double distances[]" array, which contains the distances to all available anchors. 
 With this data, the EKF task performs calculations to estimate the tag's position. 
-This estimation process is triggered every 2.5 seconds, ensuring that the system continually updates its understanding of the tag's location.
+This estimation process is triggered every time when all landmark distances are covered, ensuring that the system continually updates its understanding of the tag's location.
 \vspace{4pt}
 \newline
 The EKF algorithm, a cornerstone of this task, incorporates statistical techniques and dynamic models to refine the accuracy of the position estimate. 
 By doing so, it can effectively handle factors like noise and uncertainties, making it a robust solution for real-time positioning.
 \vspace{4pt}
 \newline
-Once the EKF-task completes its calculations, the resulting X and Y coordinate values are transmitted through the UART (Universal Asynchronous Receiver-Transmitter) interface. 
-This communication method allows for the seamless exchange of data with other components of the system or external devices. 
+Once the EKF-task completes its calculations, the resulting X and Y coordinate values are transmitted through the UART interface and via MQTT.  
 \vspace{4pt}
 \newline
 For a comprehensive understanding of the theory and principles that underpin the Extended Kalman Filter and its role in this system, you'll find in-depth coverage in Chapter \ref{chap:EKF_Handling}. 
@@ -201,7 +202,7 @@ The second objective of the BLE-Task is to relay the current position of the tag
 When the BLE-Task is first initialized, it instantiates the BleConfigLoader class. The workings of this class, along with the broader Bluetooth management process, will be expounded upon in the forthcoming chapter, referenced as \ref{chap:Bluetooth_Handling}.
 \vspace{4pt}
 \newline
-The tag device operates in two distinct modes saved in the \blueconsolas{current\_mode} variable. The first is the uwb\_mode, which serves as its standard operating mode. In this mode, the device performs distance measurements, calculates its own position, and transmits this information via UART, as previously described in \ref{chap:tof_task}.
+The tag device operates in two distinct modes saved in the current\_mode variable. The first is the uwb\_mode, which serves as its standard operating mode. In this mode, the device performs distance measurements, calculates its own position, and transmits this information via UART, as previously described in \ref{chap:tof_task}.
 \vspace{4pt}
 \newline
 The other operational mode is the ble\_mode, which is exclusively focused on maintaining a connection with the desktop software. 
@@ -210,10 +211,10 @@ It also outputs the currently saved anchor positions so that they can be display
 
 \subsubsection{Output current position}
 In the default startup scenario, where the uwb\_mode is automatically selected without any additional user input, the BLE-Task is responsible for taking the currently estimated position from the global own\_position variable and transmitting it via Bluetooth. 
-This transmission is achieved using the \yellowconsolas{send\_position} method of the BleConfigLoader class. Detailed insight into the functionality of this process will be provided in the forthcoming chapter, referenced as \ref{chap:Bluetooth_Handling}.
+This transmission is achieved using the send\_position method of the BleConfigLoader class. Detailed insight into the functionality of this process will be provided in the forthcoming chapter, referenced as \ref{chap:Bluetooth_Handling}.
 \vspace{4pt}
 \newline
-This continuous updating procedure persists indefinitely, with the current position being sent every 2.5 seconds, unless the \blueconsolas{ble\_kill\_flag} is triggered. 
+This continuous updating procedure persists indefinitely, with the current position being sent repeatedly, unless the ble\_kill\_flag is triggered. 
 The flag is set when a user initiates a mode change to ble\_mode by pressing user button 1.
 \vspace{4pt}
 \newline
@@ -245,11 +246,11 @@ It showcases the capability to disseminate critical information, such as device 
 The inclusion of delays between message publications controls the communication frequency, aligning with the specific requirements of the UWB communication system. 
 
 \subsubsection{Configuration}
-When the user triggers a mode change to ble\_mode by pressing button 1, the \blueconsolas{ble\_kill\_flag} is activated, which effectively terminates the loop responsible for continuously transmitting the current position.
+When the user triggers a mode change to ble\_mode by pressing button 1, the ble\_kill\_flag is activated, which effectively terminates the loop responsible for continuously transmitting the current position.
 \vspace{4pt}
 \newline
-In the ble\_mode, the device first retrieves its current configuration, encompassing all previously saved anchor positions, from the EEPROM. This retrieval process is achieved through the \yellowconsolas{load\_config\_from\_eeprom} method of the BleConfigLoader class. 
-Subsequently, the device compiles this configuration data into a string formatted as a JSON object and transmits it via Bluetooth, using the \yellowconsolas{save\_config\_to\_ble} method. 
+In the ble\_mode, the device first retrieves its current configuration, encompassing all previously saved anchor positions, from the EEPROM. This retrieval process is achieved through the load\_config\_from\_eeprom method of the BleConfigLoader class. 
+Subsequently, the device compiles this configuration data into a string formatted as a JSON object and transmits it via Bluetooth, using the save\_config\_to\_ble method. 
 This JSON-formatted data includes the anchor positions.
 \vspace{4pt}
 \newline
@@ -257,12 +258,12 @@ Following this configuration update transmission, a new loop commences. In this 
 These positions are then saved locally on the tag device, and the new anchor configuration is conveyed back to the configurator device, ensuring that the positions are received and updated accurately.
 \vspace{4pt}
 \newline
-In addition to this configuration exchange, the \yellowconsolas{animate\_leds} function is invoked, causing the user LEDs to flash in a distinct pattern. 
+In addition to this configuration exchange, the animate\_leds function is invoked, causing the user LEDs to flash in a distinct pattern. 
 This visual feedback serves as an indicator to the user that the device is in Bluetooth configuration mode.
 \vspace{4pt}
 \newline
 The configuration loop persists until the "Save Config" button is pressed within the UWB Configuration desktop GUI. 
-This action initiates the sending of a character to the tag device, triggering the \yellowconsolas{save\_config\_to\_eeprom} method. 
+This action initiates the sending of a character to the tag device, triggering the save\_config\_to\_eeprom method. 
 This method is responsible for writing the updated anchor coordinates into the EEPROM of the device and subsequently restarting the device with the new configuration in place. 
 This completes the process of updating and saving anchor positions for the tag device during its operation in ble\_mode.
 

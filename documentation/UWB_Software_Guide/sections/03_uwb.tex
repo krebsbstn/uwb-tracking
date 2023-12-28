@@ -41,10 +41,10 @@ To estimate the distance, four timestamps, marked in blue in Figure \ref{fig:tof
 	\end{table}
 \end{center}
 
-To calculate the time it took for the poll message to travel from the initiator to the responder, the \blueconsolas{poll\_tx\_ts} timestamp is subtracted from the \blueconsolas{poll\_rx\_ts} timestamp, yielding the \blueconsolas{rtd\_init} value. Similarly, for the time the response message took to travel in the opposite direction, \blueconsolas{resp\_tx\_ts} is subtracted from \blueconsolas{resp\_rx\_ts}, resulting in the \blueconsolas{rtd\_resp} variable.
+To calculate the time it took for the poll message to travel from the initiator to the responder, the poll\_tx\_ts timestamp is subtracted from the poll\_rx\_ts timestamp, yielding the rtd\_init value. Similarly, for the time the response message took to travel in the opposite direction, resp\_tx\_ts is subtracted from resp\_rx\_ts, resulting in the rtd\_resp variable.
 \vspace{4pt}
 \newline
-To determine the distance between the initiator and the responder, the two times (\blueconsolas{rtd\_init} and \blueconsolas{rtd\_resp}) are averaged. Before averaging, the response time (\blueconsolas{rtd\_resp}) is adjusted by applying an offset factor (1 - clockOffsetRatio). This compensates for potential variations that may arise if the clock of the initiator runs slightly faster or slower than the responder due to factors such as aging effects, temperature, voltage, or manufacturing discrepancies.
+To determine the distance between the initiator and the responder, the two times (rtd\_init and rtd\_resp) are averaged. Before averaging, the response time (rtd\_resp) is adjusted by applying an offset factor (1 - clockOffsetRatio). This compensates for potential variations that may arise if the clock of the initiator runs slightly faster or slower than the responder due to factors such as aging effects, temperature, voltage, or manufacturing discrepancies.
 \vspace{4pt}
 \newline
 Finally, to compute the distance between the two devices, the average time is converted to seconds and then multiplied by the predefined speed of light, representing the speed of electromagnetic field expansion.

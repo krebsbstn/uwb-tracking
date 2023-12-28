@@ -86,7 +86,7 @@ The class facilitates advertising, enables data reading and sending, and provide
 \end{itemize}
 
 \subsection{void init\_server()}
-\ref{sub:init_server}
+\label{sub:init_server}
 The init\_server method initializes the Bluetooth server. 
 First it creates a BLEDevice object of the NimBLE library naming it ESP32. 
 Then it creates a server using the createServer method of BLEDevice and puts the pointer to this server in the pServer variable. 
@@ -101,7 +101,7 @@ The init\_services method initializes all Bluetooth services by creating instanc
 It iterates through the my\_services array described in \ref{sub:BleServer_Variables} and creates a service for each element of type "Service" adding the respective characteristics for that service. 
 
 \subsection{std::string read\_value(const std::string uuid)}
-\ref{sub:read_value}
+\label{sub:read_value}
 The read\_value method reads and retrieves the current value of a specified Bluetooth characteristic identified by its UUID. 
 It iterates through the list of services, locates the desired characteristic using its UUID, and returns the characteristic's value as a std::string. 
 If the specified characteristic is not found, it prints a debug message to the Serial Monitor. 
@@ -126,13 +126,13 @@ Additionally, a descriptor is created for the characteristic, allowing for addit
 
 \section{BleConfigLoader Class}
 \label{sec:BleConfigLoader}
-The BleConfigLoader class serves as a fundamental component in the tag device, responsible for initializing and managing the server structure previously discussed in Section \ref{sec:Server_Structure}. During its initialization, it activates the server and periodically broadcasts its presence at intervals defined by the constants \blueconsolas{BLE\_MIN\_INTERVAL} and \blueconsolas{BLE\_MAX\_INTERVAL} in the ble-server.h file.
+The BleConfigLoader class serves as a fundamental component in the tag device, responsible for initializing and managing the server structure previously discussed in Section \ref{sec:Server_Structure}. During its initialization, it activates the server and periodically broadcasts its presence at intervals defined by the constants BLE\_MIN\_INTERVAL and BLE\_MAX\_INTERVAL in the ble-server.h file.
 \vspace{4pt}
 \newline
 Within this class, there are methods for extracting anchor position information from incoming BLE characteristics, saving this data locally, and writing it to the device's EEPROM for persistent storage. Additionally, it includes methods for sending individual characteristics when called. For a more comprehensive understanding of these methods, please consult the DOXYGEN Documentation.
 \vspace{4pt}
 \newline
-In the main.cpp file, an instance of the BleConfigLoader object is created, and its methods are invoked to enable the tag device's Bluetooth functionality. The actual invocation occurs within the \blueconsolas{BLE\_Task}, as detailed in Section \ref{sec:Ble_Task}. This class encapsulates the core BLE configuration and communication logic, facilitating seamless operation and data exchange in the tag device.
+In the main.cpp file, an instance of the BleConfigLoader object is created, and its methods are invoked to enable the tag device's Bluetooth functionality. The actual invocation occurs within the BLE\_Task, as detailed in Section \ref{sec:Ble_Task}. This class encapsulates the core BLE configuration and communication logic, facilitating seamless operation and data exchange in the tag device.
 
 \subsection{BleConfigLoader Variables}
 \label{sub:BleConfigLoader_Variables}
@@ -154,7 +154,7 @@ In the main.cpp file, an instance of the BleConfigLoader object is created, and 
 	
 \end{itemize}
 
-\subsection{BleConfigLoader Konstruktor}
+\subsection{BleConfigLoader Construktor}
 \label{sub:BleConfigLoader_Konstruktor}
 The BleConfigLoader creates an instance of the BleConfigLoader class and calls the init\_server method of the my\_server object of type BleServer. 
 The method is cescribed in \ref{sub:init_server}. 
