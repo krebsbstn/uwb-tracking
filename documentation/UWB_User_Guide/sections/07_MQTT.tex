@@ -1,0 +1,13 @@
+\chapter{MQTT}
+Another way to obtain the current position of the tag is via MQTT. 
+To utilize this feature it is necessary to put the WiFi SSID and Password, as well as the IP address of the device hosting the MQTT server into all the involved devices. 
+This is done by changing the parameters in the respective source code and flashing all UWB devices. 
+\vspace{4pt}
+\newline
+The tag's MQTT messages are published to the topic ''tag'' and contain the currently estimated X-, Y- and Z-coordinates. 
+It is updated after each new iteration of the EKF. 
+\vspace{4pt}
+\newline
+The anchor's MQTT messages contain the latest information about the UWB communication channel between each individual anchor and the tag. 
+After replying to every UWB request each anchor publishes its device id together with all the channel information to the MQTT server under the "anchor" topic. 
+
