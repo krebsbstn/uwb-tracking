@@ -67,14 +67,14 @@ only-used=true
   each featuring an ESP32 microcontroller and integrated with DWM3000
   modules from Quorvo.
   \newline
-  This system is capable of achieving precise localization through \ac{TWR}
+  This system is capable of achieving localization with an accuracy of XXX\,cm through \ac{TWR}
   measurements between one designated ''Tag'' board and five other ''Anchor'' boards.
   The collected distance measurements are processed by an \ac{EKF} running locally
-  on the Tag board, enabling it to determine its own position with high accuracy,
-  relying on the fixed positions of the Anchor boards.
+  on the Tag board, enabling it to determine its own position,
+  relying on fixed, a priori known, positions of the Anchor boards.
   \newline
   This paper presents a comprehensive overview of the system's architecture,
-  the key components, and the remarkable capabilities it offers for accurate
+  the key components, and the capabilities it offers for accurate
   indoor positioning and tracking applications.
 \end{abstract}
 
@@ -94,43 +94,41 @@ only-used=true
 Indoor positioning and tracking have become increasingly important in various areas,
 such as logistics, healthcare, industrial automation and smart infrastructures.
 Conventional positioning systems often face challenges in terms of accuracy, scalability and robustness.
-To face these requirements we developed a \ac{UWB} positioning system that utilizes
-hardware and advanced algorithms to generate precise Position information.
+To face these requirements we developed an \ac{UWB} positioning system that utilizes
+hardware and advanced algorithms to generate precise position information in the 2D-Plane at ground level.
 
 The designed \ac{UWB} system consists of six identical boards,
 all based on the ESP32 microcontroller, a versatile and powerful platform that is 
 known for its capabilities in wireless communication and processing.
 These custom-made \acp{PCB} are equipped with DWM3000 modules from Quorvo,
-which utalize powerful UWB capabilities for long-range wireless communication.
+which utalize powerful UWB capabilities for long-range wireless communication. 
+All schematics, layouts and code used in the project are available openly under a XXX license on GitHub. 
 
 One of these boards is referred to as a ''tag''.
 It is responsible for initiating measurements with the other five "anchor" boards.
 The innovative aspect of the system lies in its ability to perform accurate localization
-without dependence on external infrastructure or centralized processing.
+without dependence on external infrastructure for centralized processing, since all the necessary calculations are performed on the device itself that is being localized.
 
 The heart of the positioning system is the \acf{EKF} implemented locally on the tag board.
-This \ac{EKF} takes the distance measurements obtained by \acf{TWR} with the Anchor Boards and calculates,
-and, based on their known fixed positions, calculates the real-time position of the tag board
-with remarkable precision.
-This decentralized approach not only ensures fast and reliable positioning, but also scalability and is therefore
-suitable for various applications where real-time position data is critical.
+This \ac{EKF} takes the distance measurements obtained by \acf{TWR} with the Anchor Boards and calculates, based on their known fixed positions, the real-time position of the tag board.
+This centralized approach not only ensures fast and reliable positioning, but also theoretical scalability in terms of using more anchors and therefore expanding the coordinate system. 
 
 The measuring principle of distance measurement is explained in the following section.
 A distance measurement was implemented based on the associated IEEE standard.
-The next chapter deals with the system architecture, including the choice of anchor positions and
-information about the sceduled timing in relation to position measurements.
+The chapter \ref{Section:principle} describes the system architecture, including the choice of anchor positions and
+information about the scheduled timing in relation to position measurements.
 This is followed by a brief description of the hardware designed and
 its wide range of applications as a general evaluation board.
 In order to explain the implementation of the firmware in more detail,
 chapter \ref{section:firmware} describes the distribution of the functionalities to various tasks of the \ac{RTOS}.
 The results of the static tests can be found in chapter \ref{section:tests}.
-Both the spatial resolution and some limitations are explained.
-Finally, the last chapter summarizes the most important key words and provides a critical review of the results.
+Both, the spatial resolution and the most important limitations are explained.
+Finally, the last chapter summarizes the most important insights and provides a critical review of the results.
 
 
 
 \section{Measurement Priciple}\label{Section:principle}
-\acf{TWR} is our foundational technique for obtaining precise distance
+\acf{TWR} is a foundational technique for obtaining precise distance
 measurements within the UWB positioning system.
 It relies on the time it takes for signals to travel from a tag board to anchor boards
 and back again.
@@ -138,8 +136,8 @@ This time measurement, in compliance with the IEEE 802.15.4a/4z standards,
 offers the basis for distance estimation by multiplying the time traveled with the speed of light.
 
 The following Figure \ref{fig:twr} shows how a
-\ac{TWR} Handschake is done.
-The Tag Firmware calculates the \acf{TOF} aswell
+\ac{TWR} Handshake is done.
+The Tags firmware calculates the \acf{TOF} as well
 as the distance between both devices by comparing the
 timestamps of sending and reception.
 
@@ -185,33 +183,31 @@ timestamps of sending and reception.
 		\node [ghost, below=1.5cm of tag_timestamp.east] (response_label) {Response};
 		
 	\end{tikzpicture}
-	\caption{Timingdiagram of \acf{TWR}}
+	\caption{Timing diagram of \acf{TWR}}
 	\label{fig:twr}
 \end{figure}
 
 For detailed technical specifications and methods,
-we refer interested readers to the Documentation of
+we refer interested readers to the documentation of
 the IEEE 802.15.4a/4z standards \cite{IEEE802154a} \cite{IEEE802154z},
 which provides comprehensive guidelines for the
 complex orchestration of \ac{UWB} signals and the calculation of \ac{TOF}.
-These standards ensure the rigor and accuracy of our distance measurements.
+These standards ensure the correctness and accuracy of our distance measurements.
 
 \section{System Architecture}\label{section:system_arch}
-In our scenario, five Anchors are strategically distributed throughout the room,
-positioned at a height of 4m on the ceiling to minimize the likelihood of 
-\ac{NLOS} conditions.
-These five Anchors do not rely on information specific to their usage or mounting position.
+In our scenario, five anchors are strategically distributed throughout the room,
+positioned at a height of 4\,m on the ceiling to maximize the likelihood of 
+\ac{LOS} conditions as it facilitates more accurate \ac{TOF} measurements by minimizing multipath interference, and enhance signal reliability, leading to more precise and reliable location information than in an \ac{NLOS} environment.
+These five anchors do not rely on information specific to their usage or mounting position.
 
-Customized settings, such as Anchor positions,
-can be transmitted to the tag within our designed system through a \ac{BLE} interface.
-The tag leverages these provided Anchor positions,
+These anchor positions are being transmitted to the tag via a \ac{BLE} interface. 
+The tag leverages these provided anchor positions,
 in conjunction with distance measurements,
-to determine its own position accurately.
+to determine its own position accurately. 
 
-The following diagram illustrates the interactions between the individual components.
-It is clear that when selecting the anchor positions while setting up on a new location,
-that they should be evenly distributed along all three axes.
-In addition, an overhead perspective helps to reduce measurement inaccuracies.
+The following figure \ref{fig:systemarch} illustrates the interactions between the individual components.
+%It is clear that when selecting the anchor positions while setting up on a new location, that they should be evenly distributed along all three axes.
+%In addition, an overhead perspective helps to reduce measurement inaccuracies.
 
 \begin{figure}[hbt!]
 	\centering
@@ -254,13 +250,13 @@ In addition, an overhead perspective helps to reduce measurement inaccuracies.
 		\node [label] (legend) at (2.5,2) {AX = Anchor X \\TY = Tag Y};
 		
 	\end{tikzpicture}
-	\caption{Systemarchitecture for Positioning}
+	\caption{System architecture for positioning.}
 	\label{fig:systemarch}
 \end{figure}
 
 The round-trip time of the system is the product of the number of anchors and the ranging time.
-The time for a distance measurement could be reduced to 50ms, which leads to a general position frequency of 250ms with 5 anchors.
-This low ranging time of 50ms was achieved by implementing the firmware of the anchors interrupt-based in a multicore controller.
+The time for one distance measurement could be brought down to 50\,ms per recurrence without sacrificing accuracy, leading to a general position frequency of 250\,ms with 5 anchors. 
+This low ranging time of 50\,ms was achieved by implementing the firmware of the anchors interrupt-based in a multicore controller.
 
 Detailed information about the chances taken to optimize the round-trip time by reducing each individual rangingtime
 is given in the chapter about the Firmware.
@@ -272,7 +268,7 @@ boards.
 However, our proprietary board development enables specialized component selection
 tailored to their intended use cases.
 User-friendliness was a paramount consideration during the design process,
-resulting in the integration of multiple user buttons and LEDs for later determined purpose.
+resulting in the integration of multiple user buttons and LEDs for later determined purposes like initializing the \ac{BLE} server and entering the configuration mode to change the stored anchor positions.
 Additionally, the PCB incorporates a convenient LiPo battery charging capability
 via USB-C.
 
@@ -289,11 +285,9 @@ performance but also prioritizes user convenience.
 To meet the demanding timing requirements essential for \ac{TOF}
 measurements and enhance network round-trip times,
 our firmware is implemented based on a \ac{RTOS}.
-FreeRTOS \cite{FreeRTOS_2023}, in particular,
-offers the capability to create multiple tasks that collaborate coherently
-and can be executed simultaneously on each of the two cores of the ESP32 microcontroller.
+In particular FreeRTOS \cite{FreeRTOS_2023} offers the capability to create multiple tasks that collaborate coherently and can be executed simultaneously on each of the two cores of the ESP32 microcontroller.
 
-The documentation of the source code is continuously made available online with the help of Doxygen and Github pages.
+The documentation of the source code is continuously made available online with the help of Doxygen and GitHub pages.
 The implementation can therefore be viewed publicly\cite{doxygen-doku}.
 
 In the regular tracking mode,
@@ -312,10 +306,9 @@ encapsulated in a common superclass.
 This design decision allows us to maintain a lean and clear software structure,
 reduce redundancy and simplify maintenance.
 
-In practice, the tag, which acts as the \ac{TWR} initiator,
-iterates through a list of anchors, each of which serves as a \ac{TWR} responder.
-The tag generates distance measurements with each anchor.
-The result is a comprehensive data set that serves as the basis for precise localization calculation.
+In practice, the tag, which acts as the \ac{TWR} initiator, as part ov the localization architecture iterates through a list of anchors, each of which serves as an individual \ac{TWR} responder. 
+The tag generates distance measurements with each anchor. 
+The result is a comprehensive data set that serves as the basis for precise localization calculation. 
 
 \subsection{EKF-Task}\label{section:firmware-ekf}
 The \ac{EKF} employed in our system leverages two distinct mathematical models
@@ -323,15 +316,13 @@ to achieve precise position estimation.
 For readers interested in delving deeper into the theoretical foundations of the
 Kalman Filter, we recommend consulting the work of Li Qiang et al. in
 "Kalman Filter and Its Application"~\cite{Kalman}.
-The EKF  on the Tag utilizes a prediction model based on the constant velocity model assumption.
-It posits that the tracked object moves with a consistent velocity along its recent
-trajectory.
+The EKF  on the tag utilizes a prediction model based on the constant velocity and trajectory model assumption.
 
 This model serves as a fundamental tool for forecasting the future position of the tag.
 For potentially more dynamic systems the use of more realistic models
-for the tag movement could improve the dynamic behaviour of the Kalman Filter.
+for the tag movement could improve the dynamic behavior of the Kalman Filter.
 
-The measurement model is encapsulated in the Jacobienmatrix given in Equation~\ref{eq:measurementmatrix},
+The measurement model is encapsulated in the Jacobian matrix given, in Equation~\ref{eq:measurementmatrix},
 enabling the transformation of measured distances into accurate position estimations.
 The measurement model finds its expression in the measurement matrix $H$,
 which effectively links the measured distances to the position estimation:
@@ -350,7 +341,7 @@ which effectively links the measured distances to the position estimation:
 	\end{aligned}
 	\label{eq:measurementmatrix}
 \end{equation}
-By using the Matrix $H$ the \ac{EKF} is able to directly translate the mosition estimate into predicted distance measurements.
+By using the matrix $H$, the \ac{EKF} is able to directly translate the position estimate into predicted distance measurements.
 These are further compared to real distance measurements and based on this information the position estimate is improved.
 
 
@@ -364,44 +355,45 @@ Static tests were carried out.
 The effect of the anchor arrangement is crucial to the success of the system.
 In the case of these tests, the anchors were mounted at a height of 4m.
 One single anchor was mounted at a height of 1m to ensure good position resolution in the Z axis.
-Otherwise, an overestimation of the distances and thus a poor calculation of the Z axis was determined.
+Otherwise, an overestimation of the distances and, thus, a poor calculation of the Z axis was determined.
 
-During testing, attention was paid to good \ac{LOS} conditions,
+During testing, attention was paid to keep \ac{LOS} conditions,
 although tests showed that the influence of \ac{NLOS} conditions can be partially compensated for by using the \ac{EKF}.
 The table below shows fixed positions in the room that were measured using the system
-over a fixed period of time to make them comparable to eachother.
+over a fixed period of time to make them comparable to each other.
 To do this, the mean deviation and the fluctuation of the values over the standard deviation are then considered and evaluated.
 
 \begin{table}[hbt!]
 	\centering
 	\begin{tabular}{l l l c}
-		\toprule
+		%\toprule
 		\textbf{Position[m]} & \textbf{$\mu$[cm]} & \textbf{$\sigma$[cm]}\\
 		$(x,y,z)$ & $mean(length)$ & $std(length)$\\
-		\midrule
+		%\midrule
 		$(4.0,4.0,?)$ & $17.85cm$ & $6.66cm$\\
 		$(4.3,7.5,?)$ & $14.72cm$ & $3.16cm$\\
 		$(3.0,2.0,?)$ & $9.88cm$ & $4.45cm$\\
 		$(3.5,6.0,?)$ & $18.58cm$ & $2.64cm$\\
-		\bottomrule
+		%\bottomrule
 	\end{tabular}
 	\caption{Static mesurement deviation out of 500 measurements}
 \end{table}
 
 Because position-related changes in accuracy were determined during the test,
 a grid-based measurement was carried out in addition to the static test.
-The $10m\times8m$ room was divided into $2m\times2m$ squares using a grid.
-A measurement was then carried out at each grid intersection point.
+The 10\,mx8\,m room was divided into 2\,mx2\,m squares using a grid.
+Multiple measurement was then carried out over the course of XXX minutes at each grid intersection point.
 This procedure allows the deviations of the positions to be represented in relation to the location in the room.
-For the following illustration, $\sigma$-Ellipses were drawn to show the scattering per position.
+For the following illustration, $\sigma$-ellipses were drawn to show the scattering per position.
 
 \begin{figure}[hbt!]
 	\centering
 	\includegraphics[scale=0.35]{pic/position_plot.png}
-	\caption{Positiondeviation per coordinates in the room}
+	\caption{Position deviation per coordinates in the room.}
+	\label{fig:statistics}
 \end{figure}
 
-As can be seen from the figure, significant deviations were recorded outside the area enclosed by the anchors.
+As can be seen from the figure \ref{fig:statistics}, significant deviations were recorded outside the area enclosed by the anchors.
 Even if the system is clearly capable of very precise positioning, it can be said that if uniform positioning accuracy is to be achieved,
 the best arrangement of the anchors must be determined using simulation means.
 This ensures that the propabillity of occuring "blind spots" is reduced.
@@ -409,24 +401,21 @@ This ensures that the propabillity of occuring "blind spots" is reduced.
 
 \section{Conclusion And Outlook}\label{section:conclusion}
 In conclusion, it can be said that a very precise localization system has been designed.
-Both the hardware and the software were designed specifically for use as a positioning module and fulfill this purpose with astonishing accuracy.
+Both the hardware and the software were designed specifically for use as a positioning module and fulfill this purpose with a satisfying accuracy of XXX (noch einfügen und ggf. erläutern wo besser wo schlechter).
 
-A critical point is that the system is only scalable to a limited extent.
+A critical point is that the system's is scalability has a linear impact on its temporal performance.
 By pinging every single anchor, the tag is not able to handle a very large number of anchors without increasing the roundtrip time.
 This problem could be avoided by instead of \ac{TWR} measurements \ac{TdoA} measurements would be performed.
 Even if this measurement principle requires a nanosecond precise synchronization of the anchors,
 the roundtrip time would be limited to the duration of one ping process.
 
-Initially, a hybrid solution using \ac{TWR} and \ac{TdoA} measurements was planed,
+Initially, a hybrid solution using \ac{TWR} and \ac{TdoA} measurements was planned,
 but the wireless clock synchronization of the anchors is currently only possible with limited accuracy.
 Further research in this area could allow the system to generate accurate position measurements with a period duration of up to 50ms.
 
-To achieve further improvements, we are committed to fostering collaboration and knowledge-sharing
-within the community.
-Therefore, we have made the entire source code, along with all PCB design files,
-readily accessible to the public.
-You can find these resources, along with detailed documentation,
-on our project's GitHub repository \cite{uwb-tracking}.
+%To achieve further improvements, we are committed to fostering collaboration and knowledge-sharing within the community.
+%Therefore, we have made the entire source code, along with all PCB design files, readily accessible to the public.
+%You can find these resources, along with detailed documentation, on our project's GitHub repository \cite{uwb-tracking}.
 
 
 
