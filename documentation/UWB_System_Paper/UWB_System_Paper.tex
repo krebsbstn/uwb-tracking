@@ -24,6 +24,8 @@
 \usepackage{verbatim}
 \usepackage{tikz}
 \usepackage{array}
+\usepackage{booktabs}
+\usepackage{xcolor}
 \usetikzlibrary{arrows.meta,positioning, shapes, patterns, calc, through}
 \tikzstyle{vertex}=[circle, draw, inner sep=1pt, minimum size=6pt]
 \pgfplotsset{compat=1.17}
@@ -91,31 +93,42 @@ only-used=true
 \section{Introduction}
 \label{sec:Introduction}
 
-Indoor positioning and tracking have become increasingly important in various areas,
-such as logistics, healthcare, industrial automation and smart infrastructures.
-Conventional positioning systems often face challenges in terms of accuracy, scalability and robustness.
-To face these requirements we developed an \ac{UWB} positioning system that utilizes
-hardware and advanced algorithms to generate precise position information in the 2D-Plane at ground level.
+Indoor positioning and tracking systems gain importance
+in a variety of industrial fields aswell as in research \cite{LiFi_Positioning} \cite{Accelerometer_Positioning} \cite{UWB_Positioning} \cite{UWB_Positioning2}.
+Traditional positioning systems, however, often encounter certin limitations such as
+meterwise accuracy \cite{LiFi_Positioning} or a increasing positioning error \cite{Accelerometer_Positioning}. 
+
+In response to these challenges, Ultra-Wideband (UWB) positioning systems have emerged
+as a promising solution \cite{UWB_Positioning} \cite{UWB_Positioning2}.
+Building on this technology, we have developed an \ac{UWB} positioning system
+that utilizes hardware and advanced algorithms to generate precise position information in the
+three-dimensional space.
 
 The designed \ac{UWB} system consists of six identical boards,
 all based on the ESP32 microcontroller, a versatile and powerful platform that is 
-known for its capabilities in wireless communication and processing.
-These custom-made \acp{PCB} are equipped with DWM3000 modules from Quorvo,
-which utalize powerful UWB capabilities for long-range wireless communication. 
-All schematics, layouts and code used in the project are available openly under a XXX license on GitHub. 
+oftenly used in low-cost \ac{IoT} scenarios \cite{ESP32}.
+These custom-made \acp{PCB}
+\footnote{layout and production files are open-source available.\cite{uwb-tracking}}
+are equipped with DWM3000 modules from Quorvo,
+which utalize powerful UWB capabilities for long-range wireless communication.
 
 One of these boards is referred to as a ''tag''.
 It is responsible for initiating measurements with the other five "anchor" boards.
 The innovative aspect of the system lies in its ability to perform accurate localization
-without dependence on external infrastructure for centralized processing, since all the necessary calculations are performed on the device itself that is being localized.
+without dependence on external infrastructure for centralized processing,
+since all the necessary calculations are performed on the device itself that is being localized.
 
 The heart of the positioning system is the \acf{EKF} implemented locally on the tag board.
-This \ac{EKF} takes the distance measurements obtained by \acf{TWR} with the Anchor Boards and calculates, based on their known fixed positions, the real-time position of the tag board.
-This centralized approach not only ensures fast and reliable positioning, but also theoretical scalability in terms of using more anchors and therefore expanding the coordinate system. 
+This \ac{EKF} takes the distance measurements obtained by \acf{TWR} with the Anchor Boards and calculates,
+and, based on their a priori known positions, calculates the real-time position of the tag board
+with \color{red}remarkable \color{black}precision.
+The system is partially scalable; the number of anchors can be significantly increased at
+the expense of the general round-trip time. The ratio has the order $O(n)$.
 
 The measuring principle of distance measurement is explained in the following section.
-A distance measurement was implemented based on the associated IEEE standard.
-The chapter \ref{Section:principle} describes the system architecture, including the choice of anchor positions and
+A distance measurement was implemented based on the associated IEEE standard  \cite{IEEE802154a} \cite{IEEE802154z}.
+The chapter \ref{Section:principle} explains the system architecture,
+including the choice of anchor positions and 
 information about the scheduled timing in relation to position measurements.
 This is followed by a brief description of the hardware designed and
 its wide range of applications as a general evaluation board.
@@ -123,7 +136,7 @@ In order to explain the implementation of the firmware in more detail,
 chapter \ref{section:firmware} describes the distribution of the functionalities to various tasks of the \ac{RTOS}.
 The results of the static tests can be found in chapter \ref{section:tests}.
 Both, the spatial resolution and the most important limitations are explained.
-Finally, the last chapter summarizes the most important insights and provides a critical review of the results.
+Finally, the last chapter summarizes the most important findings and provides a critical review of the results.
 
 
 
@@ -185,6 +198,36 @@ timestamps of sending and reception.
 	\end{tikzpicture}
 	\caption{Timing diagram of \acf{TWR}}
 	\label{fig:twr}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+		ybar=0pt,
+		bar width=10pt,
+		bar shift=5pt,
+		xlabel={time [ms]},
+		ylabel={anchor index},
+		ymin=0, ymax=6,
+		xmin=0, xmax=500,
+		legend style={at={(0.83,0.97)},
+		anchor=north,legend columns=1},
+		ymajorgrids=true,
+		grid style=dashed,
+		]
+		\addplot table[col sep=comma, x=Data, y=Poll]{timing.csv};
+		\addplot table[col sep=comma, x=Data, y=Response]{timing.csv};
+		\legend{Poll, Response}
+
+		% Add a dashed line at x=250
+        \draw [thick=4pt] (axis cs:250,\pgfkeysvalueof{/pgfplots/ymin}) -- (axis cs:250,\pgfkeysvalueof{/pgfplots/ymax});
+        \node at (axis cs:250,\pgfkeysvalueof{/pgfplots/ymin}+3) [below, rotate=90] {round-trip time};
+    
+	\end{axis}
+	\end{tikzpicture}
+	\caption{Timingdiagram of the \ac{TWR} measurements.}
+	\label{fig:csvbarchart}
 \end{figure}
 
 For detailed technical specifications and methods,
