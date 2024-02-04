@@ -317,6 +317,8 @@ def print_values(lengths : List):
 #Entrence Point
 def main(args):
     path = os.path.abspath(args.path)
+    
+    print(path)
 
     # Process a directory by calling ellipses plot for every logfile.
     if os.path.isdir(path):
