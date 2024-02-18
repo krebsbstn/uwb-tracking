@@ -57,7 +57,7 @@ only-used=true
   \authorblockN{Tom Herter} \authorblockN{University
   	of Applied Sciences HTWG Konstanz}
   \authorblockN{Alfred-Wachtel-Str.~8, 78462 Konstanz, Germany}
-  \authorblockA{Email: \textcolor{red}{xxx}@htwg-konstanz.de}
+  \authorblockA{Email: to351her@htwg-konstanz.de}
   }
 
 % make the title area
@@ -233,7 +233,6 @@ During the setup of the system, anchor positions are being transmitted to the ta
 The tag's Firmware stores these configurations in persistent \ac{EEPROM} to ensure their availability throughout power cycles.
 The tag leverages these provided anchor positions, in conjunction with distance measurements, to determine its own position. 
 
-\textcolor{red}{The following figure \ref{fig:systemarch} illustrates the interactions between the individual components.}
 %It is clear that when selecting the anchor positions while setting up on a new location, that they should be evenly distributed along all three axes.
 %In addition, an overhead perspective helps to reduce measurement inaccuracies.
 
@@ -248,22 +247,19 @@ The tag leverages these provided anchor positions, in conjunction with distance 
 	\centering
 	\begin{tabular}{l l l l c}
 		%\toprule
-		\textbf{Anchor} & \textbf{X-Coordinate[m]} & \textbf{Y-Coordinate[m]} & \textbf{Z-Coordinate[m]}\\
+		\textbf{anchor} & \textbf{x-coordinate[m]} & \textbf{y-coordinate[m]} & \textbf{z-coordinate[m]}\\
 		%\midrule
-		0x02 & $0.81\,m$ & $3.63\,m$ & $3.01\,m$\\
-		0x03 & $0.81\,m$ & $6.38\,m$ & $3.01\,m$\\
-		0x04 & $6.31\,m$ & $7.66\,m$ & $2.83\,m$\\
-		0x05 & $6.72\,m$ & $3.65\,m$ & $2.64\,m$\\
-		0x06 & $2.77\,m$ & $0.07\,m$ & $0.91\,m$\\
+		0x02 & $0.81$m & $3.63$m & $3.01$m\\
+		0x03 & $0.81$m & $6.38$m & $3.01$m\\
+		0x04 & $6.31$m & $7.66$m & $2.83$m\\
+		0x05 & $6.72$m & $3.65$m & $2.64$m\\
+		0x06 & $2.77$m & $0.07$m & $0.91$m\\
 		
 		%\bottomrule
 	\end{tabular}
 	\caption{Coordinates of the anchors.}
 	\label{table:anchor_positions}
 \end{table}
-
-\textcolor{red}{Figure \ref{fig:systemarch} wirkt irgendwie nicht so krass informativ. ich würds vielleicvht ganz raus lassen. hab jetzt mal nichts dazu bearbeitet aber was meinst du?}
-\textcolor{green}{Ja finde ich auch suboptimal. aber ganz ohne wirds nicht gehen. vielleicht können wir ein Foto vom raum rein machen wo wir die Anker markieren.}
 
 As can be seen from the illustration of the room, care was taken to distribute the anchors evenly.
 Figure \ref{fig:systemarch} also shows that the distribution of anchors is also distributed in the z axis, even if more attention was paid to overhanging installation in order to reduce \ac{NLOS} conditions.
@@ -385,45 +381,45 @@ Before each test sequence it is ensured, that the \ac{EKF} is not biased by valu
 		\textbf{Position[m]} & \textbf{$\mu$[cm]} & \textbf{$\sigma$[cm]}\\
 		$(x,y)$ & $mean(length)$ & $std(length)$\\
 		%\midrule
-		$(2,2)$ & $67.66\,cm$ & $2.90\,cm$\\
-		$(2,3)$ & $55.42\,cm$ & $2.97\,cm$\\
-		$(2,4)$ & $65.05\,cm$ & $2.8\,cm$\\
-		$(2,5)$ & $47.31\,cm$ & $3.51\,cm$\\
-		$(2,6)$ & $46.07\,cm$ & $3.13\,cm$\\
-		$(2,7)$ & $54.00\,cm$ & $3.17\,cm$\\
-		$(2,8)$ & $34.48\,cm$ & $3.3\,cm$\\
-		
-		$(3,2)$ & $31.74\,cm$ & $3.42\,cm$\\
-		$(3,3)$ & $121.37\,cm$ & $4.47\,cm$\\
-		$(3,4)$ & $23.06\,cm$ & $3.07\,cm$\\
-		$(3,5)$ & $29.34\,cm$ & $2.91\,cm$\\
-		$(3,6)$ & $28.31\,cm$ & $2.93\,cm$\\
-		$(3,7)$ & $22.68\,cm$ & $3.2\,cm$\\
-		$(3,8)$ & $32.98\,cm$ & $3.73\,cm$\\
-		
-		$(4,2)$ & $19.75\,cm$ & $2.97\,cm$\\
-		$(4,3)$ & $21.73\,cm$ & $3.4\,cm$\\
-		$(4,4)$ & $29.91\,cm$ & $2.9\,cm$\\
-		$(4,5)$ & $9.27\,cm$ & $3.2\,cm$\\
-		$(4,6)$ & $28.1\,cm$ & $2.84\,cm$\\
-		$(4,7)$ & $35.95\,cm$ & $8.34\,cm$\\
-		$(4,8)$ & $14.88\,cm$ & $3.13\,cm$\\
-		
-		$(5,2)$ & $80.12\,cm$ & $3.61\,cm$\\
-		$(5,3)$ & $61.88\,cm$ & $4.19\,cm$\\
-		$(5,4)$ & $47.44\,cm$ & $3.57\,cm$\\
-		$(5,5)$ & $21.28\,cm$ & $6.76\,cm$\\
-		$(5,6)$ & $31.89\,cm$ & $3.65\,cm$\\
-		$(5,7)$ & $33.02\,cm$ & $3.72\,cm$\\
-		$(5,8)$ & $26.27\,cm$ & $3.73\,cm$\\
-		
-		$(6,2)$ & $89.12\,cm$ & $2.99\,cm$\\
-		$(6,3)$ & $99.28\,cm$ & $4.28\,cm$\\
-		$(6,4)$ & $73.01\,cm$ & $3.88\,cm$\\
-		$(6,5)$ & $55.42\,cm$ & $6.16\,cm$\\
-		$(6,6)$ & $10.63\,cm$ & $4.56\,cm$\\
-		$(6,7)$ & $29.46\,cm$ & $7.01\,cm$\\
-		$(6,8)$ & $13.0\,cm$ & $2.86\,cm$\\
+		$(2,2)$ & $67.66$ cm & $2.90$ cm\\
+		$(2,3)$ & $55.42$ cm & $2.97$ cm\\
+		$(2,4)$ & $65.05$ cm & $2.8$ cm\\
+		$(2,5)$ & $47.31$ cm & $3.51$ cm\\
+		$(2,6)$ & $46.07$ cm & $3.13$ cm\\
+		$(2,7)$ & $54.00$ cm & $3.17$ cm\\
+		$(2,8)$ & $34.48$ cm & $3.3$ cm\\
+
+		$(3,2)$ & $31.74$ cm & $3.42$ cm\\
+		$(3,3)$ & $121.37$ cm & $4.47$ cm\\
+		$(3,4)$ & $23.06$ cm & $3.07$ cm\\
+		$(3,5)$ & $29.34$ cm & $2.91$ cm\\
+		$(3,6)$ & $28.31$ cm & $2.93$ cm\\
+		$(3,7)$ & $22.68$ cm & $3.2$ cm\\
+		$(3,8)$ & $32.98$ cm & $3.73$ cm\\
+
+		$(4,2)$ & $19.75$ cm & $2.97$ cm\\
+		$(4,3)$ & $21.73$ cm & $3.4$ cm\\
+		$(4,4)$ & $29.91$ cm & $2.9$ cm\\
+		$(4,5)$ & $9.27$ cm & $3.2$ cm\\
+		$(4,6)$ & $28.1$ cm & $2.84$ cm\\
+		$(4,7)$ & $35.95$ cm & $8.34$ cm\\
+		$(4,8)$ & $14.88$ cm & $3.13$ cm\\
+
+		$(5,2)$ & $80.12$ cm & $3.61$ cm\\
+		$(5,3)$ & $61.88$ cm & $4.19$ cm\\
+		$(5,4)$ & $47.44$ cm & $3.57$ cm\\
+		$(5,5)$ & $21.28$ cm & $6.76$ cm\\
+		$(5,6)$ & $31.89$ cm & $3.65$ cm\\
+		$(5,7)$ & $33.02$ cm & $3.72$ cm\\
+		$(5,8)$ & $26.27$ cm & $3.73$ cm\\
+
+		$(6,2)$ & $89.12$ cm & $2.99$ cm\\
+		$(6,3)$ & $99.28$ cm & $4.28$ cm\\
+		$(6,4)$ & $73.01$ cm & $3.88$ cm\\
+		$(6,5)$ & $55.42$ cm & $6.16$ cm\\
+		$(6,6)$ & $10.63$ cm & $4.56$ cm\\
+		$(6,7)$ & $29.46$ cm & $7.01$ cm\\
+		$(6,8)$ & $13.0$ cm & $2.86$ cm\\
 		
 		%\bottomrule
 	\end{tabular}
