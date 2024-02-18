@@ -154,8 +154,8 @@ for x_set in range(2, 7):
 
 
 fig, ax = plt.subplots()
-ax.set_xlim(1, 7)  # Example range for x-axis
-ax.set_ylim(1, 9)  # Example range for y-axis
+ax.set_xlim(0, 7)  # Example range for x-axis
+ax.set_ylim(0, 9)  # Example range for y-axis
 
 for meas_num in range(0, len(measurements)):
     
@@ -184,6 +184,13 @@ for meas_num in range(0, len(measurements)):
 for i in range(0, len(y_grid)):
     for j in range(0, len(x_grid)):
         ax.scatter(x_grid[j], y_grid[i], s=20, color='red', marker="x")
+
+
+ax.scatter(0.81, 3.62, s=20, color='green', marker="o")
+ax.scatter(0.81, 6.36, s=20, color='green', marker="o")
+ax.scatter(6.31, 7.66, s=20, color='green', marker="o")
+ax.scatter(6.72, 3.65, s=20, color='green', marker="o")
+ax.scatter(2.77, 0.07, s=20, color='green', marker="o")
 
 #ax.scatter(x_grid[j], y_grid[i], s=20, color='black', marker="x")
 

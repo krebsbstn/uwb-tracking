@@ -235,48 +235,28 @@ The tag leverages these provided anchor positions, in conjunction with distance 
 
 \begin{figure}[hbt!]
 	\centering
-	\begin{tikzpicture}[
-		node distance=1.5cm,
-		device/.style={
-			align=center, circle, draw, minimum width=.25cm, minimum height=.5cm
-		},
-		ghost/.style={
-			align=center,minimum width=0cm, minimum height=0cm
-		},
-		label/.style={
-			draw, minimum width=2cm, minimum height=0cm, text width=3cm
-		},
-		>=latex,
-		]
-		% Responders with coords
-		\node [device] (device2) at (90:2cm) {A1};
-		\node [ghost, above=.05cm of device2.north] (dev2) {(x:0,y:2,z:2)};
-		\node [device] (device3) at (162:2cm) {A2};
-		\node [ghost, above=.05cm of device3.north] (dev3) {(x:0,y:2,z:2)};
-		\node [device] (device4) at (234:2cm) {A3};
-		\node [ghost, below=.05cm of device4.south] (dev4) {(x:0,y:2,z:2)};
-		\node [device] (device5) at (306:2cm) {A4};
-		\node [ghost, below=.05cm of device5.south] (dev5) {(x:0,y:2,z:2)};
-		\node [device] (device6) at (18:2cm) {A5};
-		\node [ghost, below=.05cm of device6.south] (dev6) {(x:0,y:2,z:2)};
-		
-		%Initiator
-		\node [device] (device1) at (0,0) {T1};
-		
-		% TWRs
-		\draw [<->] (device1) -- (device2); 
-		\draw [<->] (device1) -- (device3); 
-		\draw [<->] (device1) -- (device4); 
-		\draw [<->] (device1) -- (device5); 
-		\draw [<->] (device1) -- node[midway, above, align=left] {TWR} (device6);
-		
-		%legend
-		\node [label] (legend) at (2.5,2) {AX = Anchor X \\TY = Tag Y};
-		
-	\end{tikzpicture}
+	\includegraphics[scale=0.3]{pic/anchor_position.pdf}
 	\caption{System architecture for positioning.}
 	\label{fig:systemarch}
 \end{figure}
+
+\begin{table}[hbt!]
+	\centering
+	\begin{tabular}{l l l l c}
+		%\toprule
+		\textbf{Anchor} & \textbf{X-Coordinate[m]} & \textbf{Y-Coordinate[m]} & \textbf{Z-Coordinate[m]}\\
+		%\midrule
+		0x02 & $0.81\,m$ & $3.63\,m$ & $3.01\,m$\\
+		0x03 & $0.81\,m$ & $6.38\,m$ & $3.01\,m$\\
+		0x04 & $6.31\,m$ & $7.66\,m$ & $2.83\,m$\\
+		0x05 & $6.72\,m$ & $3.65\,m$ & $2.64\,m$\\
+		0x06 & $2.77\,m$ & $0.07\,m$ & $0.91\,m$\\
+		
+		%\bottomrule
+	\end{tabular}
+	\caption{Coordinates of the anchors.}
+	\label{table:anchor_positions}
+\end{table}
 
 \textcolor{red}{Figure \ref{fig:systemarch} wirkt irgendwie nicht so krass informativ. ich würds vielleicvht ganz raus lassen. hab jetzt mal nichts dazu bearbeitet aber was meinst du?}
 \textcolor{green}{Ja finde ich auch suboptimal. aber ganz ohne wirds nicht gehen. vielleicht können wir ein Foto vom raum rein machen wo wir die Anker markieren.}
@@ -434,7 +414,7 @@ Before each test sequence it is ensured, that the \ac{EKF} is not biased by valu
 		
 		%\bottomrule
 	\end{tabular}
-	\caption{Static mesurement deviation out of 500 measurements at each grid intersection point.}
+	\caption{Static measurement deviation out of 500 measurements at each grid intersection point.}
 	\label{table:measurements}
 \end{table}
 
@@ -445,8 +425,8 @@ For the illustration in figure \ref{fig:statistics}, $3\sigma$-ellipses were dra
 
 \begin{figure}[hbt!]
 	\includegraphics[scale=0.63]{pic/position_plot.pdf}
-	\caption{Confidence ellipses of the grid measurement with 99.7\,\% of the points respectively inside of the ellipse.
-	\textcolor{red}{kannst du hier vielleicht auch noch die anker einzeichen? könnte fürs verständis helfen.}}
+	\caption{Confidence ellipses of the grid measurement with 99.7\,\% of the points inside of the ellipse are shown in blue.
+	Displayed in red is the grid, and in green are the anchor positions.}
 	\label{fig:statistics}
 \end{figure}
 
