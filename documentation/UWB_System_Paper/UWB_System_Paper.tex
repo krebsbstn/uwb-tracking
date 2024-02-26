@@ -1,5 +1,5 @@
 % \documentclass[draftcls, onecolumn, a4paper]{IEEEtran}
-\documentclass[conference, a4paper]{IEEEtran}
+\documentclass[final, conference, a4paper]{IEEEtran}
 
 \usepackage{amsmath}   % From the American Mathematical Society
 \usepackage{amssymb}
@@ -11,7 +11,7 @@
                         % systems. The latest version can be obtained at:
                         % http://www.ctan.org/tex-archive/macros/latex/contrib/other/misc/
                         % Read the url.sty source comments for usage information.
-\usepackage{cite}
+\usepackage[noadjust]{cite}
 \usepackage{citesort}   % nicer looking citations
 \usepackage{prettyref}
 \usepackage{balance}
@@ -50,15 +50,19 @@ only-used=true
 
 % author names and affiliations use a multiple column layout for up to
 % three different affiliations
-\author{ \authorblockN{Sebastian Krebs} \authorblockN{University
-    of Applied Sciences HTWG Konstanz}
-  \authorblockN{Alfred-Wachtel-Str.~8, 78462 Konstanz, Germany}
-  \authorblockA{Email: se391kre@htwg-konstanz.de} \and
-  \authorblockN{Tom Herter} \authorblockN{University
-  	of Applied Sciences HTWG Konstanz}
-  \authorblockN{Alfred-Wachtel-Str.~8, 78462 Konstanz, Germany}
-  \authorblockA{Email: to351her@htwg-konstanz.de}
-  }
+\author{
+	\authorblockN{Sebastian Krebs}
+	\authorblockN{University of Applied Sciences HTWG Konstanz}
+  	\authorblockN{Alfred-Wachtel-Str.~8, 78462 Konstanz, Germany}
+  	\authorblockA{Email: se391kre@htwg-konstanz.de}
+	\authorblockA{sebi.krebs@web.de}
+	\and
+	\authorblockN{Tom Herter}
+	\authorblockN{University of Applied Sciences HTWG Konstanz}
+  	\authorblockN{Alfred-Wachtel-Str.~8, 78462 Konstanz, Germany}
+  	\authorblockA{Email: to351her@htwg-konstanz.de}
+	\authorblockA{\textcolor{red}{hier noch deine normale mail.}}
+}
 
 % make the title area
 \maketitle
@@ -68,7 +72,7 @@ only-used=true
   \newline
   The system is capable of achieving localization with an accuracy of up to 10\,cm, by utilizing \ac{TWR} measurements between one designated ''tag'' and five ''anchor'' devices.
   The gathered distance measurements are subsequently processed by an \ac{EKF} running locally on the tag board, enabling it to determine its own position,
-  relying on fixed, a priori known, positions of the anchor boards.
+  relying on fixed, a priori known positions of the anchor boards.
   \newline
   This paper presents a comprehensive overview of the system's architecture, the key components, and the capabilities it offers for indoor positioning and tracking applications.
 \end{abstract}
@@ -86,29 +90,29 @@ only-used=true
 \section{Introduction}
 \label{sec:Introduction}
 
-Indoor positioning and tracking systems gain importance in a variety of industrial fields as well as in research \cite{LiFi_Positioning} \cite{Accelerometer_Positioning} \cite{UWB_Positioning} \cite{UWB_Positioning2}.
+Indoor positioning and tracking systems gain importance in a variety of industrial fields as well as in research \cite{LiFi_Positioning,Accelerometer_Positioning,UWB_Positioning,UWB_Positioning2}.
 
 Traditional positioning systems, however, often encounter certain limitations, such as accuracy to the meter \cite{LiFi_Positioning} or an increased positioning deviation \cite{Accelerometer_Positioning}. 
 
-In response to these challenges, Ultra-Wideband (UWB) positioning systems have emerged as a promising solution \cite{UWB_Positioning} \cite{UWB_Positioning2}.
+To achive an improved accuracy and a reduced variance Ultra-Wideband (UWB) positioning systems have been applied to various scenarios \cite{UWB_Positioning} \cite{UWB_Positioning2}.
 Building on this technology, we have developed an \ac{UWB} positioning system that utilizes hardware and advanced algorithms to generate precise position information in the three-dimensional space.
-However, the measurements that are conducted over the course of its development are limited exclusively to two-dimensional space. 
+However, the estimations that are conducted over the course of its development are limited to the two-dimensional space. 
 
 The designed \ac{UWB} system consists of six identical boards that are all based on the ESP32 microcontroller, a versatile and powerful platform that is often used in low-cost \ac{IoT} scenarios \cite{ESP32}. 
-These custom-made \acp{PCB} \footnote{Layout and production files are open-source available.\,\cite{uwb-tracking}} are equipped with DWM3000 modules from Quorvo, which utilizes \ac{UWB} functionalities for short-range wireless communication.
+These custom-made \acp{PCB} \footnote{Layout and production files are open-source available \cite{uwb-tracking}.} are equipped with DWM3000 modules from Quorvo, which utilizes \ac{UWB} functionalities for short-range wireless communication.
 
 One of these boards is referred to as a ''tag''.
 It is responsible for initiating measurements with the other five "anchor" boards.
 The innovative aspect of the system lies in its ability to perform accurate localization without dependence on external infrastructure for its processing,
 since all the necessary calculations are performed on the device itself that is being localized.
 
-The heart of the positioning system is the \acf{EKF} implemented locally on the tag board.
+The heart of the positioning system is an \acf{EKF} implemented locally on the tag board.
 This \ac{EKF} takes the distance measurements obtained by \acf{TWR} with the anchor boards
 and based on their a priori known positions, calculates the real-time position of the tag board.
 
 The system is partially scalable; the number of anchors can be significantly increased at
 the expense of the general round-trip time.
-The ratio is linear with the order $O(n)$.
+The ratio is linear, an increaing anchor amount results in a longer roundtrip time.
 
 The measuring principle of distance measurement is explained in the following section.
 A distance measurement was implemented based on the associated IEEE standard  \cite{IEEE802154a} \cite{IEEE802154z}.
@@ -184,9 +188,9 @@ In figure \ref{fig:csvbarchart} illustrates the timing of one positioning cycle.
 During the static tests conducted in section \ref{section:tests} five anchor devices were utilized.
 The total time for position estimation is set to be 250 ms, allocating 50 ms for each distance measurement.
 The 250 ms round-trip time is a result of anchor amount chosen.
-The duration for each distance measurement, or ranging time, is set at a firm 50 ms due to limitations imposed by the processing logic, making it non-negotiable.
+The duration for each distance measurement, or ranging time, is set at a firm 50 ms due to limitations imposed by the processing logic.
 As a result, the total round-trip time is affected by the number of anchor devices utilized.
-Adding more anchors enhances the amount of individual \acp{TWR}, leading to an increase in the overall round-trip time.
+Adding more anchors increases the amount of individual \acp{TWR}, leading to a longer round-trip time.
 
 \begin{figure}[hbt!]
 	\centering
@@ -223,7 +227,7 @@ These standards ensure the correctness and accuracy of our distance measurements
 
 \section{System Architecture}\label{section:system_arch}
 In the presented scenario, five anchors are strategically distributed throughout the room,
-positioned at a height of 4\,m just under the ceiling to maximize the likelihood of 
+positioned at a height of 3\,m just under the ceiling to maximize the likelihood of 
 \ac{LOS} conditions.
 This is due to the fact that it facilitates more accurate \ac{TOF} measurements, by minimizing interference caused by multipath propagation, and enhance signal reliability,
 leading to more precise and reliable distance calculation than in an \ac{NLOS} environment.
@@ -239,7 +243,7 @@ The tag leverages these provided anchor positions, in conjunction with distance 
 \begin{figure}[hbt!]
 	\centering
 	\includegraphics[scale=0.3]{pic/anchor_position.pdf}
-	\caption{System architecture for positioning.}
+	\caption{System architecture for positioning.\textcolor{red}{Kannst du hier mit paint die tische im raum entfernen?}}
 	\label{fig:systemarch}
 \end{figure}
 
@@ -262,18 +266,19 @@ The tag leverages these provided anchor positions, in conjunction with distance 
 \end{table}
 
 As can be seen from the illustration of the room, care was taken to distribute the anchors evenly.
-Figure \ref{fig:systemarch} also shows that the distribution of anchors is also distributed in the z axis, even if more attention was paid to overhanging installation in order to reduce \ac{NLOS} conditions.
+Figure \ref{fig:systemarch} also shows that the distribution of anchors is also distributed in the z axis.
+However, more attention was paid to an overhanging installation in order to reduce \ac{NLOS} conditions.
 
-The time for one \ac{TWR} could be brought down to 50\,ms per recurrence, without sacrificing accuracy,
+The time for one \ac{TWR} could be reduced to 50\,ms per bidirectional recurrence, without sacrificing accuracy,
 leading to a general position update interval of 250\,ms with five anchors. 
 This low ranging time of 50\,ms was achieved by implementing the firmware in a interrupt-based manner for the \ac{UWB} message recognition, and utilizing the ESPs multi-core processing capabilities.
 
-Detailed implementation-specific information about the chances taken to optimize the round-trip time by reducing each individual ranging time
+Detailed implementation-specific information about the chosen procedures to optimize the round-trip time by reducing each individual ranging time
 is given in section \ref{section:firmware}.
 
 
 \section{Hardware Design}\label{section:hardware}
-The hardware design of \ac{UWB} boards draws inspiration from pre-existing DWM3000 Evaluation
+The hardware design of \ac{UWB} boards draws inspiration from pre-existing DWM3000 evaluation
 boards.
 However, the proprietary board development enables specialized component selection, tailored to their intended use cases.
 User-friendliness was a paramount consideration during the design process,
@@ -287,17 +292,17 @@ Additionally, the PCB incorporates a convenient on-board LiPo battery charging a
 	\label{fig:pcb}
 \end{figure}
 As shown in figure \ref{fig:pcb}, the board is designed in a compact form,
-making it sutable for evaluation and development purposes.
+making it suitable for evaluation and development purposes.
 Notably, our PCB design ensures a consistent layout across all boards, regardless of their specific application.
 Below the antennas of both the DWM3000 and ESP32, the ground filling has been selectively omitted, to ensure antenna radiation characteristics according to the corresponding data sheets, enabling more precise measurements.
 
 \section{Firmware Architecture}\label{section:firmware}
 To meet the demanding timing requirements essential for \ac{TOF} measurements and enhance network round-trip times,
 the firmware is based on a \ac{RTOS}.
-More precise FreeRTOS \cite{FreeRTOS_2023} offers the capability to create multiple tasks, that collaborate coherently and can be executed simultaneously on each of the two cores of the ESP32 microcontroller.
+More precisely FreeRTOS \cite{FreeRTOS_2023} offers the capability to create multiple tasks, that collaborate coherently and can be executed simultaneously on each of the two cores of the ESP32 microcontroller.
 
-Documentation of the source code is continuously made available online with the help of Doxygen and GitHub pages.
-The implementation can therefore be viewed publicly\cite{doxygen-doku}.
+Documentation of the source code is continuously made available online with the help of Doxygen and GitHub pages \cite{doxygen-doku}.
+The implementation can be viewed publicly on GitHub \cite{uwb-tracking}.
 
 Both the firmware of the tag and anchor execute the \ac{TOF} task.
 This utalizes an inheritance-based implementation that sets the distinction between \ac{TWR} initiator or \ac{TWR} responder of the ranging measurement.
@@ -435,7 +440,7 @@ For illustration in figure \ref{fig:statistics}, $3\sigma$-ellipses were drawn t
 \begin{figure}[hbt!]
 	\includegraphics[scale=0.63]{pic/position_plot.pdf}
 	\caption{Confidence ellipses of the grid measurement with 99.7\,\% of the points inside of the ellipse are shown in blue.
-	Displayed in red is the grid, and in green are the anchor positions.}
+	Displayed in red is the grid, and in green are the anchor positions.\textcolor{red}{Hier müssen wir den Raum maßstabsgetreu drunterlegen.}}
 	\label{fig:statistics}
 \end{figure}
 
