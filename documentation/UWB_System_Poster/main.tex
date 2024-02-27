@@ -15,6 +15,7 @@
 \usetikzlibrary{positioning, calc}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.17}
+\usepackage{adjustbox}
 
 % ====================
 % Lengths
@@ -78,93 +79,43 @@
 \begin{column}{\colwidth}
 
   \begin{block}{Introduction}
-    We present an indoor UWB positioning system
-    that capitalizes on advanced hardware and sophisticated algorithms,
-    resulting in an exceptional level of accuracy and reliability.
-  
-    Our UWB system comprises six identical boards,
-    all based on the ESP32 microcontroller, a versatile
-    and powerful platform known for its capabilities in
-    wireless communication and processing. These boards
-    are equipped with DWM3000 modules from Quorvo,
-    renowned for their high-performance UWB capabilities.
+    Indoor positioning and tracking systems gain importance in a variety of industrial fields as well as in research.
 
-    One of these boards is designated as the ”Tag”, responsible for
-    initiating Two-way-Ranging (TWR) measurements with the
-    remaining five ”Anchor” boards.
-    The innovative aspect of our system lies in its ability to perform accurate
-    localization without reliance on external infrastructure
-    or centralized processing.
+    Traditional positioning systems, however, often encounter certain limitations, such as accuracy to the meter or an increased positioning deviation. 
 
-    \begin{figure}[H]
-      \centering
-      \begin{tikzpicture}[
-        node distance=1.5cm,
-        device/.style={
-          align=center, circle, draw, minimum width=.25cm, minimum height=.5cm
-        },
-        ghost/.style={
-          align=center,minimum width=0cm, minimum height=0cm
-        },
-        label/.style={
-          draw, minimum width=2cm, minimum height=0cm, text width=8cm
-        },
-        >=latex,
-      ]
-        % Responders with coords
-        \node [device] (device2) at (90:5.5cm) {A1};
-        \node [ghost, above=.05cm of device2.north] (dev2) {(x:0,y:2,z:2)};
-        \node [device] (device3) at (162:5.5cm) {A2};
-        \node [ghost, above=.05cm of device3.north] (dev3) {(x:0,y:2,z:2)};
-        \node [device] (device4) at (234:5.5cm) {A3};
-        \node [ghost, below=.05cm of device4.south] (dev4) {(x:0,y:2,z:2)};
-        \node [device] (device5) at (306:5.5cm) {A4};
-        \node [ghost, below=.05cm of device5.south] (dev5) {(x:0,y:2,z:2)};
-        \node [device] (device6) at (18:5.5cm) {A5};
-        \node [ghost, below=.05cm of device6.south] (dev6) {(x:0,y:2,z:2)};
-    
-        %Initiator
-        \node [device] (device1) at (0,0) {T1};
-    
-        % TWRs
-        \draw [<->] (device1) -- (device2); 
-        \draw [<->] (device1) -- (device3); 
-        \draw [<->] (device1) -- (device4); 
-        \draw [<->] (device1) -- (device5); 
-        \draw [<->] (device1) -- node[midway, above, align=left] {TWR} (device6);
-    
-        %legend
-        \node [label] (legend) at (8,5) {AX = Anchor X \\TY = Tag Y};
-    
-      \end{tikzpicture}
-      \caption{Systemarchitecture for Positioning}
-    \end{figure}
-  \end{block}
+    To achive an improved accuracy and a reduced variance Ultra-Wideband (UWB) positioning systems have been applied to various scenarios.
+    Building on this technology, we have developed an UWB positioning system that utilizes hardware and advanced algorithms to generate precise position information in the three-dimensional space.
+    However, the estimations that are conducted over the course of its development are limited to the two-dimensional space. 
 
+    The designed UWB system consists of six identical boards that are all based on the ESP32 microcontroller, a versatile and powerful platform that is often used in low-cost IoT scenarios. 
+    These custom-made PCB's are equipped with DWM3000 modules from Quorvo, which utilizes UWB functionalities for short-range wireless communication.
+
+    One of these boards is referred to as a ''tag''.
+    It is responsible for initiating measurements with the other five "anchor" boards.
+    The innovative aspect of the system lies in its ability to perform accurate localization without dependence on external infrastructure for its processing,
+    since all the necessary calculations are performed on the device itself that is being localized.
+    \end{block}
   \separatorblocks
   
   \begin{block}{Hardware}
-    The hardware design of our system draws inspiration from pre-existing DWM3000 Evaluation
-    boards \cite{Makerfabs_2023}.
-    However, our proprietary board development enables specialized component selection
-    tailored to their intended use cases.
-    User-friendliness was a paramount consideration during the design process,
-    resulting in the integration of multiple user buttons and LEDs.
-    Additionally, the PCB incorporates a convenient LiPo battery charging capability
-    via USB-C.
+    The hardware design of UWB boards draws inspiration from pre-existing DWM3000 evaluation
+  boards.
+  However, the proprietary board development enables specialized component selection, tailored to their intended use cases.
+  User-friendliness was a paramount consideration during the design process,
+  resulting in the integration of multiple user buttons and indicating LEDs for versatile purposes like triggering the initialization of the bluetooth server, in order to view or change the stored anchor positions. 
+  Additionally, the PCB incorporates a convenient on-board LiPo battery charging and protection circuit via USB-C interface.
 
-    \begin{figure}
-      \includegraphics[scale=0.8, angle=90]{pics/pcb_design.png}
-      \caption{PCB-Design for UWB Device}
-    \end{figure}
+  \begin{figure}[hbt!]
+    \centering
+    \includegraphics[scale=0.60, angle=90]{pics/pcb_design.png}
+    \caption{PCB layout of the UWB board.}
+    \label{fig:pcb}
+  \end{figure}
 
-    Notably, our PCB design ensures a consistent layout across all boards,
-    regardless of their specific application.
-    Below the antennas of both the DWM3000 and ESP32,
-    the ground plate has been selectively omitted to enhance antenna radiation
-    characteristics and enable more precise measurements.
-    This meticulous hardware design approach not only optimizes
-    performance but also prioritizes user convenience. 
+  As shown in figure \ref{fig:pcb}, the board is designed in a compact form,
+  making it suitable for evaluation and development purposes.
+  Notably, our PCB design ensures a consistent layout across all boards, regardless of their specific application.
+  Below the antennas of both the DWM3000 and ESP32, the ground filling has been selectively omitted, to ensure antenna radiation characteristics according to the corresponding data sheets, enabling more precise measurements.
   \end{block}
 \end{column}
 
@@ -173,10 +124,13 @@
 \begin{column}{\colwidth}
 
   \begin{block}{Two-way-Ranging (TWR)}
-    Two-Way Ranging (TWR) is our foundational technique for obtaining precise
-    distance measurements within the UWB positioning system.
-    It relies on the time it takes for signals to travel from a Tag board to
-    Anchor boards and back again.
+    TWR is a foundational technique for obtaining precise distance measurements
+    within the UWB positioning system.
+    It relies on the time it takes for signals to propagate from a tag board
+    to an anchor board and back again.
+    This time measurement, in compliance with the IEEE 802.15.4a/4z standards,
+    offers the basis for distance estimation by multiplying the time traveled with the speed of light.
+
     \begin{figure}[H]
       \begin{tikzpicture}[
         node distance=1.5cm,
@@ -221,8 +175,12 @@
       \caption{Timingdiagram of Two-Way-Ranging}
     \end{figure}
 
-    Given the timestamps the Tag is able to calculate the corresponding
-    time-of-flight aswell as the distance between both devices by using the following Formula:
+    The tag's firmware calculates the TOF as well as the distance
+    between both devices by comparing the timestamps of sending and reception. 
+    Therefore it is necessary for the UWB messages to not only be tracked by
+    the time they are received at the tag,
+    but also to contain information about when each anchor received it and when
+    it starts to transmit the response.
 
     \begin{equation*}
       \begin{aligned}
@@ -241,18 +199,16 @@
   \separatorblocks
 
   \begin{block}{Firmware}
-    The Firmware \cite{uwb-tracking} for both the Tags and Anchors shares a common codebase
+    The Firmware for both the Tags and Anchors shares a common codebase
     with only a minor distinction during device startup.
     Upon booting, the current role of the device is read from the EEPROM,
     and based on this role, the appropriate tasks are executed.
 
-    The development of firmware built on FreeRTOS\cite{FreeRTOS_2023} offers the capability
+    The development of firmware built on FreeRTOS offers the capability
     to seemingly execute multiple tasks in parallel.
     Leveraging the dual cores of the ESP32 microcontroller allows us to
     genuinely achieve parallelism.
 
-    The versatility of FreeRTOS enables the design of firmware that
-    seamlessly adapts to the requirements of both Tags and Anchors.
     This design approach ensures efficient resource utilization and
     effective task management, ultimately contributing to the system's
     overall performance.
@@ -281,39 +237,41 @@
     Next, a measurement is predicted based on the predicted state.
     Finally, the actual measurement is compared to the predicted measurement,
     and the state estimation is corrected based on the estimation error.
-    This process leads to the convergence of the estimation towards the ground truth.\cite{Kalman}
+    This process leads to the convergence of the estimation towards the ground truth.
 
     The following blockdiagram shows how the different steps interact to generate a
     state estimation based on the current measurement.
-    \begin{figure}[H]
     
+    \begin{figure}
+      \hspace*{-1.25cm}
       \begin{tikzpicture}[
           node distance=1.5cm,
           block/.style={
               rectangle, draw, align=center,
-              minimum width=3cm, minimum height=1.5cm
+              minimum width=3cm, minimum height=1.5cm,
+              font =\small
           },
           >=latex,
       ]
           % System block
-          \node [block] (system) {System};
-          \node [left=9cm of system] (uk) {$u_k$};
+          \node [block] (system) {system};
+          \node [left=10cm of system] (uk) {$u_k$};
           \node [right=9cm of system] (zk1) {$z_{k+1}$};
           \node [left=.5cm of system] (x_k) at (system.south west) {$x_{k}$};
           \node [right=.5cm of system] (x_k1) at (system.south east) {$x_{k+1}$};
       
           % Kalman filter blocks
-          \node [block, below=3cm of system] (messmodel) {Mess-\\modell};
-          \node [block, left=2.5cm of messmodel] (systemmodel) {System-\\modell};
-          \node [block, right=3.5cm of messmodel] (correction) {Korrektur};
-          \node [right=1.5cm of correction] (x_dach_k1) {$\hat{x}_{k+1}$};
+          \node [block, below=3cm of system] (messmodel) {measurement-\\modell};
+          \node [block, left=2.5cm of messmodel] (systemmodel) {system-\\modell};
+          \node [block, right=3.5cm of messmodel] (correction) {correction};
+          \node [right=1cm of correction] (x_dach_k1) {$\hat{x}_{k+1}$};
           \node [left=1.5cm of systemmodel] (x_dach_k) at (systemmodel.south west) {$\hat{x}_{k}$};
   
           % Arrows
           \draw [line width=0.5mm, ->] (uk) -- (system);
           \draw [line width=0.5mm, ->] (system.east) -- ++(.5,0) |- (zk1);
       
-          \coordinate[right=-8.5cm of system.west] (systemcoord_left);
+          \coordinate[right=-9cm of system.west] (systemcoord_left);
           \draw [line width=0.5mm, ->] (systemcoord_left) |- (systemmodel.west);
           \draw [line width=0.5mm, ->] (systemmodel.east) -- node[above] {$\hat{x}_{k+1|k}$} (messmodel.west);
           \draw [line width=0.5mm, ->] (messmodel.east) -- node[above] {$\hat{z}_{k+1|k}$} (correction.west);
@@ -346,47 +304,88 @@
               |- ($(systemmodel.west)+(-1.75,-2.5)$)
               |- ($(systemmodel.west)+(0,-.5)$);
         \end{tikzpicture}
-        \caption{Blockschaltbild des Kalman Filters}
+        \caption{Block diagram of the Kalman Filters}
+      
     \end{figure}
-    In this context, $u_k$ represents control commands that input into the system.
-    $z_k$ describes the observed measurement at time $k$, and $x$ represents the
-    current system state.
-    In the case of our application, $x$ contains the three-dimensional coordinates
-    of the tag, and the vector $z$ encompasses all distance measurements
-    to the landmarks, which are the anchors.
-    Every time a variable is marked with a hat,
-    that means that this is an estimation of the given variable.
+    %In this context, $u_k$ represents control commands that input into the system.
+    %$z_k$ describes the observed measurement at time $k$, and $x$ represents the
+    %current system state.
+    %In the case of our application, $x$ contains the three-dimensional coordinates
+    %of the tag, and the vector $z$ encompasses all distance measurements
+    %to the landmarks, which are the anchors.
+    %Every time a variable is marked with a hat,
+    %that means that this is an estimation of the given variable.
   \end{block}
 
   \separatorblocks
 
   \begin{block}{Tests}
+    The measurements given in the table below were conducted in a
+    laboratory environment under good Line-of-Sight conditions.
+    As can be seen, the standard deviation of the position estimation is below 10cm.
+    However, the absolut deviation of the position estimation is relatively high.
+    This deviation is a result of the Kalman-Filter, trying to solve a three-dimensional
+    calculation with a minimum anchor amount and their non-ideal mounting positions.
 
-    \begin{table}
+    \begin{table}[hbt!]
       \centering
-      \begin{tabular}{l r r c}
-        \toprule
-        \textbf{Ground-Truth} & \textbf{mean} & \textbf{standarddeviation}\\
-        $(x,y,z)$ & $mean(x,y,z)$ & $std(x, y, z)$\\
-        \midrule
-        $(a,b,c)$ & $(a,b,c)$ & $(a,b,c)$\\
-        $(a,b,c)$ & $(a,b,c)$ & $(a,b,c)$\\
-        $(a,b,c)$ & $(a,b,c)$ & $(a,b,c)$\\
-        $(a,b,c)$ & $(a,b,c)$ & $(a,b,c)$\\
-        \bottomrule
+      \begin{tabular}{l l l c}
+        %\toprule
+        \textbf{Position[m]} & \textbf{$\mu$[cm]} & \textbf{$\sigma$[cm]}\\
+        $(x,y)$ & $mean(length)$ & $std(length)$\\
+        %\midrule
+        $(2,2)$ & $67.66$ cm & $2.90$ cm\\
+        $(2,3)$ & $55.42$ cm & $2.97$ cm\\
+        $(2,4)$ & $65.05$ cm & $2.8$ cm\\
+        $(2,5)$ & $47.31$ cm & $3.51$ cm\\
+        $(2,6)$ & $46.07$ cm & $3.13$ cm\\
+        $(2,7)$ & $54.00$ cm & $3.17$ cm\\
+        $(2,8)$ & $34.48$ cm & $3.3$ cm\\
+    
+        $(3,2)$ & $31.74$ cm & $3.42$ cm\\
+        $(3,3)$ & $121.37$ cm & $4.47$ cm\\
+        $(3,4)$ & $23.06$ cm & $3.07$ cm\\
+        $(3,5)$ & $29.34$ cm & $2.91$ cm\\
+        $(3,6)$ & $28.31$ cm & $2.93$ cm\\
+        $(3,7)$ & $22.68$ cm & $3.2$ cm\\
+        $(3,8)$ & $32.98$ cm & $3.73$ cm\\
+    
+        $(4,2)$ & $19.75$ cm & $2.97$ cm\\
+        $(4,3)$ & $21.73$ cm & $3.4$ cm\\
+        $(4,4)$ & $29.91$ cm & $2.9$ cm\\
+        $(4,5)$ & $9.27$ cm & $3.2$ cm\\
+        $(4,6)$ & $28.1$ cm & $2.84$ cm\\
+        $(4,7)$ & $35.95$ cm & $8.34$ cm\\
+        $(4,8)$ & $14.88$ cm & $3.13$ cm\\
+    
+        %$(5,2)$ & $80.12$ cm & $3.61$ cm\\
+        %$(5,3)$ & $61.88$ cm & $4.19$ cm\\
+        %$(5,4)$ & $47.44$ cm & $3.57$ cm\\
+        %$(5,5)$ & $21.28$ cm & $6.76$ cm\\
+        %$(5,6)$ & $31.89$ cm & $3.65$ cm\\
+        %$(5,7)$ & $33.02$ cm & $3.72$ cm\\
+        %$(5,8)$ & $26.27$ cm & $3.73$ cm\\
+    
+        %$(6,2)$ & $89.12$ cm & $2.99$ cm\\
+        %$(6,3)$ & $99.28$ cm & $4.28$ cm\\
+        %$(6,4)$ & $73.01$ cm & $3.88$ cm\\
+        %$(6,5)$ & $55.42$ cm & $6.16$ cm\\
+        %$(6,6)$ & $10.63$ cm & $4.56$ cm\\
+        %$(6,7)$ & $29.46$ cm & $7.01$ cm\\
+        %$(6,8)$ & $13.0$ cm & $2.86$ cm\\
+        
+        %\bottomrule
       \end{tabular}
-      \caption{Presentation of Testresults}
+      \caption{Static measurement deviation out of 500 measurements at each grid intersection point.}
+      \label{table:measurements}
     \end{table}
 
-  \end{block}
-
-  \begin{block}{References}
-
-    \nocite{*}
-    \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
+    Applying a fixed constraint for the z-axis would reduce the three-dimensional estimation
+    to a two-dimensional one.
+    This would allow the Kalman-Filter to deliver more precise position estimations.
+    Overall this project created an universal platform for further research in the field of UWB positioning and communication.
 
   \end{block}
-
 \end{column}
 
 \separatorcolumnwithoutline
@@ -394,97 +393,3 @@
 \end{frame}
 
 \end{document}
-g
-Fusce aliquam magna velit
-Et rutrum ex euismod vel. Pellentesque ultricies, velit
-in fermentum vestibulum, lectus nisi pretium nibh, sit
-amet aliquam lectus augue vel velit. Suspendisse
-rhoncus massa porttitor augue feugiat molestie. Sed
-molestie ut orci nec malesuada. Sed ultricies feugiat
-est fringilla posuere.
-Figure 3. Another figure caption.
-Nam cursus consequat egestas
-Nulla eget sem quam. Ut aliquam volutpat nisi vestibu-
-lum convallis. Nunc a lectus et eros facilisis hendrerit
-eu non urna. Interdum et malesuada fames ac ante ip-
-sum primis in faucibus. Etiam sit amet velit eget sem
-euismod tristique. Praesent enim erat, porta vel mattis
-sed, pharetra sed ipsum. Morbi commodo condimen-
-tum massa, tempus venenatis massa hendrerit quis.
-Maecenas sed porta est. Praesent mollis interdum lec-
-tus, sit amet sollicitudin risus tincidunt non.
-Etiam sit amet tempus lorem, aliquet condimentum
-velit. Donec et nibh consequat, sagittis ex eget, dic-
-tum orci. Etiam quis semper ante. Ut eu mauris purus.
-Proin nec consectetur ligula. Mauris pretium molestie
-ullamcorper. Integer nisi neque, aliquet et odio non,
-sagittis porta justo.
-Sed consequat id ante vel efficitur. Praesent
-congue massa sed est scelerisque, elementum
-mollis augue iaculis.
-In sed est finibus, vulputate nunc gravida, pulvinar lorem. In
-maximus nunc dolor, sed auctor eros porttitor quis.
-Fusce ornare dignissim nisi. Nam sit amet risus vel lacus
-tempor tincidunt eu a arcu.
-Donec rhoncus vestibulum erat, quis aliquam leo gravida
-egestas.
-Sed luctus, elit sit amet dictum maximus, diam
-dolor faucibus purus, sed lobortis justo erat id turpis.
-Pellentesque facilisis dolor in leo bibendum
-congue. Maecenas congue finibus justo, vitae
-eleifend urna facilisis at.
-A block containing some math
-Nullam non est elit. In eu ornare justo. Maecenas port-
-titor sodales lacus, ut cursus augue sodales ac.
-Z ∞
-−∞
-e−x2
-dx = √π
-Interdum et malesuada fames {1, 4, 9, . . .} ac ante ip-
-sum primis in faucibus. Cras eleifend dolor eu nulla
-suscipit suscipit. Sed lobortis non felis id vulputate.
-A heading inside a block
-Praesent consectetur mi x2 + y2 metus, nec vestibu-
-lum justo viverra nec. Proin eget nulla pretium, eges-
-tas magna aliquam, mollis neque. Vivamus dictum u⊺v
-sagittis odio, vel porta erat congue sed. Maecenas ut
-dolor quis arcu auctor porttitor.
-Another heading inside a block
-Sed augue erat, scelerisque a purus ultricies, placerat
-porttitor neque. Donec P(y | x) fermentum consectetur
-∇x P(y | x) sapien sagittis egestas. Duis eget leo euis-
-mod nunc viverra imperdiet nec id justo.
-Nullam vel erat at velit convallis
-laoreet
-Class aptent taciti sociosqu ad litora torquent per conu-
-bia nostra, per inceptos himenaeos. Phasellus libero
-enim, gravida sed erat sit amet, scelerisque congue
-diam. Fusce dapibus dui ut augue pulvinar iaculis.
-First column Second column Third column Fourth
-Foo 13.37 384,394 α
-Bar 2.17 1,392 β
-Baz 3.14 83,742 δ
-Qux 7.59 974 γ
-Table 1. A table caption.
-Donec quis posuere ligula. Nunc feugiat elit a mi male-
-suada consequat. Sed imperdiet augue ac nibh aliquet
-tristique. Aenean eu tortor vulputate, eleifend lorem in,
-dictum urna. Proin auctor ante in augue tincidunt tem-
-por. Proin pellentesque vulputate odio, ac gravida nulla
-posuere efficitur. Aenean at velit vel dolor blandit mo-
-lestie. Mauris laoreet commodo quam, non luctus nibh
-ullamcorper in. Class aptent taciti sociosqu ad litora
-torquent per conubia nostra, per inceptos himenaeos.
-Nulla varius finibus volutpat. Mauris molestie lorem tin-
-cidunt, iaculis libero at, gravida ante. Phasellus at felis
-eu neque suscipit suscipit. Integer ullamcorper, dui nec
-pretium ornare, urna dolor consequat libero, in feugiat
-elit lorem euismod lacus. Pellentesque sit amet dolor
-mollis, auctor urna non, tempus sem.[?]
-References
-sourcecode: Hochschule Konstanz Technik, Wirtschaft und Gestaltung
-Departement of Electrical Engineering and Information Technology
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
