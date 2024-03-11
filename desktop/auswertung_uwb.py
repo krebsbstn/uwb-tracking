@@ -12,7 +12,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 
-base_path = "C:\\Users\\Tom Niclas Herter\\Desktop\\Hochschule\\Projektarbeit\\uwb-tracking\\documentation\\logdata\\grid_meas\\"  # Change this to the path of your text file
+base_path = "../documentation/logdata/grid_meas/" # Dataset to use
+background_img_path = "../documentation/logdata/grid_meas/Grundriss_F314_M1-50_Neugestaltung_KI-Labor.png"
+
 
 file_name = "2mx2mx0m_3min" + ".txt"
 
@@ -37,7 +39,7 @@ def open_text_file(file_path):
         with open(file_path, 'r') as file:
             for line in file:
                 data = json.loads(line)
-                coordinates_list.append([data['x'], data['y'], data['z']])
+                coordinates_list.append([data['y'], data['x'], data['z']])
         return coordinates_list
     except FileNotFoundError:
         print("File not found.")
@@ -154,8 +156,8 @@ for x_set in range(2, 7):
 
 
 fig, ax = plt.subplots()
-ax.set_xlim(0, 7)  # Example range for x-axis
-ax.set_ylim(0, 9)  # Example range for y-axis
+ax.set_xlim(-1, 10)  # Example range for x-axis
+ax.set_ylim(-1, 11)  # Example range for y-axis
 
 for meas_num in range(0, len(measurements)):
     
@@ -176,25 +178,27 @@ for meas_num in range(0, len(measurements)):
     #ax.scatter(x, y, s=20, color='blue')  # Scatter plot of your data
     
     confidence_ellipse(np.array(x), np.array(y), ax, facecolor='blue', alpha=0.6) 
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.xlabel('Y')
+    plt.ylabel('X')
     plt.title('Confidence Ellipses')
     plt.grid(True)
 
-for i in range(0, len(y_grid)):
-    for j in range(0, len(x_grid)):
-        ax.scatter(x_grid[j], y_grid[i], s=20, color='red', marker="x")
+for i in range(0, len(x_grid)):
+    for j in range(0, len(y_grid)):
+        ax.scatter(y_grid[j], x_grid[i], s=20, color='red', marker="x")
 
 
-ax.scatter(0.81, 3.62, s=20, color='green', marker="o")
-ax.scatter(0.81, 6.36, s=20, color='green', marker="o")
-ax.scatter(6.31, 7.66, s=20, color='green', marker="o")
-ax.scatter(6.72, 3.65, s=20, color='green', marker="o")
-ax.scatter(2.77, 0.07, s=20, color='green', marker="o")
+img = plt.imread(background_img_path)
+
+ext = [-2.65, 12, -.5, 10]
+plt.imshow(img, zorder=0, extent=ext)
+
+aspect=img.shape[0]/float(img.shape[1])*((ext[1]-ext[0])/(ext[3]-ext[2]))
+plt.gca().set_aspect(aspect)
 
 #ax.scatter(x_grid[j], y_grid[i], s=20, color='black', marker="x")
 
-plt.savefig(r"C:\Users\Tom Niclas Herter\Desktop\Hochschule\Projektarbeit\uwb-tracking\documentation\UWB_System_Paper\pic\position_plot.pdf", format='pdf')
+#plt.savefig(r"/home/skrebs/Documents/workspace/uwb-tracking/documentation/UWB_System_Paper/pic/position_plot.pdf", format='pdf')
 plt.show()
 
 
