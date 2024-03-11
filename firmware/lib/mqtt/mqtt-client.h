@@ -8,8 +8,9 @@
 
 /**
  * @brief Callback function for MQTT subscriptions, called when a message arrives.
- * The function serves as an interrupt handler for receiving messages.
- * @param message The message payload.
+ * simply prints the message to the terminal.
+ * @param topic The topic where the message is received.
+ * @param payload Pointer to the first byte of the payload.
  * @param length The length of the message.
  */
 void subscribe_callback(char* topic, byte* payload, unsigned int length);
@@ -28,6 +29,8 @@ public:
      * @param mqtt_port The MQTT server port number.
      * @param wifi_ssid The WiFi SSID for network connection.
      * @param wifi_pwd The WiFi password for network connection.
+     * @param dev_id The PCB's MQTT Devicename.
+     * @param buffer_size The outputbuffer used for incoming and outgoing messages.
      */
     MqttClient(
         const char* topic,
@@ -40,6 +43,7 @@ public:
 
     /**
      * @brief Must be called frequently to allow the callback function to handle incoming messages.
+     * Handles reconnection and MQTT event processing.
      */
     void update();
 
@@ -47,6 +51,7 @@ public:
      * @brief Publishes a message on the specified MQTT topic.
      * @param topic The MQTT topic to publish to.
      * @param msg The message to publish.
+     * @param plength Length of the message to publish.
      */
     void publish(char* topic, char* msg, unsigned int plength);
 
@@ -77,7 +82,7 @@ private:
 
     /**
      * @brief Connects the ESP to the WiFi network using provided credentials.
-     * WiFi settings can be found in the config.h file.
+     * WiFi settings can be found in the main.cpp file.
      * @param wifi_ssid The WiFi SSID.
      * @param wifi_pwd The WiFi password.
      */

@@ -118,23 +118,24 @@ private:
           Characteristic{name : "my position [i.e. x, y, z]", characteristic_uuid : BLE_CHARAKTERISTIK_OWN_POSITION_UUID, descriptor_uuid : BLE_DESCRIPTOR_OWN_POSITION_UUID},
         }
       }
-        
   };
 
   /**
    * @brief Adds a new characteristic with the given UUID to a service.
    *
    * @param service The service to which the characteristic should be added.
-   * @param characteristic The characteristic to be added.
+   * @param characteristic A Caracteristic struct, containing uuids and name of the caracteriistic.
    */
   void add_Characteristic(BLEService *service, BleServer::Characteristic characteristic);
 
   /**
    * @brief Initializes all services for the BLE server.
    *
-   * Creates a BLEService for each service UUID specified in the header file
+   * @details Creates a BLEService for each service UUID specified in the header file
    * and creates a BLECharacteristic for each characteristic UUID specified in the header.
    * Finally, each created service is started.
+   *
+   * @note The services and their characteristics are defined in this header file.
    */
   void init_services();
 };

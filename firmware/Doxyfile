@@ -6,6 +6,7 @@ PROJECT_NAME           = "UWB-Tracking"
 # Das Verzeichnis, in dem der Quellcode liegt (relativer Pfad)
 INPUT                  = ./src
 INPUT                  = ./lib
+EXCLUDE                = ./lib/dw3000-port
 
 # Das Verzeichnis, in dem die generierte Dokumentation gespeichert wird (automatisch erstellt)
 OUTPUT_DIRECTORY       = doxygen-output
@@ -14,6 +15,8 @@ OUTPUT_DIRECTORY       = doxygen-output
 GENERATE_HTML          = YES
 GENERATE_LATEX         = YES
 GENERATE_XML           = NO
+HIDE_SCOPE_NAMES       = YES
+SHOW_NAMESPACES        = NO
 
 # Doxygen-Konfiguration für Kommentare
 EXTRACT_ALL            = YES

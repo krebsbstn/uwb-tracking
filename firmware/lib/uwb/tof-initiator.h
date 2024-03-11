@@ -24,6 +24,7 @@ public:
      * @brief Constructor for the TofInitiator class.
      * @param src The source address for the TOF initiator.
      * @param dst An array of destination addresses for the responders.
+     * @param wdt_timeout Timeout for the Watchdog, wdt triggers reboot.
      * @param num_of_responders The number of responder devices.
      */
     TofInitiator(uwb_addr src, uwb_addr* dst, unsigned long wdt_timeout, uint8_t num_of_responders);
@@ -65,6 +66,7 @@ private:
 
     /**
      * @brief Process the TOF response received from a responder.
+     * The calculated distance is stored into temp_distance.
      */
     void process_tof_response();
 };

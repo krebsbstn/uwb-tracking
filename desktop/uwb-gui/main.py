@@ -106,6 +106,8 @@ class Dashboard(tk.Frame):
                 widget = BleConfigWidget(self.canvas, widget_data['name'])
             elif widget_data['type'] == "SerialWidget":
                 widget = SerialWidget(self.canvas, widget_data['name'])
+            elif widget_data['type'] == "BlePlotPositionWidget":
+                widget = BlePlotPositionWidget(self.canvas, widget_data['name'])
             else:
                 widget = Widget(self.canvas, widget_data['name'])
             widget.place(x=widget_data['x'], y=widget_data['y'], width=widget_data['width'], height=widget_data['height'], anchor="nw")

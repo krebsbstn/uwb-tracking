@@ -1,15 +1,7 @@
 #include "tof-responder.h"
 
-/**
- * @brief Initialize static Semaphore.
- */
 SemaphoreHandle_t TofResponder::responseSemaphore = NULL;
 
-/**
- * @brief Constructor for the TofResponder class.
- * @param src The source address of the responder.
- * @param dst The destination address of the initiator.
- */
 TofResponder::TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout, DynamicJsonDocument* rx_diagnostics)
     : TofDevice(src, wdt_timeout)
     , dst_address(dst)
@@ -24,9 +16,6 @@ TofResponder::TofResponder(uwb_addr src, uwb_addr dst, unsigned long wdt_timeout
     xSemaphoreTake(responseSemaphore, 0); // Semaphore starts as unavailable
 }
 
-/**
- * @brief Initialize and configure the TOF responder device.
- */
 void TofResponder::setup()
 {
     TofDevice::setup();
@@ -59,10 +48,6 @@ void TofResponder::setup()
     dwt_configciadiag(1);
 }
 
-
-/**
- * @brief Main loop of the TOF responder device.
- */
 void TofResponder::loop()
 {
     TofDevice::loop();
@@ -245,10 +230,6 @@ void TofResponder::update_rx_diagnostics()
     (*this->rx_diagnostics_json)["stsAccumCount"] = diagnostic_data.stsAccumCount;
 }
 
-/**
- * @brief Static interrupt service routine (ISR) for successful frame reception.
- * @param cb_data Callback data containing information about the received frame.
- */
 void TofResponder::rx_ok_cb(const dwt_cb_data_t *cb_data)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;

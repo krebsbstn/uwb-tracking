@@ -27,10 +27,10 @@
 #include <ArduinoEigen.h>
 
 /* Network specific Settings*/
-#define MQTT_SERVER "192.168.43.195"
+#define MQTT_SERVER "xxx"
 #define MQTT_PORT 1883
-#define WIFI_SSID "MQTT_Test"
-#define WIFI_PWD "admin1234"
+#define WIFI_SSID "xxx"
+#define WIFI_PWD "xxx"
 
 /* EEPROM-Addresses*/
 #define IS_INITIATOR 0 /*EEPROM-Address for storing current state*/
