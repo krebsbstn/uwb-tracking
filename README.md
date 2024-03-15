@@ -15,6 +15,6 @@ The repository includes the following components:
 
 The code and documentation are organized in a clear and consistent manner, with comments and instructions to facilitate understanding and reuse by others.
 
-Overall, this repository represents a significant effort to develop a UWB-Ranging-based Trekking Technology that can improve safety, navigation, and adventure experiences in indoor environments. The project has practical and academic value.
+Overall, this repository represents a significant effort to develop a UWB-Ranging-based Tracking Technology that can improve safety, navigation, and adventure experiences in indoor environments. The project has practical and academic value.
 
 Also see our [Github Pages](https://krebsbstn.github.io/uwb-tracking/files.html)
