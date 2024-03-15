@@ -45,7 +45,7 @@ public:
     virtual void loop() override;
 
 private:
-    uint32_t frame_cnt; /* See Note 13 */
+    uint32_t frame_cnt; 
     uint8_t seq_cnt; /* Frame sequence number, incremented after each transmission. */
     uint8_t nonce[13]; /* 13-byte nonce used in this example as per IEEE802.15.4 */
     
