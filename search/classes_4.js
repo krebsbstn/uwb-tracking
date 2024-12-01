@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['service_0',['Service',['../structBleServer_1_1Service.html',1,'BleServer']]]
+  ['recoverydetector_0',['RecoveryDetector',['../classRecoveryDetector.html',1,'']]],
+  ['restserver_1',['RestServer',['../classRestServer.html',1,'']]]
 ];

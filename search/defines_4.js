@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['initiator_5fkey_5findex_0',['INITIATOR_KEY_INDEX',['../tof-device_8h.html#a12ef3296ea6ab034fe8ccceabe354fdf',1,'tof-device.h']]]
+  ['frame_5flength_0',['FRAME_LENGTH',['../tdoa-device_8h.html#a69629b77e517daf716c92ad1f8418558',1,'tdoa-device.h']]]
 ];

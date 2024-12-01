@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['vecx_0',['vecX',['../classekf_1_1EKF__Filter.html#ac36c7bfcbd82724b5f132d0e31257efc',1,'ekf::EKF_Filter::vecX()'],['../classekf_1_1EKF__Filter.html#a9a1bf7086395383ee59fb809c8f93b65',1,'ekf::EKF_Filter::vecX() const']]]
+  ['update_0',['update',['../classmqtt_1_1MqttClient.html#ac5c54df7ed3b930268c8d7752c101725',1,'mqtt::MqttClient']]],
+  ['update_5frx_5fdiagnostics_1',['update_rx_diagnostics',['../classTofResponder.html#adb7f262de3591220c166aa5ae9943e97',1,'TofResponder']]]
 ];

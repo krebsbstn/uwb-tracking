@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['espclient_0',['espClient',['../classmqtt_1_1MqttClient.html#abd77e757e4b3bb6f1e4b42b21ea9e040',1,'mqtt::MqttClient']]]
+  ['eth_5fconnected_0',['eth_connected',['../classCustomEthernetClient.html#ac84beb1a79f197fb28f9762c774e856c',1,'CustomEthernetClient']]]
 ];

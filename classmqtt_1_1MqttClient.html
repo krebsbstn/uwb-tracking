@@ -89,9 +89,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa1635d2d22c29bec1706ef4c9efd11dd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#aa1635d2d22c29bec1706ef4c9efd11dd">MqttClient</a> (const char *<a class="el" href="classmqtt_1_1MqttClient.html#a4ed7b4c951621dbec76099594f64d249">topic</a>, const char *mqtt_server, uint16_t mqtt_port, const char *wifi_ssid, const char *wifi_pwd, String <a class="el" href="classmqtt_1_1MqttClient.html#aea2a87bf09220327b068d42b7084d272">dev_id</a>, uint16_t buffer_size)</td></tr>
-<tr class="memdesc:aa1635d2d22c29bec1706ef4c9efd11dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for the MQTT client.  <a href="classmqtt_1_1MqttClient.html#aa1635d2d22c29bec1706ef4c9efd11dd">More...</a><br /></td></tr>
-<tr class="separator:aa1635d2d22c29bec1706ef4c9efd11dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6886a14336e70e5f7bb1eadd1e2af8eb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#a6886a14336e70e5f7bb1eadd1e2af8eb">MqttClient</a> (const char *<a class="el" href="classmqtt_1_1MqttClient.html#a4ed7b4c951621dbec76099594f64d249">topic</a>, const char *mqtt_server, uint16_t mqtt_port, Client *espClient, String <a class="el" href="classmqtt_1_1MqttClient.html#aea2a87bf09220327b068d42b7084d272">dev_id</a>, uint16_t buffer_size, std::function&lt; void(char *, byte *, unsigned int)&gt; <a class="el" href="classmqtt_1_1MqttClient.html#a0b3ab29dc42b6eed894bd335f1169ce7">callback</a>)</td></tr>
+<tr class="memdesc:a6886a14336e70e5f7bb1eadd1e2af8eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor for the MQTT client.  <a href="classmqtt_1_1MqttClient.html#a6886a14336e70e5f7bb1eadd1e2af8eb">More...</a><br /></td></tr>
+<tr class="separator:a6886a14336e70e5f7bb1eadd1e2af8eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5c54df7ed3b930268c8d7752c101725"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#ac5c54df7ed3b930268c8d7752c101725">update</a> ()</td></tr>
 <tr class="memdesc:ac5c54df7ed3b930268c8d7752c101725"><td class="mdescLeft">&#160;</td><td class="mdescRight">Must be called frequently to allow the callback function to handle incoming messages. Handles reconnection and MQTT event processing.  <a href="classmqtt_1_1MqttClient.html#ac5c54df7ed3b930268c8d7752c101725">More...</a><br /></td></tr>
 <tr class="separator:ac5c54df7ed3b930268c8d7752c101725"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,15 +110,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a4bcd6ce7d04c38f8c4ff908d1fc50f86"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#a4bcd6ce7d04c38f8c4ff908d1fc50f86">reconnect</a> ()</td></tr>
 <tr class="memdesc:a4bcd6ce7d04c38f8c4ff908d1fc50f86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reconnects the MQTT client to the broker. It retries every 5 seconds until a connection is established.  <a href="classmqtt_1_1MqttClient.html#a4bcd6ce7d04c38f8c4ff908d1fc50f86">More...</a><br /></td></tr>
 <tr class="separator:a4bcd6ce7d04c38f8c4ff908d1fc50f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a001c27c2a88f8d71742c44c18bf37a0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#a001c27c2a88f8d71742c44c18bf37a0e">setup_wifi</a> (const char wifi_ssid[], const char wifi_pwd[])</td></tr>
-<tr class="memdesc:a001c27c2a88f8d71742c44c18bf37a0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connects the ESP to the WiFi network using provided credentials. WiFi settings can be found in the main.cpp file.  <a href="classmqtt_1_1MqttClient.html#a001c27c2a88f8d71742c44c18bf37a0e">More...</a><br /></td></tr>
-<tr class="separator:a001c27c2a88f8d71742c44c18bf37a0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:abd77e757e4b3bb6f1e4b42b21ea9e040"><td class="memItemLeft" align="right" valign="top">WiFiClient&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#abd77e757e4b3bb6f1e4b42b21ea9e040">espClient</a></td></tr>
-<tr class="memdesc:abd77e757e4b3bb6f1e4b42b21ea9e040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to establish the WiFi connection.  <a href="classmqtt_1_1MqttClient.html#abd77e757e4b3bb6f1e4b42b21ea9e040">More...</a><br /></td></tr>
-<tr class="separator:abd77e757e4b3bb6f1e4b42b21ea9e040"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cd3b854e81e8a2fbcee5e6e1db1da25"><td class="memItemLeft" align="right" valign="top">PubSubClient&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#a9cd3b854e81e8a2fbcee5e6e1db1da25">client</a></td></tr>
 <tr class="memdesc:a9cd3b854e81e8a2fbcee5e6e1db1da25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to send MQTT commands.  <a href="classmqtt_1_1MqttClient.html#a9cd3b854e81e8a2fbcee5e6e1db1da25">More...</a><br /></td></tr>
 <tr class="separator:a9cd3b854e81e8a2fbcee5e6e1db1da25"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,12 +120,14 @@ Private Attributes</h2></td></tr>
 <tr class="separator:aea2a87bf09220327b068d42b7084d272"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ed7b4c951621dbec76099594f64d249"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#a4ed7b4c951621dbec76099594f64d249">topic</a></td></tr>
 <tr class="separator:a4ed7b4c951621dbec76099594f64d249"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b3ab29dc42b6eed894bd335f1169ce7"><td class="memItemLeft" align="right" valign="top">std::function&lt; void(char *, byte *, unsigned int)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmqtt_1_1MqttClient.html#a0b3ab29dc42b6eed894bd335f1169ce7">callback</a></td></tr>
+<tr class="separator:a0b3ab29dc42b6eed894bd335f1169ce7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A class for managing MQTT communication. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aa1635d2d22c29bec1706ef4c9efd11dd" name="aa1635d2d22c29bec1706ef4c9efd11dd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1635d2d22c29bec1706ef4c9efd11dd">&#9670;&#160;</a></span>MqttClient()</h2>
+<a id="a6886a14336e70e5f7bb1eadd1e2af8eb" name="a6886a14336e70e5f7bb1eadd1e2af8eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6886a14336e70e5f7bb1eadd1e2af8eb">&#9670;&#160;</a></span>MqttClient()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -157,14 +153,8 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>wifi_ssid</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>wifi_pwd</em>, </td>
+          <td class="paramtype">Client *&#160;</td>
+          <td class="paramname"><em>espClient</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -176,7 +166,13 @@ Private Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>buffer_size</em>&#160;</td>
+          <td class="paramname"><em>buffer_size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; void(char *, byte *, unsigned int)&gt;&#160;</td>
+          <td class="paramname"><em>callback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -189,13 +185,13 @@ Private Attributes</h2></td></tr>
 <p>Default constructor for the MQTT client. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">topic</td><td>The MQTT topic for communication. </td></tr>
+    <tr><td class="paramname">topic</td><td>The MQTT topic for subscription. </td></tr>
     <tr><td class="paramname">mqtt_server</td><td>The MQTT server hostname or IP address. </td></tr>
     <tr><td class="paramname">mqtt_port</td><td>The MQTT server port number. </td></tr>
-    <tr><td class="paramname">wifi_ssid</td><td>The WiFi SSID for network connection. </td></tr>
-    <tr><td class="paramname">wifi_pwd</td><td>The WiFi password for network connection. </td></tr>
+    <tr><td class="paramname">ethClient</td><td>The Ethernet client used for communication. </td></tr>
     <tr><td class="paramname">dev_id</td><td>The PCB's MQTT Devicename. </td></tr>
     <tr><td class="paramname">buffer_size</td><td>The outputbuffer used for incoming and outgoing messages. </td></tr>
+    <tr><td class="paramname">callback</td><td>The callback function for incoming messages. </td></tr>
   </table>
   </dd>
 </dl>
@@ -315,51 +311,6 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a001c27c2a88f8d71742c44c18bf37a0e" name="a001c27c2a88f8d71742c44c18bf37a0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a001c27c2a88f8d71742c44c18bf37a0e">&#9670;&#160;</a></span>setup_wifi()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void setup_wifi </td>
-          <td>(</td>
-          <td class="paramtype">const char&#160;</td>
-          <td class="paramname"><em>wifi_ssid</em>[], </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char&#160;</td>
-          <td class="paramname"><em>wifi_pwd</em>[]&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Connects the ESP to the WiFi network using provided credentials. WiFi settings can be found in the main.cpp file. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">wifi_ssid</td><td>The WiFi SSID. </td></tr>
-    <tr><td class="paramname">wifi_pwd</td><td>The WiFi password. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="ac5c54df7ed3b930268c8d7752c101725" name="ac5c54df7ed3b930268c8d7752c101725"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac5c54df7ed3b930268c8d7752c101725">&#9670;&#160;</a></span>update()</h2>
 
@@ -380,6 +331,28 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a0b3ab29dc42b6eed894bd335f1169ce7" name="a0b3ab29dc42b6eed894bd335f1169ce7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b3ab29dc42b6eed894bd335f1169ce7">&#9670;&#160;</a></span>callback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;void(char*, byte*, unsigned int)&gt; callback</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a9cd3b854e81e8a2fbcee5e6e1db1da25" name="a9cd3b854e81e8a2fbcee5e6e1db1da25"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9cd3b854e81e8a2fbcee5e6e1db1da25">&#9670;&#160;</a></span>client</h2>
 
@@ -423,30 +396,6 @@ Private Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a id="abd77e757e4b3bb6f1e4b42b21ea9e040" name="abd77e757e4b3bb6f1e4b42b21ea9e040"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd77e757e4b3bb6f1e4b42b21ea9e040">&#9670;&#160;</a></span>espClient</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">WiFiClient espClient</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Used to establish the WiFi connection. </p>
 
 </div>
 </div>

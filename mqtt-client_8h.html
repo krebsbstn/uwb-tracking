@@ -76,14 +76,15 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#define-members">Macros</a>  </div>
   <div class="headertitle"><div class="title">mqtt-client.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;WiFi.h&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="ethernetClient_8h_source.html">ethernetClient.h</a>&gt;</code><br />
 <code>#include &lt;Wire.h&gt;</code><br />
 <code>#include &lt;PubSubClient.h&gt;</code><br />
 <code>#include &lt;Arduino.h&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="mqtt-client_8h_source.html">Go to the source code of this file.</a></p>
@@ -99,54 +100,71 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespacemqtt"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemqtt.html">mqtt</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:ae848fd7b4aec6e8d10bb1ba0cb66882f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mqtt-client_8h.html#ae848fd7b4aec6e8d10bb1ba0cb66882f">subscribe_callback</a> (char *topic, byte *payload, unsigned int length)</td></tr>
-<tr class="memdesc:ae848fd7b4aec6e8d10bb1ba0cb66882f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function for MQTT subscriptions, called when a message arrives. simply prints the message to the terminal.  <a href="mqtt-client_8h.html#ae848fd7b4aec6e8d10bb1ba0cb66882f">More...</a><br /></td></tr>
-<tr class="separator:ae848fd7b4aec6e8d10bb1ba0cb66882f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a7d48a2e386abc8d3700600f20d13414a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mqtt-client_8h.html#a7d48a2e386abc8d3700600f20d13414a">TOPIC_POSITION</a>&#160;&#160;&#160;&quot;uwb/%s/position&quot;</td></tr>
+<tr class="separator:a7d48a2e386abc8d3700600f20d13414a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6abafb60706c5c003d38d9cd9e71909"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mqtt-client_8h.html#ac6abafb60706c5c003d38d9cd9e71909">TOPIC_RX_DIAGNOSTICS</a>&#160;&#160;&#160;&quot;uwb/%s/uwb_info&quot;</td></tr>
+<tr class="separator:ac6abafb60706c5c003d38d9cd9e71909"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf74c2f9db9193055fa675d875895ad1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mqtt-client_8h.html#adf74c2f9db9193055fa675d875895ad1">TOPIC_DEVICE_CONFIG_INFO</a>&#160;&#160;&#160;&quot;uwb/%s/infos&quot;</td></tr>
+<tr class="separator:adf74c2f9db9193055fa675d875895ad1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31796ae3730c08db11371bc207354d31"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mqtt-client_8h.html#a31796ae3730c08db11371bc207354d31">TOPIC_DEVICE_CONFIG_INPUT</a>&#160;&#160;&#160;&quot;uwb/%s/config&quot;</td></tr>
+<tr class="separator:a31796ae3730c08db11371bc207354d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="ae848fd7b4aec6e8d10bb1ba0cb66882f" name="ae848fd7b4aec6e8d10bb1ba0cb66882f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae848fd7b4aec6e8d10bb1ba0cb66882f">&#9670;&#160;</a></span>subscribe_callback()</h2>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="adf74c2f9db9193055fa675d875895ad1" name="adf74c2f9db9193055fa675d875895ad1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf74c2f9db9193055fa675d875895ad1">&#9670;&#160;</a></span>TOPIC_DEVICE_CONFIG_INFO</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void subscribe_callback </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>topic</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">byte *&#160;</td>
-          <td class="paramname"><em>payload</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>length</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">#define TOPIC_DEVICE_CONFIG_INFO&#160;&#160;&#160;&quot;uwb/%s/infos&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Callback function for MQTT subscriptions, called when a message arrives. simply prints the message to the terminal. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">topic</td><td>The topic where the message is received. </td></tr>
-    <tr><td class="paramname">payload</td><td>Pointer to the first byte of the payload. </td></tr>
-    <tr><td class="paramname">length</td><td>The length of the message. </td></tr>
-  </table>
-  </dd>
-</dl>
+</div>
+</div>
+<a id="a31796ae3730c08db11371bc207354d31" name="a31796ae3730c08db11371bc207354d31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31796ae3730c08db11371bc207354d31">&#9670;&#160;</a></span>TOPIC_DEVICE_CONFIG_INPUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TOPIC_DEVICE_CONFIG_INPUT&#160;&#160;&#160;&quot;uwb/%s/config&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7d48a2e386abc8d3700600f20d13414a" name="a7d48a2e386abc8d3700600f20d13414a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d48a2e386abc8d3700600f20d13414a">&#9670;&#160;</a></span>TOPIC_POSITION</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TOPIC_POSITION&#160;&#160;&#160;&quot;uwb/%s/position&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac6abafb60706c5c003d38d9cd9e71909" name="ac6abafb60706c5c003d38d9cd9e71909"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6abafb60706c5c003d38d9cd9e71909">&#9670;&#160;</a></span>TOPIC_RX_DIAGNOSTICS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TOPIC_RX_DIAGNOSTICS&#160;&#160;&#160;&quot;uwb/%s/uwb_info&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
