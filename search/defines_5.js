@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['initiator_5fkey_5findex_0',['INITIATOR_KEY_INDEX',['../tof-device_8h.html#a12ef3296ea6ab034fe8ccceabe354fdf',1,'tof-device.h']]]
+  ['num_5flandmarks_0',['NUM_LANDMARKS',['../datatypes_8h.html#ab88bc70b2baa309a5b71bb2c50cd3721',1,'datatypes.h']]]
 ];

@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['topic_5fdevice_5fconfig_5finfo_0',['TOPIC_DEVICE_CONFIG_INFO',['../mqtt-client_8h.html#adf74c2f9db9193055fa675d875895ad1',1,'mqtt-client.h']]],
-  ['topic_5fdevice_5fconfig_5finput_1',['TOPIC_DEVICE_CONFIG_INPUT',['../mqtt-client_8h.html#a31796ae3730c08db11371bc207354d31',1,'mqtt-client.h']]],
-  ['topic_5fposition_2',['TOPIC_POSITION',['../mqtt-client_8h.html#a7d48a2e386abc8d3700600f20d13414a',1,'mqtt-client.h']]],
-  ['topic_5frx_5fdiagnostics_3',['TOPIC_RX_DIAGNOSTICS',['../mqtt-client_8h.html#ac6abafb60706c5c003d38d9cd9e71909',1,'mqtt-client.h']]],
-  ['tx_5fant_5fdly_4',['TX_ANT_DLY',['../tdoa-device_8h.html#a9cd77ca2a6cc178f74926f7d9b331f8e',1,'TX_ANT_DLY():&#160;tdoa-device.h'],['../tof-device_8h.html#a9cd77ca2a6cc178f74926f7d9b331f8e',1,'TX_ANT_DLY():&#160;tof-device.h']]]
+  ['user_5f1_5fbtn_0',['USER_1_BTN',['../pin__config_8h.html#a4d59ed71b2f456accaeaee284987286c',1,'pin_config.h']]],
+  ['user_5f1_5fled_1',['USER_1_LED',['../pin__config_8h.html#a443bf1a4c33c7641f2018c904901dd6b',1,'pin_config.h']]],
+  ['user_5f2_5fbtn_2',['USER_2_BTN',['../pin__config_8h.html#acc20b35816d57676f2c3741218229532',1,'pin_config.h']]],
+  ['user_5f2_5fled_3',['USER_2_LED',['../pin__config_8h.html#a8b423ca591e85457d3297e0fc804bf76',1,'pin_config.h']]],
+  ['user_5f3_5fled_4',['USER_3_LED',['../pin__config_8h.html#a0f795a5d9144fe37722b5abb1e404386',1,'pin_config.h']]]
 ];

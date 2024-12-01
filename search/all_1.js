@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['begin_0',['begin',['../classWatchdog.html#ab0bdf5cca484fb2ba637c39384b27fb2',1,'Watchdog::begin()'],['../classCustomEthernetClient.html#ab0bdf5cca484fb2ba637c39384b27fb2',1,'CustomEthernetClient::begin()'],['../classRestServer.html#ab0bdf5cca484fb2ba637c39384b27fb2',1,'RestServer::begin()'],['../classRecoveryDetector.html#ab0bdf5cca484fb2ba637c39384b27fb2',1,'RecoveryDetector::begin()']]],
+  ['begin_0',['begin',['../classWatchdog.html#ab0bdf5cca484fb2ba637c39384b27fb2',1,'Watchdog']]],
   ['ble_2dserver_2ecpp_1',['ble-server.cpp',['../ble-server_8cpp.html',1,'']]],
   ['ble_2dserver_2eh_2',['ble-server.h',['../ble-server_8h.html',1,'']]],
   ['ble_5fcharakteristik_5fanchor_5fpositions_5fuuid_3',['BLE_CHARAKTERISTIK_ANCHOR_POSITIONS_UUID',['../ble-server_8h.html#a57dcf0b4e797e1f5d9986991e9a401a8',1,'ble-server.h']]],
@@ -20,6 +20,5 @@ var searchData=
   ['ble_5fservice_5foutput_5fuuid_17',['BLE_SERVICE_OUTPUT_UUID',['../ble-server_8h.html#ae4bff960f3ce379d00f18aff8329a363',1,'ble-server.h']]],
   ['bleconfigloader_18',['BleConfigLoader',['../classBleConfigLoader.html#a41cf43ece3b80ea952e833b91a55186f',1,'BleConfigLoader::BleConfigLoader()'],['../classBleConfigLoader.html',1,'BleConfigLoader']]],
   ['bleserver_19',['BleServer',['../classBleServer.html',1,'BleServer'],['../classBleServer.html#a6af1a26d7e81725353d2b679f6813920',1,'BleServer::BleServer()']]],
-  ['blink_5fframe_5fsn_5fidx_20',['BLINK_FRAME_SN_IDX',['../tdoa-device_8h.html#ac3412f44941057139ae06f92d74f2f72',1,'tdoa-device.h']]],
-  ['bootloader_21',['Bootloader',['../util_8h.html#afddb85483810aea160a6bf2c90259b55a27cbf9d52560657770d970321a668eb4',1,'util.h']]]
+  ['blink_5fframe_5fsn_5fidx_20',['BLINK_FRAME_SN_IDX',['../tdoa-device_8h.html#ac3412f44941057139ae06f92d74f2f72',1,'tdoa-device.h']]]
 ];

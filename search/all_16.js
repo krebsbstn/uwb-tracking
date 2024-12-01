@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['y_0',['y',['../structcoordinate.html#ab927965981178aa1fba979a37168db2a',1,'coordinate']]]
+  ['z_0',['z',['../structcoordinate.html#ab3e6ed577a7c669c19de1f9c1b46c872',1,'coordinate']]]
 ];

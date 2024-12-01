@@ -1,22 +1,6 @@
 var searchData=
 [
-  ['default_5fdevice_5fname_0',['DEFAULT_DEVICE_NAME',['../conf__manager_8h.html#a9dae37b6b57e30542ac5d55a27d6e46c',1,'conf_manager.h']]],
-  ['default_5finterface_1',['DEFAULT_INTERFACE',['../conf__manager_8h.html#ad9b2541b15929e98f6f46dc43a0a420d',1,'conf_manager.h']]],
-  ['default_5fip_5faddress_2',['DEFAULT_IP_ADDRESS',['../conf__manager_8h.html#a32de0e3cfb4b33d5da084bd19d16e11b',1,'conf_manager.h']]],
-  ['default_5fmeasurement_5fscheme_3',['DEFAULT_MEASUREMENT_SCHEME',['../conf__manager_8h.html#a42c7428f30b743a763bf0de7203698f4',1,'conf_manager.h']]],
-  ['default_5fmqtt_5fbroker_4',['DEFAULT_MQTT_BROKER',['../conf__manager_8h.html#ae0fc7062b16fcc1ea5cd34193772b097',1,'conf_manager.h']]],
-  ['default_5fmqtt_5fport_5',['DEFAULT_MQTT_PORT',['../conf__manager_8h.html#a01342056d524ed0b20f9e0ccc800d1db',1,'conf_manager.h']]],
-  ['default_5fpcb_5fversion_6',['DEFAULT_PCB_VERSION',['../conf__manager_8h.html#a2ba3ad09490aa2ae3c199f7c7279a821',1,'conf_manager.h']]],
-  ['default_5fpositionx_7',['DEFAULT_POSITIONX',['../conf__manager_8h.html#a45d313fb31c95f9f672df237a0bcfee2',1,'conf_manager.h']]],
-  ['default_5fpositiony_8',['DEFAULT_POSITIONY',['../conf__manager_8h.html#a51aa45444110879fddfd0f0628ff5a85',1,'conf_manager.h']]],
-  ['default_5fpositionz_9',['DEFAULT_POSITIONZ',['../conf__manager_8h.html#a1564466d6b5044197e9bf5126742526d',1,'conf_manager.h']]],
-  ['default_5frole_10',['DEFAULT_ROLE',['../conf__manager_8h.html#a5357cbfc67bf9c0372a304cd83059e69',1,'conf_manager.h']]],
-  ['default_5fsw_5fversion_11',['DEFAULT_SW_VERSION',['../conf__manager_8h.html#a6e502f7d208cccb3003148dc4f448446',1,'conf_manager.h']]],
-  ['default_5fuse_5fble_12',['DEFAULT_USE_BLE',['../conf__manager_8h.html#aa4d7fccf8f0d73699337251650c68f62',1,'conf_manager.h']]],
-  ['default_5fuse_5fmqtt_13',['DEFAULT_USE_MQTT',['../conf__manager_8h.html#aa218b8cdb8cbfc5d9f42d739ae935b4a',1,'conf_manager.h']]],
-  ['default_5fuse_5fudp_14',['DEFAULT_USE_UDP',['../conf__manager_8h.html#a82bbcb91f1693c66c80b8cca4d1065f9',1,'conf_manager.h']]],
-  ['default_5fuse_5fuwb_15',['DEFAULT_USE_UWB',['../conf__manager_8h.html#a191b4a9bd4403e872ea50c77f288ebf3',1,'conf_manager.h']]],
-  ['dest_5fpan_5fid_16',['DEST_PAN_ID',['../tdoa-device_8h.html#acd7ff302b6f0328bc6a132afa7747c8b',1,'DEST_PAN_ID():&#160;tdoa-device.h'],['../tof-device_8h.html#acd7ff302b6f0328bc6a132afa7747c8b',1,'DEST_PAN_ID():&#160;tof-device.h']]],
-  ['dim_5fx_17',['DIM_X',['../extended-kalman_8h.html#af6ec22f9c3bd91bd252e29aebb461b11',1,'extended-kalman.h']]],
-  ['dim_5fz_18',['DIM_Z',['../extended-kalman_8h.html#a3ee1669e4235e65a86c90dfecbff5387',1,'extended-kalman.h']]]
+  ['dest_5fpan_5fid_0',['DEST_PAN_ID',['../tdoa-device_8h.html#acd7ff302b6f0328bc6a132afa7747c8b',1,'DEST_PAN_ID():&#160;tdoa-device.h'],['../tof-device_8h.html#acd7ff302b6f0328bc6a132afa7747c8b',1,'DEST_PAN_ID():&#160;tof-device.h']]],
+  ['dim_5fx_1',['DIM_X',['../extended-kalman_8h.html#af6ec22f9c3bd91bd252e29aebb461b11',1,'extended-kalman.h']]],
+  ['dim_5fz_2',['DIM_Z',['../extended-kalman_8h.html#a3ee1669e4235e65a86c90dfecbff5387',1,'extended-kalman.h']]]
 ];
